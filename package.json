@@ -1,0 +1,75 @@
+{
+  "name": "rtpl",
+  "private": true,
+  "description": "Tool for creating resources",
+  "homepage": "https://github.com/swordev/rtpl#readme",
+  "bugs": {
+    "url": "https://github.com/swordev/rtpl/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/swordev/rtpl"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Juanra GM",
+    "email": "juanrgm724@gmail.com",
+    "url": "https://github.com/juanrgm"
+  },
+  "scripts": {
+    "build": "tsc -b tsconfig.build.json",
+    "check": "pnpm format && pnpm eslint",
+    "check:eslint": "eslint .",
+    "check:format": "prettier -c .",
+    "clean": "wspa clean",
+    "format": "prettier -w .",
+    "patch": "wspa patch",
+    "prepare": "pnpm patch",
+    "start": "node packages/cli/lib/bin.js",
+    "test": "jest",
+    "watch": "tsc -b tsconfig.build.json -w"
+  },
+  "devDependencies": {
+    "@changesets/changelog-github": "^0.4.4",
+    "@changesets/cli": "^2.22.0",
+    "@trivago/prettier-plugin-sort-imports": "^3.2.0",
+    "@tsconfig/node16": "^1.0.2",
+    "@types/jest": "^27.5.0",
+    "@types/node": "^16.11.33",
+    "@wspa/config": "^0.0.2",
+    "eslint": "^8.15.0",
+    "jest": "^27.5.1",
+    "prettier": "2.5.1",
+    "prettier-plugin-packagejson": "^2.2.17",
+    "prettier-plugin-sort-json": "^0.0.2",
+    "ts-jest": "^27.1.4",
+    "typescript": "^4.6.4",
+    "wspa": "^0.0.6"
+  },
+  "engine": {
+    "node": ">=16.0.0"
+  },
+  "x-wspa": {
+    "extends": "@wspa/config/auto.js",
+    "pkgManifest": {
+      "homepage": "https://github.com/swordev/rtpl",
+      "bugs": {
+        "url": "https://github.com/swordev/rtpl/issues",
+        "email": "juanrgm724@gmail.com"
+      },
+      "repository": {
+        "type": "git",
+        "url": "https://github.com/swordev/rtpl"
+      },
+      "license": "MIT",
+      "author": {
+        "name": "Juanra GM",
+        "email": "juanrgm724@gmail.com",
+        "url": "https://github.com/juanrgm"
+      },
+      "engine": {
+        "node": ">=16.0.0"
+      }
+    }
+  }
+}

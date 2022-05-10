@@ -1,0 +1,6 @@
+.eslintrc.js
+# .gitignore
+.history
+coverage
+lib
+node_modules

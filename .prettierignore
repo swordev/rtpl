@@ -1,0 +1,7 @@
+pnpm-lock.yaml
+# .gitignore
+.history
+node_modules
+coverage
+lib
+tsconfig.tsbuildinfo

@@ -1,0 +1,21 @@
+{
+  "name": "rtpl",
+  "version": "0.0.1",
+  "description": "CLI tool for resource templates",
+  "scripts": {
+    "build": "tsc -b",
+    "clean": "tsc -b --clean",
+    "watch": "tsc -b -w"
+  },
+  "dependencies": {
+    "@rtpl/cli": "workspace:*"
+  },
+  "publishConfig": {
+    "directory": "lib"
+  },
+  "x-wspa": {
+    "pkgManifest": {
+      "bin": "index.js"
+    }
+  }
+}

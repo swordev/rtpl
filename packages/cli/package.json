@@ -1,0 +1,45 @@
+{
+  "name": "@rtpl/cli",
+  "version": "0.0.1",
+  "description": "CLI tool for resource templates",
+  "scripts": {
+    "build": "tsc -b",
+    "clean": "tsc -b --clean",
+    "watch": "tsc -b -w"
+  },
+  "dependencies": {
+    "@types/json-schema": "^7.0.11",
+    "ajv": "^8.11.0",
+    "brace-expansion": "^2.0.1",
+    "chalk": "^4.1.2",
+    "commander": "^9.2.0",
+    "diff": "^5.0.0",
+    "lodash.isplainobject": "^4.0.6",
+    "lodash.mergewith": "^4.6.2",
+    "lodash.set": "^4.3.2",
+    "micromatch": "^4.0.5",
+    "ts-essentials": "^9.1.2",
+    "yaml": "^2.0.1"
+  },
+  "devDependencies": {
+    "@types/brace-expansion": "^1.1.0",
+    "@types/chalk": "^2.2.0",
+    "@types/commander": "^2.12.2",
+    "@types/diff": "^5.0.2",
+    "@types/lodash.isplainobject": "^4.0.7",
+    "@types/lodash.mergewith": "^4.6.7",
+    "@types/lodash.set": "^4.3.7",
+    "@types/micromatch": "^4.0.2"
+  },
+  "peerDependencies": {
+    "ts-node": "^10.4.0"
+  },
+  "publishConfig": {
+    "directory": "lib"
+  },
+  "x-wspa": {
+    "pkgManifest": {
+      "bin": "bin.js"
+    }
+  }
+}
