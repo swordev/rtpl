@@ -10,7 +10,8 @@ importers:
       '@tsconfig/node16': ^1.0.2
       '@types/jest': ^27.5.0
       '@types/node': ^16.11.33
-      '@wspa/config': ^0.0.2
+      '@wspa/cli': ^0.1.1
+      '@wspa/config': ^0.0.4
       eslint: ^8.15.0
       jest: ^27.5.1
       prettier: 2.5.1
@@ -18,7 +19,6 @@ importers:
       prettier-plugin-sort-json: ^0.0.2
       ts-jest: ^27.1.4
       typescript: ^4.6.4
-      wspa: ^0.0.6
     devDependencies:
       '@changesets/changelog-github': 0.4.4
       '@changesets/cli': 2.22.0
@@ -26,7 +26,8 @@ importers:
       '@tsconfig/node16': 1.0.2
       '@types/jest': 27.5.0
       '@types/node': 16.11.33
-      '@wspa/config': 0.0.2
+      '@wspa/cli': 0.1.1
+      '@wspa/config': 0.0.4
       eslint: 8.15.0
       jest: 27.5.1
       prettier: 2.5.1
@@ -34,7 +35,6 @@ importers:
       prettier-plugin-sort-json: 0.0.2_prettier@2.5.1
       ts-jest: 27.1.4_de3efcd1e6a6e8470860984ab19632da
       typescript: 4.6.4
-      wspa: 0.0.6
 
   packages/cli:
     specifiers:
@@ -1438,8 +1438,8 @@ packages:
       '@types/yargs-parser': 21.0.0
     dev: true
 
-  /@wspa/cli/0.0.4:
-    resolution: {integrity: sha512-TkQV28QfLHdPSBaDo3ujdCcC4PvS4yNb/pMyogA5BXh8gAVGWwwQKEoHLUKBAtc2ZdQF++7rCHz8qG1jt/pBBA==}
+  /@wspa/cli/0.1.1:
+    resolution: {integrity: sha512-CtdOL8SviwqW1n+5nQQWDSUn+B2G0PbYCr/lyRWyQ02Klh+yX3MG7exFptjjUf0dfha9G5hM95gEVOwnpZXBNA==}
     hasBin: true
     dependencies:
       '@pnpm/find-workspace-packages': 4.0.4_@pnpm+logger@4.0.0
@@ -1452,10 +1452,10 @@ packages:
       yaml: 2.0.1
     dev: true
 
-  /@wspa/config/0.0.2:
-    resolution: {integrity: sha512-4Q8vlFc/0oSiEtQJI5ifeb5GDixsJWGqJhl4F3gSfUmf1ffJLrh/ybkT07O4gBvBhhzq7zY3jOYrhtu30r60Zg==}
+  /@wspa/config/0.0.4:
+    resolution: {integrity: sha512-Rnkz0/CXo1BBv8n96hvMiRh9fBWuwMmqH68wK4tfPdm0K9R/gzvnRzW6SGZcPcN6VdoBFOuTJQcJnzpEvB6C8w==}
     dependencies:
-      '@wspa/cli': 0.0.4
+      '@wspa/cli': 0.1.1
     dev: true
 
   /@zkochan/npm-conf/2.0.2:
@@ -4985,13 +4985,6 @@ packages:
         optional: true
       utf-8-validate:
         optional: true
-    dev: true
-
-  /wspa/0.0.6:
-    resolution: {integrity: sha512-rM5DWgBb/u9lsdrUC71y9bvI5xGG4kN4A+y47Gn/UDFLdKQ8uZEQq0ggFZ1zgPLdczZZa+3x3jeMtcyEaiTHeQ==}
-    hasBin: true
-    dependencies:
-      '@wspa/cli': 0.0.4
     dev: true
 
   /xml-name-validator/3.0.0:
