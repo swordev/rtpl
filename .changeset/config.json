@@ -9,7 +9,7 @@
     }
   ],
   "commit": false,
-  "fixed": [],
+  "fixed": [["@rtpl/cli", "rtpl"]],
   "ignore": [],
   "linked": [],
   "updateInternalDependencies": "patch"
