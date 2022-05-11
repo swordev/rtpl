@@ -39,7 +39,9 @@
   },
   "x-wspa": {
     "pkgManifest": {
-      "bin": "bin.js"
+      "bin": {
+        "rtpl": "bin.js"
+      }
     }
   }
 }
