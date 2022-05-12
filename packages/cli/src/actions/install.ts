@@ -1,4 +1,5 @@
 import { GlobalOptions } from "../cli";
+import { parseConfigFile } from "../utils/self/config";
 import {
   ActionEnum,
   execFileAction,
@@ -15,12 +16,18 @@ export type InstallActionOptions = GlobalOptions & {
 };
 
 export default async function install(options: InstallActionOptions) {
-  const allModels = await resolve({
-    filter: options.filter,
-    configPath: options.configPath,
-    lockPath: options.lockPath,
-    outPath: options.outPath,
-  });
+  const config = await parseConfigFile(options.configPath);
+  const allModels = await resolve(
+    {
+      filter: options.filter,
+      configPath: options.configPath,
+      lockPath: options.lockPath,
+      outPath: options.outPath,
+    },
+    config
+  );
+
+  for (const tpl of config.templates) await tpl.onBeforeInstall?.(options);
 
   const lockData = lock.parseFile(options.lockPath, true) ?? {
     templates: {},
@@ -86,5 +93,8 @@ export default async function install(options: InstallActionOptions) {
 
     if (!options.dryRun) await lock.writeFile(options.lockPath, lockData);
   }
+
+  for (const tpl of config.templates) await tpl.onInstall?.(options);
+
   return { changes, exitCode: errors ? 1 : 0 };
 }

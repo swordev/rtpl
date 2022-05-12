@@ -1,4 +1,5 @@
 import { AbstractModel } from "../..";
+import { InstallActionOptions } from "../../actions/install";
 import { parseJsonFile, resolveIndexPath } from "../fs";
 import { merge } from "../object";
 import { DeepPartial } from "../ts";
@@ -31,6 +32,8 @@ export type Template<TOptions = any, TModel = any> = {
   useOptions?: UseOptions<TOptions>;
   useModel?: UseModel<TOptions, TModel>;
   useTransformer?: UseTransformer<TOptions>;
+  onBeforeInstall?: (options: InstallActionOptions) => Promise<void>;
+  onInstall?: (options: InstallActionOptions) => Promise<void>;
 };
 
 export type Config = {

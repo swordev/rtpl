@@ -2,7 +2,7 @@ import { AbstractModel } from "../..";
 import { DirModel } from "../../models/DirModel";
 import { isPlainObject } from "../object";
 import { makeFilter } from "../string";
-import { parseConfigFile } from "./config";
+import { Config, parseConfigFile } from "./config";
 import { global } from "./global";
 import { isMatch } from "micromatch";
 import { basename, dirname, join, relative } from "path";
@@ -107,10 +107,10 @@ export async function resolveModels(options: {
   return values;
 }
 
-export async function resolve(options: CallOptions) {
+export async function resolve(options: CallOptions, config?: Config) {
   global.lastCallOptions = options;
+  if (!config) config = await parseConfigFile(options.configPath);
   let result: Record<string, Awaited<ReturnType<typeof resolveModels>>> = {};
-  const config = await parseConfigFile(options.configPath);
   const lockDir = dirname(options.lockPath);
   const outPath = options.outPath;
   const filter = options.filter;

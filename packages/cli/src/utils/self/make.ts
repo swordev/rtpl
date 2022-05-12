@@ -37,9 +37,9 @@ export type MakeOptions<T> = (
       ) => Promise<PartialOptions<T>>)
 ) => UseOptions<T>;
 
-export type MakeEntrypoint<TOptions> = (data: {
-  name: string;
-}) => (options?: PartialOptions<TOptions>) => Template<TOptions>;
+export type MakeEntrypoint<TOptions> = (
+  data: Pick<Template<TOptions>, "name" | "onBeforeInstall" | "onInstall">
+) => (options?: PartialOptions<TOptions>) => Template<TOptions>;
 
 export type Make<TOptions> = {
   makeEntrypoint: MakeEntrypoint<TOptions>;
@@ -132,10 +132,10 @@ export function make<TOptions extends Record<string, unknown> = {}>(
     return (result.data.useTransformer = cb);
   };
 
-  result.makeEntrypoint = ({ name }) => {
+  result.makeEntrypoint = (template) => {
     return function (options) {
       return {
-        name,
+        ...template,
         options,
         useOptions: result.data.useOptions,
         useModel: result.data.useModel,
