@@ -1,14 +1,7 @@
-import { Callable, stringify } from "../utils/object";
-import { StringifyClass } from "../utils/self/model";
+import { stringify } from "../utils/object";
 import { AbstractModel, TypeEnum } from "./AbstractModel";
 
-type SpecValue = string | number | StringifyClass | { toString(): string };
-
-export class RawModel extends AbstractModel<
-  | Callable<SpecValue | SpecValue[]>
-  | Callable<SpecValue | SpecValue[]>[]
-  | undefined
-> {
+export class RawModel<T = any> extends AbstractModel<T> {
   protected static _tplModelType = TypeEnum.Raw;
   toString() {
     return Array.isArray(this.spec)
