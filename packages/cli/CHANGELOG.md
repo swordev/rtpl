@@ -1,5 +1,11 @@
 # @rtpl/cli
 
+## 0.1.1
+
+### Patch Changes
+
+- [`7cab87b`](https://github.com/swordev/rtpl/commit/7cab87bf7a11395eb13a83fa042d2d4b363c798b) Thanks [@juanrgm](https://github.com/juanrgm)! - Allow generic type in `RawModel`
+
 ## 0.1.0
 
 ### Minor Changes
