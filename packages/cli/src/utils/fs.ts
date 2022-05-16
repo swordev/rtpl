@@ -30,6 +30,7 @@ export async function readIfExists(path: string) {
   try {
     return await readFile(path);
   } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "EISDIR") return;
     if ((error as NodeJS.ErrnoException).code === "ENOENT") return;
     throw error;
   }

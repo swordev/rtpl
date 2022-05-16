@@ -3,7 +3,7 @@ import { checkPath, mkrdir } from "../fs";
 import { sort } from "../object";
 import * as lock from "./lock";
 import chalk from "chalk";
-import { readFile, rm, writeFile } from "fs/promises";
+import { readFile, rm, rmdir, writeFile } from "fs/promises";
 import { dirname, join, relative } from "path";
 
 export enum ActionEnum {
@@ -124,7 +124,18 @@ export async function execFileAction(
       await writeFile(absPath, action.data);
       return dirs.map((v) => relative(baseDir, v).replace(/\\/g, "/"));
     } else if (action.type === ActionEnum.UPDATE) {
-      await writeFile(absPath, action.data);
+      const exec = async () => await writeFile(absPath, action.data);
+      try {
+        await exec();
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== "EISDIR") throw error;
+        try {
+          await rmdir(absPath);
+        } catch (_error) {
+          throw error;
+        }
+        await exec();
+      }
     } else if (action.type === ActionEnum.DELETE) {
       try {
         await rm(absPath);
