@@ -1,6 +1,6 @@
 import { GlobalOptions } from "../cli";
 import { parseConfigFile } from "../utils/self/config";
-import { camelCase } from "lodash";
+import camelCase from "lodash.camelcase";
 import { stringify } from "yaml";
 
 export type OptionsOptions = GlobalOptions & {
