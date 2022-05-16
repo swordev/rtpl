@@ -1,4 +1,4 @@
-lockfileVersion: 5.3
+lockfileVersion: 5.4
 
 importers:
 
@@ -33,7 +33,7 @@ importers:
       prettier: 2.5.1
       prettier-plugin-packagejson: 2.2.17_prettier@2.5.1
       prettier-plugin-sort-json: 0.0.2_prettier@2.5.1
-      ts-jest: 27.1.4_de3efcd1e6a6e8470860984ab19632da
+      ts-jest: 27.1.4_3y7pzupgu3ueocdatbfldfrs3i
       typescript: 4.6.4
 
   packages/cli:
@@ -69,7 +69,7 @@ importers:
       lodash.mergewith: 4.6.2
       lodash.set: 4.3.2
       micromatch: 4.0.5
-      ts-essentials: 9.1.2_typescript@4.6.4
+      ts-essentials: 9.1.2
       yaml: 2.0.1
     devDependencies:
       '@types/brace-expansion': 1.1.0
@@ -297,12 +297,16 @@ packages:
     resolution: {integrity: sha512-oG0ej7efjEXxb4UgE+klVx+3j4MVo+A2vCzm7OUN4CLo6WhQ+vSOD2yJ8m7B+DghObxtLxt3EfgMWpq+AsWehQ==}
     engines: {node: '>=6.0.0'}
     hasBin: true
+    dependencies:
+      '@babel/types': 7.17.10
     dev: true
 
   /@babel/parser/7.17.10:
     resolution: {integrity: sha512-n2Q6i+fnJqzOaq2VkdXxy2TCPCWQZHiCo0XqmrCvDWcZQKRyZzYi4Z0yxlBuN0w+r2ZHmre+Q087DSrw3pbJDQ==}
     engines: {node: '>=6.0.0'}
     hasBin: true
+    dependencies:
+      '@babel/types': 7.17.10
     dev: true
 
   /@babel/plugin-syntax-async-generators/7.8.4_@babel+core@7.17.10:
@@ -4666,15 +4670,13 @@ packages:
     engines: {node: '>=8'}
     dev: true
 
-  /ts-essentials/9.1.2_typescript@4.6.4:
+  /ts-essentials/9.1.2:
     resolution: {integrity: sha512-EaSmXsAhEiirrTY1Oaa7TSpei9dzuCuFPmjKRJRPamERYtfaGS8/KpOSbjergLz/Y76/aZlV9i/krgzsuWEBbg==}
     peerDependencies:
       typescript: '>=4.1.0'
-    dependencies:
-      typescript: 4.6.4
     dev: false
 
-  /ts-jest/27.1.4_de3efcd1e6a6e8470860984ab19632da:
+  /ts-jest/27.1.4_3y7pzupgu3ueocdatbfldfrs3i:
     resolution: {integrity: sha512-qjkZlVPWVctAezwsOD1OPzbZ+k7zA5z3oxII4dGdZo5ggX/PL7kvwTM0pXTr10fAtbiVpJaL3bWd502zAhpgSQ==}
     engines: {node: ^10.13.0 || ^12.13.0 || ^14.15.0 || >=15.0.0}
     hasBin: true
