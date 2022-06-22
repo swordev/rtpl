@@ -1,5 +1,15 @@
 # @rtpl/cli
 
+## 0.2.0
+
+### Minor Changes
+
+- [`d5cbdaa`](https://github.com/swordev/rtpl/commit/d5cbdaa9a39b1c3d3bc668137e7b7f09069ff178) Thanks [@juanrgm](https://github.com/juanrgm)! - Add `generate` and `onReady` spec options to `SecretModel`
+
+### Patch Changes
+
+- [`bb066bf`](https://github.com/swordev/rtpl/commit/bb066bfb56ffbbbadf77121e00ebcdd8b2599fd4) Thanks [@juanrgm](https://github.com/juanrgm)! - Overwrite empty dir
+
 ## 0.1.1
 
 ### Patch Changes
