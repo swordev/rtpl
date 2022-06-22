@@ -7,10 +7,19 @@ import {
   upperAlphaCharset,
 } from "../utils/crypto";
 import { readIfExists } from "../utils/fs";
-import { AbstractModel, Data, DelayedValue, TypeEnum } from "./AbstractModel";
-import { Writable } from "ts-essentials";
+import {
+  AbstractModel,
+  Data,
+  DelayedValue,
+  setDelayedValue,
+  TypeEnum,
+} from "./AbstractModel";
 
 export type SecretSpec = {
+  /**
+   * @default true
+   */
+  generate?: boolean;
   /**
    * @default 'alpha-number'
    */
@@ -27,14 +36,21 @@ export type SecretSpec = {
    * @default 16
    */
   length?: number;
+  onReady?: (data: {
+    path: string;
+    prev: string | undefined;
+    current: string | undefined;
+  }) => Promise<string | undefined>;
 };
 
 export class SecretModel extends AbstractModel<SecretSpec | undefined> {
   protected static _tplModelType = TypeEnum.Secret;
   private value: DelayedValue<string>;
+  readonly hasNewValue: DelayedValue<boolean>;
   constructor(readonly data: Data<SecretSpec>) {
     super(data);
     this.value = new DelayedValue(undefined, this.lastStacks);
+    this.hasNewValue = new DelayedValue(undefined, this.lastStacks);
   }
   toJSON() {
     return this.toString();
@@ -45,8 +61,10 @@ export class SecretModel extends AbstractModel<SecretSpec | undefined> {
   async onReady(path: string) {
     await super.onReady(path);
     const value = (await readIfExists(path))?.toString();
-    let newValue = value;
-    if (!newValue) {
+    const hasNewValue = value ? false : true;
+    const generate = this.spec?.generate ?? true;
+    let endValue = value;
+    if (!endValue && generate) {
       const length = this.spec?.length ?? 16;
       const inCharset = this.spec?.charset ?? "alpha-number";
       const charsetMap = {
@@ -63,8 +81,16 @@ export class SecretModel extends AbstractModel<SecretSpec | undefined> {
       if (charset.length <= 10) {
         throw new Error(`Charset length is too small`);
       }
-      newValue = randomString(length, charset);
+      endValue = randomString(length, charset);
     }
-    (this.value as Writable<typeof this.value>).value = newValue;
+    const auxValue = await this.spec?.onReady?.({
+      path,
+      prev: value,
+      current: endValue,
+    });
+    if (typeof auxValue === "string") endValue = auxValue;
+    if (typeof endValue !== "string") throw new Error(`Secret is empty`);
+    setDelayedValue(this.value, endValue);
+    setDelayedValue(this.hasNewValue, hasNewValue);
   }
 }
