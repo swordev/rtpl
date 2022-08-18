@@ -22,9 +22,9 @@
     "check:eslint": "eslint .",
     "check:format": "prettier -c .",
     "clean": "wspa clean",
-    "format": "prettier -w .",
     "compose": "wspa compose",
-    "prepare": "pnpm compose",
+    "format": "prettier -w .",
+    "postinstall": "wspa compose",
     "start": "node packages/cli/lib/bin.js",
     "test": "jest",
     "watch": "tsc -b tsconfig.build.json -w"
