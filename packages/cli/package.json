@@ -12,15 +12,15 @@
     "ajv": "^8.11.0",
     "brace-expansion": "^2.0.1",
     "chalk": "^4.1.2",
-    "commander": "^9.2.0",
-    "diff": "^5.0.0",
+    "commander": "^9.4.0",
+    "diff": "^5.1.0",
     "lodash.camelcase": "^4.3.0",
     "lodash.isplainobject": "^4.0.6",
     "lodash.mergewith": "^4.6.2",
     "lodash.set": "^4.3.2",
     "micromatch": "^4.0.5",
-    "ts-essentials": "^9.1.2",
-    "yaml": "^2.1.0"
+    "ts-essentials": "^9.2.0",
+    "yaml": "^2.1.1"
   },
   "devDependencies": {
     "@types/brace-expansion": "^1.1.0",
