@@ -114,7 +114,6 @@ export async function execFileAction(
   path: string,
   dryRun: boolean
 ) {
-  logAction(action.type, path);
   const absPath = join(baseDir, path);
   if (action.lock === false) {
     throw new Error(`Path not found in lock entrypoint files`);

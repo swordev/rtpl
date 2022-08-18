@@ -75,6 +75,13 @@ export default (defaultOptions?: Partial<GlobalOptions>) => {
     .command("install")
     .alias("i")
     .option("-d,--dry-run", "dry run", false)
+    .option("-i,--interactive", "interactive mode", false)
+    .option(
+      "-l,--lines <value>",
+      "diff context lines (interactive mode)",
+      Number,
+      1
+    )
     .action(makeAction(install));
   program
     .command("options")
