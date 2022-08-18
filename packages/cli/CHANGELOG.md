@@ -1,5 +1,17 @@
 # @rtpl/cli
 
+## 0.3.0
+
+### Minor Changes
+
+- [`bec9fe9`](https://github.com/swordev/rtpl/commit/bec9fe93a7dcb80e9bc0af6923df2c465acac79f) Thanks [@juanrgm](https://github.com/juanrgm)! - Rename `context` option to `lines` in `diff` action
+
+* [`7075bb2`](https://github.com/swordev/rtpl/commit/7075bb27af0c7b05d3a4369f58c4bfc891d8182b) Thanks [@juanrgm](https://github.com/juanrgm)! - Add interactive mode option to `install` action
+
+### Patch Changes
+
+- [`755a641`](https://github.com/swordev/rtpl/commit/755a641bc7e5927792706fe0d1010afbf953139d) Thanks [@juanrgm](https://github.com/juanrgm)! - Update dependencies
+
 ## 0.2.0
 
 ### Minor Changes
