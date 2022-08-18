@@ -16,7 +16,7 @@ export default async function diff(options: DiffOptions) {
     lockPath: options.lockPath,
     outPath: options.outPath,
   });
-  let someChange = false;
+  let changes = 0;
   for (const name in allModels) {
     const models = allModels[name];
     for (const path in models) {
@@ -27,7 +27,7 @@ export default async function diff(options: DiffOptions) {
         typeof old !== "string" ||
         lines.some((line) => line.added || line.removed);
 
-      if (haveChanges) someChange = true;
+      if (haveChanges) changes++;
       if (!options.showAll && !haveChanges) continue;
       console.info("\x1b[36m%s\x1b[0m", path);
 
@@ -67,6 +67,6 @@ export default async function diff(options: DiffOptions) {
       console.info();
     }
   }
-  if (!someChange) process.stderr.write(`${chalk.grey("No changes")}\n`);
-  return { exitCode: someChange ? 1 : 0 };
+  if (!changes) process.stderr.write(`${chalk.grey("No changes")}\n`);
+  return { exitCode: changes ? 1 : 0, changes };
 }
