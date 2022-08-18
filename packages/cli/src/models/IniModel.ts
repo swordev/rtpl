@@ -12,19 +12,21 @@ interface IniSpecRecord<T> {
 
 export type IniSpec = IniSpecRecord<Value | IniSpec>;
 
+export type ConfigFormat = {
+  groupBraces?: boolean;
+  /**
+   * @default true
+   */
+  padding?: boolean;
+  /**
+   * @default "="
+   */
+  assignChar?: string;
+  onRender?: (key: string | null, block: string[], level: number) => string[];
+};
+
 export type Config = {
-  format?: {
-    groupBraces?: boolean;
-    /**
-     * @default true
-     */
-    padding?: boolean;
-    /**
-     * @default "="
-     */
-    assignChar?: string;
-    onRender?: (key: string | null, block: string[], level: number) => string[];
-  };
+  format?: ConfigFormat;
 };
 
 export class IniModel<
@@ -36,7 +38,7 @@ export class IniModel<
       {
         padding: true,
         assignChar: "=",
-      } as Config["format"],
+      } as ConfigFormat,
       this.data.format ?? {}
     );
 
