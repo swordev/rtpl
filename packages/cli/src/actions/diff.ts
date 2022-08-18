@@ -7,7 +7,7 @@ import { diffLines } from "diff";
 export type DiffOptions = GlobalOptions & {
   showAll: boolean;
   hideLines: boolean;
-  context: number;
+  lines: number;
 };
 export default async function diff(options: DiffOptions) {
   const allModels = await resolve({
@@ -52,7 +52,7 @@ export default async function diff(options: DiffOptions) {
           }
 
           const haveLineChanges = line.added || line.removed;
-          if (options.context === 1 && !haveLineChanges) continue;
+          if (options.lines === 1 && !haveLineChanges) continue;
 
           if (options.hideLines) {
             console.info(result);

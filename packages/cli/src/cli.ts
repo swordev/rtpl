@@ -68,7 +68,7 @@ export default (defaultOptions?: Partial<GlobalOptions>) => {
     .alias("d")
     .option("-a,--show-all", "show all")
     .option("--hide-lines", "hide lines", false)
-    .option("--context <lines>", "context lines", Number, 1)
+    .option("--lines <value>", "diff context lines", Number, 1)
     .action(makeAction(diff));
   program.command("init").action(makeAction(init));
   program
