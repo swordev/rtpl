@@ -1,5 +1,11 @@
 # @rtpl/cli
 
+## 0.3.1
+
+### Patch Changes
+
+- [`5962f27`](https://github.com/swordev/rtpl/commit/5962f273a268439dfcf956fdc1581d07366e7b13) Thanks [@juanrgm](https://github.com/juanrgm)! - Throw failed exit code
+
 ## 0.3.0
 
 ### Minor Changes
