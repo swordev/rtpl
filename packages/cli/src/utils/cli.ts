@@ -8,6 +8,10 @@ export async function prompt(text: string, rl?: Interface) {
       output: process.stdout,
     });
   return new Promise<string>((resolve) => {
+    rl?.on("SIGINT", () => {
+      console.info();
+      process.exit(1);
+    });
     rl!.question(text, (value: string) => {
       rl!.close();
       resolve(value.trim());
