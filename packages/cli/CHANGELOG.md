@@ -1,5 +1,13 @@
 # @rtpl/cli
 
+## 0.3.2
+
+### Patch Changes
+
+- [`59fa82b`](https://github.com/swordev/rtpl/commit/59fa82bfc791321dbd09c4dea48117187502a019) Thanks [@juanrgm](https://github.com/juanrgm)! - Update dependencies
+
+- [`36bf534`](https://github.com/swordev/rtpl/commit/36bf534c31572d6e358b9c7f7e0f0e59f305c638) Thanks [@juanrgm](https://github.com/juanrgm)! - Return the exit code when there is a fatal error
+
 ## 0.3.1
 
 ### Patch Changes
