@@ -1,5 +1,6 @@
 import { JsonModel } from "../../../src";
 import { extractMap } from "../../../src/utils/self/model";
+import { it, describe, expect } from "vitest";
 
 describe("extractMap", () => {
   it("shoulds filter by name", () => {

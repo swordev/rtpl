@@ -1,4 +1,5 @@
 import { RawModel } from "../../../src/models/RawModel";
+import { it, describe, expect } from "vitest";
 
 describe("RawModel.toString", () => {
   it("resolves all values", () => {

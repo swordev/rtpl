@@ -1,4 +1,5 @@
 import { CronModel } from "../../../src/models/CronModel";
+import { it, describe, expect } from "vitest";
 
 describe("CronModel.toString", () => {
   it("renders single line", () => {

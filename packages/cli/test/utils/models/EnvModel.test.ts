@@ -1,4 +1,5 @@
 import { EnvModel } from "../../../src/models/EnvModel";
+import { it, describe, expect } from "vitest";
 
 describe("EnvModel.toString", () => {
   it("resolves all values", () => {

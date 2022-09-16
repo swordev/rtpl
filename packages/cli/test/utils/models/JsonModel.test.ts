@@ -1,5 +1,6 @@
 import { RawModel } from "../../../src";
 import { JsonModel } from "../../../src/models/JsonModel";
+import { it, describe, expect } from "vitest";
 
 describe("JsonModel.toString", () => {
   it("resolves all values", () => {

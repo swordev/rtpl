@@ -1,5 +1,6 @@
 import { DirModel, RawModel } from "../../../src";
 import { resolveModels } from "../../../src/utils/self/resolve";
+import { it, describe, expect } from "vitest";
 
 describe("resolveModels", () => {
   it("uses model name as file name", async () => {

@@ -1,4 +1,5 @@
 import { AbstractModel } from "../../../src/models/AbstractModel";
+import { it, describe, expect } from "vitest";
 
 class StringModel extends AbstractModel<string | undefined> {
   toString(): string {
@@ -9,7 +10,8 @@ class StringModel extends AbstractModel<string | undefined> {
 describe("AbstractModel.lastStacks", () => {
   it("returns current source", () => {
     const [stack] = new StringModel({}).lastStacks;
-    expect(stack.getFileName()).toBe(__filename);
+    const normalize = (v: string) => v.replaceAll("\\", "/");
+    expect(normalize(stack.getFileName())).toBe(normalize(__filename));
     expect(typeof stack.getLineNumber() == "number").toBe(true);
   });
 });
