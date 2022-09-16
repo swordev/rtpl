@@ -25,16 +25,12 @@ export function merge<TObject, TSource>(object: TObject, source: TSource) {
 export type JSONClass = { toString(): string; toJSON(): string };
 export type Callable<T, TArgs extends any[] = []> = T | ((...args: TArgs) => T);
 
-export function resolve<T extends { toString(): string } | undefined | null>(
-  data: Callable<T>
-): T {
-  if (typeof data === "function") data = data();
-  return data as any;
+export function resolve<T>(data: Callable<T>): T {
+  if (typeof data === "function") data = (data as () => T)();
+  return data;
 }
 
-export function stringify<T extends { toString(): string } | undefined | null>(
-  data: Callable<T>
-) {
+export function stringify(data: Callable<unknown>) {
   data = resolve(data);
   return data?.toString() ?? "";
 }
