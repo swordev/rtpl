@@ -36,6 +36,7 @@ function makeAction(cb: (options: any) => Promise<any>) {
       if (typeof result?.exitCode === "number") process.exit(result.exitCode);
     } catch (error) {
       console.error(chalk.red((error as Error).stack));
+      process.exit(2);
     }
   };
 }
