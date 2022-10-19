@@ -1,5 +1,5 @@
 import { Callable, isPlainObject, resolve } from "../utils/object";
-import { AbstractModel, TypeEnum } from "./AbstractModel";
+import { AbstractRes, ResType } from "./AbstractRes";
 
 export type JSONPrimitive =
   | string
@@ -47,13 +47,16 @@ export const toString = (value: JSONValue): string => {
   );
 };
 
-export class JsonModel<
+export class JsonRes<
   T extends JSONValue | undefined,
   TConf extends Record<string, unknown> = {}
-> extends AbstractModel<T, TConf> {
-  protected static _tplModelType = TypeEnum.Json;
-  toString() {
-    return toString(this.spec);
+> extends AbstractRes<T, TConf> {
+  protected static _tplResType = ResType.Json;
+  override getDefaultExtension() {
+    return "json";
+  }
+  override toString() {
+    return toString(this.data);
   }
   toJSON() {
     return JSON.parse(this.toString());

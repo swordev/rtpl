@@ -1,5 +1,3 @@
-import braceExpansion from "brace-expansion";
-import type { Stats } from "fs";
 import { mkdir, readFile, stat } from "fs/promises";
 import {
   basename,
@@ -9,7 +7,6 @@ import {
   normalize,
   posix,
   relative,
-  resolve,
 } from "path";
 import { parse as parseYaml } from "yaml";
 
@@ -34,45 +31,6 @@ export async function readIfExists(path: string) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") return;
     throw error;
   }
-}
-
-export async function resolveIndexPath(path: string): Promise<string>;
-export async function resolveIndexPath(
-  path: string,
-  allowOptionalFlag?: boolean
-): Promise<string | undefined>;
-export async function resolveIndexPath(
-  path: string,
-  allowOptionalFlag?: boolean
-): Promise<string | undefined> {
-  const paths = braceExpansion(path);
-  let optionalFlags = 0;
-  for (let path of paths) {
-    const hasOptionalFlag = allowOptionalFlag && path.endsWith("?");
-    if (hasOptionalFlag) {
-      path = path.slice(0, path.length - 1);
-      optionalFlags++;
-    }
-    path = resolve(path);
-    let info: Stats | undefined;
-    try {
-      info = await stat(path);
-    } catch (error) {}
-    const paths = [
-      ...(info?.isFile() ? [path] : []),
-      `${path}.ts`,
-      `${path}.js`,
-      ...(info?.isDirectory() ? [join(path, "index.ts")] : []),
-      ...(info?.isDirectory() ? [join(path, "index.js")] : []),
-    ];
-    for (const path of paths) {
-      if (await checkPath(path)) {
-        return path;
-      }
-    }
-  }
-  if (allowOptionalFlag && optionalFlags === paths.length) return;
-  throw new Error(`Index files not founds: ${paths.join(", ")}`);
 }
 
 export async function resolvePackagePath(input: string) {

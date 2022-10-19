@@ -7,15 +7,10 @@ import {
   upperAlphaCharset,
 } from "../utils/crypto";
 import { readIfExists } from "../utils/fs";
-import {
-  AbstractModel,
-  Data,
-  DelayedValue,
-  setDelayedValue,
-  TypeEnum,
-} from "./AbstractModel";
+import { AbstractRes, ResOptions, ResType } from "./AbstractRes";
+import { DelayedValue, setDelayedValue } from "./DelayedValue";
 
-export type SecretSpec = {
+export type SecretData = {
   /**
    * @default true
    */
@@ -43,30 +38,33 @@ export type SecretSpec = {
   }) => Promise<string | undefined>;
 };
 
-export class SecretModel extends AbstractModel<SecretSpec | undefined> {
-  protected static _tplModelType = TypeEnum.Secret;
+export class SecretRes extends AbstractRes<SecretData | undefined> {
+  protected static _tplResType = ResType.Secret;
   private value: DelayedValue<string>;
   readonly hasNewValue: DelayedValue<boolean>;
-  constructor(readonly data: Data<SecretSpec>) {
-    super(data);
+  constructor(readonly options: ResOptions<SecretData>) {
+    super(options);
     this.value = new DelayedValue(undefined, this.lastStacks);
     this.hasNewValue = new DelayedValue(undefined, this.lastStacks);
+  }
+  override getDefaultExtension() {
+    return "secret";
   }
   toJSON() {
     return this.toString();
   }
-  toString() {
+  override toString() {
     return this.value.toString();
   }
-  async onReady(path: string) {
+  override async onReady(path: string) {
     await super.onReady(path);
     const value = (await readIfExists(path))?.toString();
     const hasNewValue = value ? false : true;
-    const generate = this.spec?.generate ?? true;
+    const generate = this.data?.generate ?? true;
     let endValue = value;
     if (!endValue && generate) {
-      const length = this.spec?.length ?? 16;
-      const inCharset = this.spec?.charset ?? "alpha-number";
+      const length = this.data?.length ?? 16;
+      const inCharset = this.data?.charset ?? "alpha-number";
       const charsetMap = {
         number: numberCharset,
         lowerAlpha: lowerAlphaCharset,
@@ -83,7 +81,7 @@ export class SecretModel extends AbstractModel<SecretSpec | undefined> {
       }
       endValue = randomString(length, charset);
     }
-    const auxValue = await this.spec?.onReady?.({
+    const auxValue = await this.data?.onReady?.({
       path,
       prev: value,
       current: endValue,

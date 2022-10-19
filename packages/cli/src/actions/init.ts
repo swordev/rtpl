@@ -8,13 +8,13 @@ export type CheckOptions = GlobalOptions;
 
 export default async function init(options: CheckOptions) {
   const code = `
-import { defineConfig } from "@rtpl/cli";
+import { createTpl } from "@rtpl/cli";
 
-export default defineConfig({
-  templates: [],
+export default createTpl({
+  name: "myTpl"
 });
 `;
-  const base = `rtpl.config.ts`;
+  const base = `rtpl.ts`;
   const path = join(process.cwd(), base);
   if (await checkPath(path)) {
     console.error(`[${chalk.yellow("!")}] "${base}" already exists`);

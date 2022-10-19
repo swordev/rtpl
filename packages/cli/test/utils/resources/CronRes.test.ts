@@ -1,10 +1,10 @@
-import { CronModel } from "../../../src/models/CronModel";
+import { CronRes } from "../../../src/resources/CronRes";
 import { it, describe, expect } from "vitest";
 
-describe("CronModel.toString", () => {
+describe("CronRes.toString", () => {
   it("renders single line", () => {
-    const cron = new CronModel({
-      spec: [
+    const cron = new CronRes({
+      data: [
         {
           script: "run.sh",
           day: 1,
@@ -16,8 +16,8 @@ describe("CronModel.toString", () => {
   });
 
   it("renders script callback", () => {
-    const cron = new CronModel({
-      spec: [
+    const cron = new CronRes({
+      data: [
         {
           script: () => "run.sh",
           day: 1,

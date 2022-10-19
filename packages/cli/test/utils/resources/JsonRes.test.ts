@@ -1,8 +1,8 @@
-import { RawModel } from "../../../src";
-import { JsonModel } from "../../../src/models/JsonModel";
+import { RawRes } from "../../../src";
+import { JsonRes } from "../../../src/resources/JsonRes";
 import { it, describe, expect } from "vitest";
 
-describe("JsonModel.toString", () => {
+describe("JsonRes.toString", () => {
   it("resolves all values", () => {
     class C {
       toJSON() {
@@ -10,24 +10,24 @@ describe("JsonModel.toString", () => {
       }
     }
 
-    const model = new JsonModel({
-      spec: {
+    const res = new JsonRes({
+      data: {
         a: () => 1,
         b: 2,
         c: new C(),
         d: () => new C(),
         e: () => () => () => 1,
-        f: new JsonModel({
-          spec: {
+        f: new JsonRes({
+          data: {
             a: 1,
           },
         }),
-        g: new RawModel({
-          spec: "test",
+        g: new RawRes({
+          data: "test",
         }),
       },
     });
-    expect(model.toString()).toBe(
+    expect(res.toString()).toBe(
       JSON.stringify(
         {
           a: 1,

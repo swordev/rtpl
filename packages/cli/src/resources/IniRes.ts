@@ -1,16 +1,17 @@
 import { Callable, resolve, stringify } from "../utils/object";
-import { StringifyClass } from "../utils/self/model";
-import { AbstractModel, DelayedValue, TypeEnum } from "./AbstractModel";
+import { StringifyClass } from "../utils/self/rs";
+import { AbstractRes, ResType } from "./AbstractRes";
+import { DelayedValue } from "./DelayedValue";
 
 type Value = Callable<
   string | number | boolean | null | StringifyClass | undefined
 >;
 
-interface IniSpecRecord<T> {
+interface IniDataRecord<T> {
   [key: string]: T;
 }
 
-export type IniSpec = IniSpecRecord<Value | IniSpec>;
+export type IniData = IniDataRecord<Value | IniData>;
 
 export type ConfigFormat = {
   groupBraces?: boolean;
@@ -29,24 +30,27 @@ export type Config = {
   format?: ConfigFormat;
 };
 
-export class IniModel<
-  T extends IniSpec | IniSpec[] | undefined
-> extends AbstractModel<T, Config> {
-  protected static _tplModelType = TypeEnum.Ini;
-  toString() {
+export class IniRes<
+  T extends IniData | IniData[] | undefined
+> extends AbstractRes<T, Config> {
+  protected static _tplResType = ResType.Ini;
+  override getDefaultExtension() {
+    return "ini";
+  }
+  override toString() {
     const format = Object.assign(
       {
         padding: true,
         assignChar: "=",
       } as ConfigFormat,
-      this.data.format ?? {}
+      this.options.format ?? {}
     );
 
     const isValue = (value: unknown): value is Value => {
       const type = typeof value;
       return (
         value === null ||
-        AbstractModel.isInstance(value) ||
+        AbstractRes.isInstance(value) ||
         DelayedValue.isInstance(value) ||
         type === "function" ||
         type === "string" ||
@@ -83,7 +87,7 @@ export class IniModel<
 
     const renderGroup = (
       key: string | null,
-      value: IniSpec,
+      value: IniData,
       level = 0
     ): string[] => {
       const values = Object.entries(value)
@@ -92,15 +96,15 @@ export class IniModel<
       return onRender(key, values, level);
     };
 
-    const render = (key: string, value: Value | IniSpec, level: number) =>
+    const render = (key: string, value: Value | IniData, level: number) =>
       isValue(value)
         ? renderValue(key, value, level)
         : renderGroup(key, value, level + 1);
 
-    const spec: IniSpec[] = Array.isArray(this.spec)
-      ? this.spec
-      : [this.spec ?? {}];
+    const data: IniData[] = Array.isArray(this.data)
+      ? this.data
+      : [this.data ?? {}];
 
-    return spec.flatMap((v) => renderGroup(null, v)).join("\n");
+    return data.flatMap((v) => renderGroup(null, v)).join("\n");
   }
 }

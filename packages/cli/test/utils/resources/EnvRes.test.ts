@@ -1,7 +1,7 @@
-import { EnvModel } from "../../../src/models/EnvModel";
+import { EnvRes } from "../../../src/resources/EnvRes";
 import { it, describe, expect } from "vitest";
 
-describe("EnvModel.toString", () => {
+describe("EnvRes.toString", () => {
   it("resolves all values", () => {
     class C {
       toString() {
@@ -11,14 +11,14 @@ describe("EnvModel.toString", () => {
         return "3";
       }
     }
-    const model = new EnvModel({
-      spec: {
+    const res = new EnvRes({
+      data: {
         a: () => 1,
         b: 2,
         c: new C(),
         d: () => new C(),
       },
     });
-    expect(model.toString()).toBe(["a=1", "b=2", "c=3", "d=3"].join("\n"));
+    expect(res.toString()).toBe(["a=1", "b=2", "c=3", "d=3"].join("\n"));
   });
 });

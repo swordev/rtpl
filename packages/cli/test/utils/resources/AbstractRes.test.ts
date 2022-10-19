@@ -1,15 +1,15 @@
-import { AbstractModel } from "../../../src/models/AbstractModel";
+import { AbstractRes } from "../../../src/resources/AbstractRes";
 import { it, describe, expect } from "vitest";
 
-class StringModel extends AbstractModel<string | undefined> {
+class StringRes extends AbstractRes<string | undefined> {
   toString(): string {
-    return this.spec ?? "";
+    return this.data ?? "";
   }
 }
 
-describe("AbstractModel.lastStacks", () => {
+describe("AbstractRes.lastStacks", () => {
   it("returns current source", () => {
-    const [stack] = new StringModel({}).lastStacks;
+    const [stack] = new StringRes({}).lastStacks;
     const normalize = (v: string) => v.replaceAll("\\", "/");
     expect(normalize(stack.getFileName())).toBe(normalize(__filename));
     expect(typeof stack.getLineNumber() == "number").toBe(true);

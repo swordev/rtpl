@@ -1,4 +1,4 @@
-import { AbstractModel } from "../../models/AbstractModel";
+import { AbstractRes } from "../../resources/AbstractRes";
 import { checkPath, mkrdir } from "../fs";
 import { sort } from "../object";
 import * as lock from "./lock";
@@ -47,7 +47,7 @@ export function logAction(action: ActionEnum, path: string) {
 
 export async function getFileAction(
   path: string,
-  model: AbstractModel,
+  res: AbstractRes,
   previousLock?: lock.LockDataFile
 ): Promise<ActionResult> {
   const lock: lock.LockDataFile = previousLock
@@ -58,8 +58,8 @@ export async function getFileAction(
         creationDate: new Date().toISOString(),
       };
 
-  if (model) {
-    const data = model.toString();
+  if (res) {
+    const data = res.toString();
     if (!(await checkPath(path))) {
       return { type: ActionEnum.ADD, data, lock };
     } else {
@@ -88,7 +88,7 @@ export async function getFileAction(
 }
 
 export async function getFileActions(
-  models: Record<string, AbstractModel>,
+  resMap: Record<string, AbstractRes>,
   lockDataEntrypoint: lock.LockDataTemplate
 ) {
   const result: Record<string, ActionResult> = {};
@@ -96,12 +96,12 @@ export async function getFileActions(
 
   for (const path of lockFilePaths) {
     const lock = lockDataEntrypoint.files[path];
-    result[path] = await getFileAction(path, models[path], lock);
+    result[path] = await getFileAction(path, resMap[path], lock);
   }
 
-  for (const path in models) {
+  for (const path in resMap) {
     if (!(path in result)) {
-      result[path] = await getFileAction(path, models[path]);
+      result[path] = await getFileAction(path, resMap[path]);
     }
   }
 

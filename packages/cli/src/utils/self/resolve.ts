@@ -1,15 +1,14 @@
-import { AbstractModel } from "../..";
-import { DirModel } from "../../models/DirModel";
+import { AbstractRes, Tpl } from "../..";
+import { DirRes } from "../../resources/DirRes";
+import { checkPath, statIfExists } from "../fs";
 import { isPlainObject } from "../object";
+import { stripRootBackPaths } from "../path";
 import { makeFilter } from "../string";
-import { Config, parseConfigFile } from "./config";
-import { global } from "./global";
 import { isMatch } from "micromatch";
 import { basename, dirname, join, relative } from "path";
-import { Awaited } from "ts-essentials";
+import * as posix from "path/posix";
 
-export type CallOptions = {
-  configPath?: string;
+export type ResolveConfigOptions = {
   filter?: string[];
   outPath: string;
   lockPath: string;
@@ -25,18 +24,18 @@ export function resolvePath(data: {
   return path.replace(/\\/g, "/");
 }
 
-export async function resolveModels(options: {
-  input: unknown;
+export async function resolveResources(options: {
+  resources: unknown;
   outPath?: string;
   lockDir?: string;
   filter?: string[];
   onValue?: (
     key: string,
-    value: AbstractModel,
+    value: AbstractRes,
     actions: { process: boolean; add: boolean }
   ) => Promise<void | false>;
 }) {
-  const values: Record<string, AbstractModel> = {};
+  const values: Record<string, AbstractRes> = {};
   const patterns = options?.filter?.flatMap((v) => makeFilter(v));
   const isPath = (name: string) => name.includes("/");
   const isDir = (name: string) => name.endsWith("/");
@@ -57,26 +56,35 @@ export async function resolveModels(options: {
       for (const value of input) {
         await process(value, [...levels, (index++).toString()]);
       }
-    } else if (AbstractModel.isInstance(input)) {
-      const modelName = input.name;
+    } else if (AbstractRes.isInstance(input)) {
+      const resName = input.name;
 
-      if (modelName) {
-        const modelNameBase = basename(modelName);
-        if (modelName !== modelNameBase)
-          throw new Error(`Invalid model name: ${modelName}`);
+      if (resName) {
+        const resNameBase = basename(resName);
+        if (resName !== resNameBase)
+          throw new Error(`Invalid resource name: ${resName}`);
       }
 
       const pathLevels = levels.slice(0, -1);
-      const tag = levels.slice(-1)[0] ?? "_";
+      let tag = levels.slice(-1)[0] ?? "_";
+      const defaultExtension = input.getDefaultExtension();
+
+      if (
+        typeof defaultExtension === "string" &&
+        !tag.includes(".") &&
+        !resName
+      ) {
+        tag += `.${defaultExtension}`;
+      }
 
       if (isPath(tag)) {
         if (isDir(tag)) {
-          pathLevels.push(tag, input.name ?? "_");
+          pathLevels.push(tag, resName ?? "_");
         } else {
           pathLevels.push(tag);
         }
       } else {
-        pathLevels.push(input.name ?? tag);
+        pathLevels.push(resName ?? tag);
       }
 
       const path = resolvePath({
@@ -96,75 +104,90 @@ export async function resolveModels(options: {
       const result = await options.onValue?.(path, input, actions);
       if (result === false) actions.add = actions.process = false;
       if (actions.add) {
-        if (path in values) throw new Error(`Duplicated model path: ${path}`);
+        if (path in values)
+          throw new Error(`Duplicated resource path: ${path}`);
         values[path] = input as any;
       }
-      if (actions.process && DirModel.isInstance(input))
-        await process(input.spec, pathLevels);
+      if (actions.process && DirRes.isInstance(input))
+        await process(input.data, pathLevels);
     }
   };
-  await process(options.input, []);
+  await process(options.resources, []);
   return values;
 }
 
-export async function resolve(options: CallOptions, config?: Config) {
-  global.lastCallOptions = options;
-  if (!config) config = await parseConfigFile(options.configPath);
-  let result: Record<string, Awaited<ReturnType<typeof resolveModels>>> = {};
+export async function readTplFile(path: string): Promise<Tpl> {
+  const info = await statIfExists(path);
+
+  if (!info) throw new Error(`Invalid path: ${path}`);
+
+  let filePath: string | undefined;
+
+  if (info.isDirectory()) {
+    const paths = [".js", ".ts"].map((ext) => join(path, `rtpl${ext}`));
+    for (const v of paths) {
+      if (await checkPath(v)) filePath = v;
+    }
+    if (!filePath) throw new Error(`Invalid path: ${path}`);
+  } else {
+    filePath = path;
+  }
+
+  if (/\.(j|t)s$/i.test(filePath)) {
+    if (/\.ts$/i.test(filePath)) require("ts-node/register");
+    const object = require(filePath);
+    return object.default ?? object;
+  } else {
+    throw new Error(`Invalid values path: ${path}`);
+  }
+}
+
+export async function resolveTpl(tpl: Tpl, options: ResolveConfigOptions) {
   const lockDir = dirname(options.lockPath);
   const outPath = options.outPath;
   const filter = options.filter;
+  const resolveOptions = {
+    lockDir,
+    outPath,
+    filter,
+  };
+  const inResources = await resolveResources({
+    ...resolveOptions,
+    resources: await tpl.resources(),
+    onValue: async (path, res, actions) => {
+      if (res.resolved === false) {
+        actions.process = false;
+      } else {
+        (res as { resolved: boolean }).resolved = true;
+      }
+    },
+  });
 
-  for (const tpl of config.templates) {
-    const modelOptions = tpl.options ?? {};
-    let input = tpl.useModel ? await tpl.useModel(modelOptions) : {};
-    result[tpl.name] = await resolveModels({
-      input,
-      lockDir,
-      outPath,
-      filter,
-      onValue: async (path, model, actions) => {
-        if (model.resolved === false) {
-          actions.process = false;
-        } else {
-          (model as { resolved: boolean }).resolved = true;
-        }
-      },
-    });
-  }
+  tpl.transformer(inResources);
 
-  for (const tpl of config.templates) {
-    if (tpl.useTransformer) {
-      const tmp = tpl.useTransformer(result, {
-        modelName: tpl.name,
-        options,
-      });
-      if (tmp) result = tmp as typeof result;
+  const resources = await resolveResources({
+    ...resolveOptions,
+    resources: inResources,
+    onValue: async (path, res, actions) => {
+      await res.onReady(path);
+      if (DirRes.isInstance(res)) {
+        actions.add = false;
+        actions.process = !res.resolved;
+      }
+    },
+  });
+
+  for (let path in resources) {
+    const isRootPath = path.startsWith("../");
+
+    const newPath = stripRootBackPaths(path);
+    if (isRootPath) {
+      resources[newPath] = resources[path];
+    } else {
+      resources[posix.join("resources", newPath)] = resources[path];
     }
+    delete resources[path];
   }
 
-  for (const name in result) {
-    result[name] = await resolveModels({
-      input: result[name],
-      lockDir,
-      outPath,
-      filter,
-      onValue: async (path, model, actions) => {
-        await model.onReady(path);
-        if (DirModel.isInstance(model)) {
-          actions.add = false;
-          actions.process = !model.resolved;
-        }
-      },
-    });
-  }
-
-  const paths: string[] = [];
-  for (const name in result) {
-    for (const path in result[name]) {
-      if (paths.includes(path)) throw new Error(`Duplicated path: ${path}`);
-      paths.push(path);
-    }
-  }
-  return result;
+  return resources;
 }

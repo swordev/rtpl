@@ -1,9 +1,9 @@
 import { Callable, resolve } from "../utils/object";
-import { AbstractModel, TypeEnum } from "./AbstractModel";
+import { AbstractRes, ResType } from "./AbstractRes";
 
 export type Schedule = number | [number, number] | { each: number };
 
-export type CronSpec = Callable<{
+export type CronData = Callable<{
   minute?: Schedule;
   hour?: Schedule;
   day?: Schedule;
@@ -29,10 +29,10 @@ export function formatSchedule(schedule: Schedule | undefined) {
   }
 }
 
-export class CronModel extends AbstractModel<CronSpec> {
-  protected static _tplModelType = TypeEnum.Cron;
-  toString() {
-    return (this.spec ?? [])
+export class CronRes extends AbstractRes<CronData> {
+  protected static _tplResType = ResType.Cron;
+  override toString() {
+    return (this.data ?? [])
       .map(resolve)
       .filter((v) => v.enabled ?? true)
       .map((v) =>

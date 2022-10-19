@@ -11,7 +11,7 @@ import { program } from "commander";
 import { resolve } from "path";
 
 export type GlobalOptions = {
-  configPath: string | undefined;
+  templatePath: string;
   outPath: string;
   lockPath: string;
   filter: string[] | undefined;
@@ -19,9 +19,7 @@ export type GlobalOptions = {
 
 function getGlobalOptions(): GlobalOptions {
   const options = program.opts() as GlobalOptions;
-  options.configPath = options.configPath
-    ? resolveUnixPath(options.configPath)
-    : undefined;
+  options.templatePath = resolveUnixPath(options.templatePath);
   options.outPath = resolve(options.outPath);
   options.lockPath = resolve(options.lockPath);
   return options;
@@ -46,11 +44,7 @@ export default (defaultOptions?: Partial<GlobalOptions>) => {
   program.name("rtpl");
   program.version(pkg.version);
   program
-    .option(
-      "-c,--config-path <path>",
-      "config file path",
-      "rtpl.config.{js,ts}?"
-    )
+    .option("-t,--template-path <value>", "template file path", ".")
     .option(
       "-l,--lock-path <value>",
       "lock file path",
