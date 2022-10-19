@@ -1,0 +1,9 @@
+{
+  "mode": "pre",
+  "tag": "next",
+  "initialVersions": {
+    "@rtpl/cli": "0.3.2",
+    "rtpl": "0.3.2"
+  },
+  "changesets": []
+}
