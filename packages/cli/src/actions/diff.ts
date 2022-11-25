@@ -19,8 +19,16 @@ export default async function diff(options: DiffOptions) {
   let changes = 0;
   for (const path in resources) {
     const res = resources[path];
+    let resValue: string;
+    try {
+      resValue = res.toString();
+    } catch (error) {
+      console.info("\x1b[36m%s\x1b[0m", path);
+      throw error;
+    }
+
     const old = (await readIfExists(path))?.toString();
-    const lines = diffLines(old ?? "", res.toString());
+    const lines = diffLines(old ?? "", resValue);
     const haveChanges =
       typeof old !== "string" ||
       lines.some((line) => line.added || line.removed);
