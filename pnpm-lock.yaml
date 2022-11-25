@@ -7,7 +7,7 @@ importers:
       '@changesets/changelog-github': ^0.4.6
       '@changesets/cli': ^2.24.4
       '@trivago/prettier-plugin-sort-imports': ^3.3.0
-      '@tsconfig/node16': ^1.0.3
+      '@tsconfig/node18': ^1.0.1
       '@types/node': ^18.7.18
       '@wspa/cli': ^0.6.0
       '@wspa/config': ^0.2.3
@@ -22,7 +22,7 @@ importers:
       '@changesets/changelog-github': 0.4.6
       '@changesets/cli': 2.24.4
       '@trivago/prettier-plugin-sort-imports': 3.3.0_prettier@2.7.1
-      '@tsconfig/node16': 1.0.3
+      '@tsconfig/node18': 1.0.1
       '@types/node': 18.7.18
       '@wspa/cli': 0.6.0
       '@wspa/config': 0.2.3
@@ -1788,8 +1788,8 @@ packages:
       - supports-color
     dev: true
 
-  /@tsconfig/node16/1.0.3:
-    resolution: {integrity: sha512-yOlFc+7UtL/89t2ZhjPvvB/DeAr3r+Dq58IgzsFkOAvVC6NMJXmCGjbptdXdR9qsX7pKcTL+s87FtYREi2dEEQ==}
+  /@tsconfig/node18/1.0.1:
+    resolution: {integrity: sha512-sNFeK6X2ATlhlvzyH4kKYQlfHXE2f2/wxtB9ClvYXevWpmwkUT7VaSrjIN9E76Qebz8qP5JOJJ9jD3QoD/Z9TA==}
     dev: true
 
   /@types/brace-expansion/1.1.0:
