@@ -6,6 +6,9 @@
     "rtpl": "0.3.2"
   },
   "changesets": [
+    "nervous-games-heal",
+    "shy-tools-draw",
+    "tiny-trains-exercise",
     "yellow-rats-punch"
   ]
 }
