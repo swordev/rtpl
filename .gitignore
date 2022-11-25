@@ -1,8 +1,9 @@
 .history
 .pnpm-store
-node_modules
 coverage
 lib
-tsconfig.tsbuildinfo
-rtpl.js
+node_modules
+resources
 rtpl-lock.json
+rtpl.js
+tsconfig.tsbuildinfo
