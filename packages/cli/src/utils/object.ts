@@ -22,6 +22,10 @@ export function merge<TObject, TSource>(object: TObject, source: TSource) {
   });
 }
 
+export function clone<T>(object: T) {
+  return merge({}, object);
+}
+
 export type JSONClass = { toString(): string; toJSON(): string };
 export type Callable<T, TArgs extends any[] = []> = T | ((...args: TArgs) => T);
 

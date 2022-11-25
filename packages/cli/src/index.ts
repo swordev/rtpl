@@ -1,10 +1,11 @@
-export { createTpl, Tpl } from "./utils/self/config";
+export { DelayedValue } from "./resources/DelayedValue";
+export { createTpl, Tpl, TplTransformerSelf } from "./utils/self/config";
 export { AbstractRes } from "./resources/AbstractRes";
-export { CronRes } from "./resources/CronRes";
+export { CronRes, CronData } from "./resources/CronRes";
 export { DirRes } from "./resources/DirRes";
-export { EnvRes } from "./resources/EnvRes";
-export { IniRes } from "./resources/IniRes";
+export { EnvRes, EnvData } from "./resources/EnvRes";
+export { IniRes, IniData } from "./resources/IniRes";
 export { JsonRes } from "./resources/JsonRes";
 export { RawRes } from "./resources/RawRes";
-export { SecretRes } from "./resources/SecretRes";
+export { SecretRes, SecretData } from "./resources/SecretRes";
 export { YamlRes } from "./resources/YamlRes";

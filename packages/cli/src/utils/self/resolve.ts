@@ -2,7 +2,7 @@ import { AbstractRes, Tpl } from "../..";
 import { DirRes } from "../../resources/DirRes";
 import { checkPath, statIfExists } from "../fs";
 import { isPlainObject } from "../object";
-import { stripRootBackPaths } from "../path";
+import { isDir, isPath, stripRootBackPaths } from "../path";
 import { makeFilter } from "../string";
 import { isMatch } from "micromatch";
 import { basename, dirname, join, relative } from "path";
@@ -24,6 +24,44 @@ export function resolvePath(data: {
   return path.replace(/\\/g, "/");
 }
 
+function resolveTag(tag: string, input: AbstractRes) {
+  const defaultExtension = input.getDefaultExtension();
+  if (
+    typeof defaultExtension === "string" &&
+    !tag.includes(".") &&
+    !input.name
+  ) {
+    return `${tag}.${defaultExtension}`;
+  }
+  return tag;
+}
+
+function splitLevels(res: AbstractRes, levels: string[]): [string[], string] {
+  const folders = levels.slice(0, -1);
+  const rawTag = levels.slice(-1)[0] ?? "_";
+  const tag = resolveTag(rawTag, res);
+  return [folders, tag];
+}
+
+function resolvePathLevels(res: AbstractRes, levels: string[]) {
+  const isRootDir =
+    !levels.length && DirRes.isInstance(res) && !res.name?.length;
+  if (isRootDir) return [];
+
+  const [pathLevels, tag] = splitLevels(res, levels);
+
+  if (isPath(tag)) {
+    if (isDir(tag)) {
+      pathLevels.push(tag, res.name ?? "_");
+    } else {
+      pathLevels.push(tag);
+    }
+  } else {
+    pathLevels.push(res.name ?? tag);
+  }
+  return pathLevels;
+}
+
 export async function resolveResources(options: {
   resources: unknown;
   outPath?: string;
@@ -37,8 +75,6 @@ export async function resolveResources(options: {
 }) {
   const values: Record<string, AbstractRes> = {};
   const patterns = options?.filter?.flatMap((v) => makeFilter(v));
-  const isPath = (name: string) => name.includes("/");
-  const isDir = (name: string) => name.endsWith("/");
 
   const process = async (input: unknown, levels: string[]) => {
     if (isPlainObject(input)) {
@@ -65,28 +101,7 @@ export async function resolveResources(options: {
           throw new Error(`Invalid resource name: ${resName}`);
       }
 
-      const pathLevels = levels.slice(0, -1);
-      let tag = levels.slice(-1)[0] ?? "_";
-      const defaultExtension = input.getDefaultExtension();
-
-      if (
-        typeof defaultExtension === "string" &&
-        !tag.includes(".") &&
-        !resName
-      ) {
-        tag += `.${defaultExtension}`;
-      }
-
-      if (isPath(tag)) {
-        if (isDir(tag)) {
-          pathLevels.push(tag, resName ?? "_");
-        } else {
-          pathLevels.push(tag);
-        }
-      } else {
-        pathLevels.push(resName ?? tag);
-      }
-
+      const pathLevels = resolvePathLevels(input, levels);
       const path = resolvePath({
         path: pathLevels.join("/"),
         lockDir: options.lockDir ?? ".",
@@ -151,6 +166,9 @@ export async function resolveTpl(tpl: Tpl, options: ResolveConfigOptions) {
     outPath,
     filter,
   };
+
+  const outFolder = "resources";
+
   const inResources = await resolveResources({
     ...resolveOptions,
     resources: await tpl.resources(),
@@ -163,13 +181,13 @@ export async function resolveTpl(tpl: Tpl, options: ResolveConfigOptions) {
     },
   });
 
-  tpl.transformer(inResources);
+  await tpl.transformer(inResources);
 
   const resources = await resolveResources({
     ...resolveOptions,
     resources: inResources,
     onValue: async (path, res, actions) => {
-      await res.onReady(path);
+      await res.onReady(posix.join(outFolder, path));
       if (DirRes.isInstance(res)) {
         actions.add = false;
         actions.process = !res.resolved;
@@ -184,7 +202,7 @@ export async function resolveTpl(tpl: Tpl, options: ResolveConfigOptions) {
     if (isRootPath) {
       resources[newPath] = resources[path];
     } else {
-      resources[posix.join("resources", newPath)] = resources[path];
+      resources[posix.join(outFolder, newPath)] = resources[path];
     }
     delete resources[path];
   }

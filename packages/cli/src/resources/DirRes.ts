@@ -24,7 +24,9 @@ export class DirRes<
       ? (T[number] | ST[number])[]
       : ST
   >;
-  add<ST extends Record<string, unknown> | unknown[]>(data: ST) {
+  add<ST extends Record<string, unknown> | unknown[]>(
+    data: ST
+  ): DirRes<T & ST> {
     const self = this as Writable<typeof this>;
     if (Array.isArray(data)) {
       if (Array.isArray(self.data)) {
@@ -41,7 +43,9 @@ export class DirRes<
     }
     return this as any as DirRes<T & ST>;
   }
-  set<TData extends Record<string, unknown> | unknown[]>(data: TData) {
+  set<TData extends Record<string, unknown> | unknown[]>(
+    data: TData
+  ): DirRes<TData> {
     const self = this as Writable<typeof this>;
     self.data = self.options.data = data as any;
     return this as any as DirRes<TData>;

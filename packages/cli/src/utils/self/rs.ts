@@ -122,8 +122,11 @@ export function extractMap<T, F extends Filter<T>>(this: Resources, filter: F) {
   return extracted;
 }
 
-export function remove<T, F extends Filter<T>>(this: Resources, filter: F) {
-  return Object.values(extractMap.bind(this)(filter));
+export function remove<T, F extends Filter<T>>(
+  this: Resources,
+  filter: F
+): FilterResult<F>[] {
+  return Object.values(extractMap.bind(this)(filter)) as any;
 }
 
 export function move<T, F extends Filter<T>>(

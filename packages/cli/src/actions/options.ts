@@ -9,7 +9,7 @@ export type OptionsOptions = GlobalOptions & {
 
 export default async function options(options: OptionsOptions) {
   const tpl = await readTplFile(options.templatePath);
-  const tplOptions = tpl.options();
+  const tplOptions = await tpl.options();
 
   if (options.format === "yaml") {
     console.info(
