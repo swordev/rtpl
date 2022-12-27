@@ -1,5 +1,11 @@
 # @rtpl/cli
 
+## 0.4.0-next.2
+
+### Patch Changes
+
+- [`6fc596a`](https://github.com/swordev/rtpl/commit/6fc596a71e5c1a18257b98059e634c7defed5ee5) Thanks [@juanrgm](https://github.com/juanrgm)! - Update deps
+
 ## 0.4.0-next.1
 
 ### Minor Changes
