@@ -1,5 +1,21 @@
 # @rtpl/cli
 
+## 0.4.0
+
+### Minor Changes
+
+- [`dcd1254`](https://github.com/swordev/rtpl/commit/dcd1254f01072914a85aa8bf0891479ee772b8b7) Thanks [@juanrgm](https://github.com/juanrgm)! - Add `depGroups` config option
+
+- [`8a7970d`](https://github.com/swordev/rtpl/commit/8a7970d2289d2d19ec1c7201ba132d15bbab7392) Thanks [@juanrgm](https://github.com/juanrgm)! - Refactor globally and create `Tpl` class
+
+- [`36bd931`](https://github.com/swordev/rtpl/commit/36bd9314b44fcda483273196ca54ca8d708dbd3f) Thanks [@juanrgm](https://github.com/juanrgm)! - Restructure the project and rename concepts
+
+### Patch Changes
+
+- [`56ebf10`](https://github.com/swordev/rtpl/commit/56ebf106ebdcd9bd6861e1796e38e93a6860d3c0) Thanks [@juanrgm](https://github.com/juanrgm)! - Update dependencies
+
+- [`6fc596a`](https://github.com/swordev/rtpl/commit/6fc596a71e5c1a18257b98059e634c7defed5ee5) Thanks [@juanrgm](https://github.com/juanrgm)! - Update deps
+
 ## 0.4.0-next.1
 
 ### Minor Changes
