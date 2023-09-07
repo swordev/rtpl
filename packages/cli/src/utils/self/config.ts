@@ -57,7 +57,9 @@ export type ResResult<R, D extends { [name: string]: Tpl }> = R extends DirRes<
   : R & DepsResources<D>;
 
 export type DepsOptions<T extends { [name: string]: Tpl }> = {
-  [name in keyof T]: T[name] extends Tpl<infer O, unknown> ? O : never;
+  [name in keyof T]: T[name] extends Tpl<infer O, infer R, infer D, infer DG>
+    ? TplOptions<O, D, DG>
+    : never;
 };
 
 export type TplSelf<D extends DepsTpl = {}, DG extends string = never> = {
