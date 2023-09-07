@@ -4,6 +4,7 @@ import init from "./actions/init";
 import install from "./actions/install";
 import options from "./actions/options";
 import render from "./actions/render";
+import repairLock from "./actions/repair-lock";
 import { resolveUnixPath } from "./utils/fs";
 import { parseStringListValue } from "./utils/string";
 import chalk from "chalk";
@@ -84,5 +85,6 @@ export default (defaultOptions?: Partial<GlobalOptions>) => {
     .option("--format <type>", "Output format (json, js, yaml)", "json")
     .action(makeAction(options));
   program.command("render").alias("r").action(makeAction(render));
+  program.command("repair-lock").action(makeAction(repairLock));
   program.parse(process.argv);
 };
