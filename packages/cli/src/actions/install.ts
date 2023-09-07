@@ -7,6 +7,7 @@ import {
   logAction,
 } from "../utils/self/install";
 import * as lock from "../utils/self/lock";
+import { splitGlobalOptions } from "../utils/self/options";
 import { readTplFile, resolveTpl } from "../utils/self/resolve";
 import diff from "./diff";
 import chalk from "chalk";
@@ -15,17 +16,16 @@ import { dirname, join } from "path";
 
 export type InstallActionOptions = GlobalOptions & {
   dryRun: boolean;
-  interactive: boolean;
+  confirm: boolean;
   lines: number;
 };
 
 export default async function install(options: InstallActionOptions) {
-  if (options.interactive) {
+  const [globalOptions] = splitGlobalOptions(options);
+
+  if (!options.confirm) {
     const diffResult = await diff({
-      templatePath: options.templatePath,
-      filter: options.filter,
-      lockPath: options.lockPath,
-      outPath: options.outPath,
+      ...globalOptions,
       lines: options.lines,
       hideLines: false,
       showAll: false,

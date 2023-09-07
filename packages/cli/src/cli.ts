@@ -6,17 +6,13 @@ import options from "./actions/options";
 import render from "./actions/render";
 import repairLock from "./actions/repair-lock";
 import { resolveUnixPath } from "./utils/fs";
+import { GlobalOptions } from "./utils/self/options";
 import { parseStringListValue } from "./utils/string";
 import chalk from "chalk";
 import { program } from "commander";
 import { resolve } from "path";
 
-export type GlobalOptions = {
-  templatePath: string;
-  outPath: string;
-  lockPath: string;
-  filter: string[] | undefined;
-};
+export type { GlobalOptions };
 
 function getGlobalOptions(): GlobalOptions {
   const options = program.opts() as GlobalOptions;
@@ -71,7 +67,7 @@ export default (defaultOptions?: Partial<GlobalOptions>) => {
     .command("install")
     .alias("i")
     .option("-d,--dry-run", "dry run", false)
-    .option("-i,--interactive", "interactive mode", false)
+    .option("-c,--confirm", "confirm changes", false)
     .option(
       "-l,--lines <value>",
       "diff context lines (interactive mode)",
