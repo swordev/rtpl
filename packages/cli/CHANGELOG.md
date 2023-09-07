@@ -1,5 +1,19 @@
 # @rtpl/cli
 
+## 0.5.0
+
+### Minor Changes
+
+- [`25db445`](https://github.com/swordev/rtpl/commit/25db445d648dd0a946733e8276ca93614e3e52c9) Thanks [@juanrgm](https://github.com/juanrgm)! - Replace `interactive` by `confirm` option in the install command
+
+- [`74b889a`](https://github.com/swordev/rtpl/commit/74b889aa1b93fb6a27dac2547f7ab670a9969824) Thanks [@juanrgm](https://github.com/juanrgm)! - Add `backup` and `restore` commands
+
+- [`4712fce`](https://github.com/swordev/rtpl/commit/4712fcea2e8d8e5711646256903ac539374c7a0c) Thanks [@juanrgm](https://github.com/juanrgm)! - Add `repair-lock` command
+
+### Patch Changes
+
+- [`4284ea4`](https://github.com/swordev/rtpl/commit/4284ea40bfe5e8c005372f6c5c2c653fcf526bb3) Thanks [@juanrgm](https://github.com/juanrgm)! - Fix types of deps options
+
 ## 0.4.0
 
 ### Minor Changes
