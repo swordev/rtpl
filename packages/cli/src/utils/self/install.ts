@@ -48,7 +48,7 @@ export function logAction(action: ActionEnum, path: string) {
 export async function getFileAction(
   path: string,
   res: AbstractRes,
-  previousLock?: lock.LockDataFile
+  previousLock?: lock.LockDataFile,
 ): Promise<ActionResult> {
   const lock: lock.LockDataFile = previousLock
     ? {
@@ -89,7 +89,7 @@ export async function getFileAction(
 
 export async function getFileActions(
   resMap: Record<string, AbstractRes>,
-  lockDataEntrypoint: lock.LockDataTemplate
+  lockDataEntrypoint: lock.LockDataTemplate,
 ) {
   const result: Record<string, ActionResult> = {};
   const lockFilePaths = Object.keys(lockDataEntrypoint.files);
@@ -112,7 +112,7 @@ export async function execFileAction(
   action: ActionResult,
   baseDir: string,
   path: string,
-  dryRun: boolean
+  dryRun: boolean,
 ) {
   const absPath = join(baseDir, path);
   if (action.lock === false) {

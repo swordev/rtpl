@@ -86,7 +86,7 @@ export default async function install(options: InstallActionOptions) {
       console.error(
         `[${chalk.red("!")}]`,
         path,
-        chalk.grey((error as Error).message)
+        chalk.grey((error as Error).message),
       );
     }
   }

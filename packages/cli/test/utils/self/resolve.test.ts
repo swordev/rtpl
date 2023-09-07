@@ -20,7 +20,7 @@ describe("resolveResources", () => {
   it("prepends folder", async () => {
     const res = new RawRes({ name: "f2" });
     expect(
-      await resolveResources({ resources: { folder: { res } } })
+      await resolveResources({ resources: { folder: { res } } }),
     ).toMatchObject({
       "folder/f2": res,
     });
@@ -29,7 +29,7 @@ describe("resolveResources", () => {
   it("overrides file name", async () => {
     const res = new RawRes({ name: "f3" });
     expect(
-      await resolveResources({ resources: { "./folder/fx": res } })
+      await resolveResources({ resources: { "./folder/fx": res } }),
     ).toMatchObject({
       "folder/fx": res,
     });
@@ -38,7 +38,7 @@ describe("resolveResources", () => {
   it("prepends folder", async () => {
     const res = new RawRes({ name: "f3" });
     expect(
-      await resolveResources({ resources: { "./folder/f/": res } })
+      await resolveResources({ resources: { "./folder/f/": res } }),
     ).toMatchObject({
       "folder/f/f3": res,
     });
@@ -48,7 +48,7 @@ describe("resolveResources", () => {
     const folder1 = new DirRes({ name: "folder1" });
     const res = new RawRes({ name: "f3" });
     expect(
-      await resolveResources({ resources: { main: folder1.set({ res }) } })
+      await resolveResources({ resources: { main: folder1.set({ res }) } }),
     ).toMatchObject({
       folder1: folder1,
       "folder1/f3": res,
@@ -59,7 +59,7 @@ describe("resolveResources", () => {
     const folder1 = new DirRes({ name: "folder1" });
     const folder2 = new DirRes({ name: "folder2" });
     expect(
-      await resolveResources({ resources: { main: folder1.set({ folder2 }) } })
+      await resolveResources({ resources: { main: folder1.set({ folder2 }) } }),
     ).toMatchObject({
       folder1: folder1,
       "folder1/folder2": folder2,

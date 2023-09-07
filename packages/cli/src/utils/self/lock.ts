@@ -80,7 +80,7 @@ export function validate(data: LockData) {
   const validate = new Ajv().compile(schema);
   if (!validate(data))
     throw new Error(
-      `Invalid json schema: ${JSON.stringify(validate.errors, null, 2)}`
+      `Invalid json schema: ${JSON.stringify(validate.errors, null, 2)}`,
     );
 }
 

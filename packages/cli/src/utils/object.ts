@@ -2,7 +2,7 @@ import _isPlainObject from "lodash.isplainobject";
 import mergeWith from "lodash.mergewith";
 
 export const isPlainObject: (
-  input: unknown
+  input: unknown,
 ) => input is Record<string, unknown> = _isPlainObject as any;
 
 export function sort<T extends Record<string, unknown>>(object: T) {
@@ -46,7 +46,7 @@ export type Constructor<T> = {
 
 export function isInstanceOf<T>(
   subject: unknown,
-  constructor: Constructor<T>
+  constructor: Constructor<T>,
 ): subject is T {
   return (
     subject instanceof constructor ||

@@ -70,7 +70,7 @@ export async function resolveResources(options: {
   onValue?: (
     key: string,
     value: AbstractRes,
-    actions: { process: boolean; add: boolean }
+    actions: { process: boolean; add: boolean },
   ) => Promise<void | false>;
 }) {
   const values: Record<string, AbstractRes> = {};

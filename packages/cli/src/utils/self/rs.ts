@@ -53,7 +53,7 @@ export function forEach<T, F extends Filter<T>>(
     ref: string;
     resource: T;
     resources: Resources;
-  }) => boolean | void
+  }) => boolean | void,
 ) {
   const resources = this;
   const instanceOf: Constructor<T> | undefined =
@@ -99,14 +99,14 @@ export function find<T, F extends Filter<T>>(this: Resources, filter: F) {
 
 export function findOne<T, F extends Filter<T>>(
   this: Resources,
-  filter: F
+  filter: F,
 ): FilterResult<F> | undefined {
   return find.bind(this)(filter)[0] as any;
 }
 
 export function findOneOrFail<T, F extends Filter<T>>(
   this: Resources,
-  filter: F
+  filter: F,
 ): FilterResult<F> {
   const resource = find.bind(this)(filter)[0] as any;
   if (!resource) throw new Error("Resource not found");
@@ -124,7 +124,7 @@ export function extractMap<T, F extends Filter<T>>(this: Resources, filter: F) {
 
 export function remove<T, F extends Filter<T>>(
   this: Resources,
-  filter: F
+  filter: F,
 ): FilterResult<F>[] {
   return Object.values(extractMap.bind(this)(filter)) as any;
 }
@@ -132,7 +132,7 @@ export function remove<T, F extends Filter<T>>(
 export function move<T, F extends Filter<T>>(
   this: Resources,
   filter: F,
-  target: string
+  target: string,
 ) {
   const extracted = extractMap.bind(this)(filter);
 

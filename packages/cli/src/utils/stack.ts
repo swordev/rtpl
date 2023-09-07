@@ -28,11 +28,11 @@ export type AfterOf =
 
 export function getLastStacks(
   afterOf: AfterOf[] | undefined,
-  required: true
+  required: true,
 ): [Call, ...Call[]];
 export function getLastStacks(
   excluafterOfde?: AfterOf[],
-  required?: false
+  required?: false,
 ): Call[];
 export function getLastStacks(afterOf?: AfterOf[], required?: boolean): Call[] {
   const trace = captureStackTrace();

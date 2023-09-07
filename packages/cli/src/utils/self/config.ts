@@ -9,7 +9,7 @@ export type Resources = Record<string, unknown>;
 export type PartialOptions<O> = DeepPartial<O, Builtin>;
 export type DepsTpl = { [name: string]: Tpl };
 export type Enabled<
-  T extends string | number | symbol = string | number | symbol
+  T extends string | number | symbol = string | number | symbol,
 > =
   | {
       [N in T]?: boolean;
@@ -17,19 +17,19 @@ export type Enabled<
   | T[];
 
 function normalizeEnabled<
-  T extends string | number | symbol = string | number | symbol
+  T extends string | number | symbol = string | number | symbol,
 >(input: Enabled<T>): T[] {
   if (Array.isArray(input)) return input;
   return Object.keys(input).filter(
-    (name) => input[name as keyof typeof input]
+    (name) => input[name as keyof typeof input],
   ) as T[];
 }
 
 export function createEnabledArray<
-  T extends string | number | symbol = string | number | symbol
+  T extends string | number | symbol = string | number | symbol,
 >(
   enabled: Enabled<T> | undefined,
-  groups: Record<string, Enabled<T>> | undefined
+  groups: Record<string, Enabled<T>> | undefined,
 ) {
   const enabledArray = normalizeEnabled(enabled ?? []);
   const groupsArrays: Record<string, T[]> = {};
@@ -38,7 +38,7 @@ export function createEnabledArray<
   }
 
   const values = enabledArray.flatMap(
-    (v) => groupsArrays[v as keyof typeof groupsArrays] ?? v
+    (v) => groupsArrays[v as keyof typeof groupsArrays] ?? v,
   );
   return {
     values,
@@ -66,7 +66,7 @@ export type TplSelf<D extends DepsTpl = {}, DG extends string = never> = {
 
 export type TplOptionsSelf<
   D extends DepsTpl = {},
-  DG extends string = never
+  DG extends string = never,
 > = TplSelf<D, DG> & {
   createDefaultsEnabled: (defaults: Enabled<DG | keyof D>) => {
     enabled: Enabled<DG | keyof D>;
@@ -89,7 +89,7 @@ export type TplResourcesSelf<D extends DepsTpl = {}> = TplSelf<D> & {
 export type TplOptions<
   O,
   D extends DepsTpl = {},
-  DG extends string = string
+  DG extends string = string,
 > = O & {
   enabled?: Enabled<DG | keyof D>;
   deps?: DepsOptions<D>;
@@ -99,7 +99,7 @@ export type TplConfig<
   O = any,
   R = any,
   D extends DepsTpl = {},
-  DG extends string = never
+  DG extends string = never,
 > = {
   name: string;
   deps?: D;
@@ -112,12 +112,12 @@ export type TplConfig<
         this: TplOptionsSelf<D, DG>,
         o: PartialOptions<TplOptions<O, D, DG>>,
         cast: (
-          o: PartialOptions<TplOptions<O, D, DG>>
-        ) => PartialOptions<TplOptions<O, D, DG>>
+          o: PartialOptions<TplOptions<O, D, DG>>,
+        ) => PartialOptions<TplOptions<O, D, DG>>,
       ) => Promise<PartialOptions<TplOptions<O, D, DG>>>);
   resources?: (
     this: TplResourcesSelf<D>,
-    o: TplOptions<O, D, DG>
+    o: TplOptions<O, D, DG>,
   ) => Promise<R>;
   transformer?: (this: TplTransformerSelf<D>) => Promise<void | undefined>;
 };
@@ -126,7 +126,7 @@ export class Tpl<
   O = any,
   R = any,
   D extends DepsTpl = any,
-  DG extends string = never
+  DG extends string = never,
 > {
   #options: TplOptions<O, D> | undefined;
   protected deps: D;
@@ -136,16 +136,16 @@ export class Tpl<
         (deps as any)[name] = tpl.fork();
         return deps;
       },
-      {} as D
+      {} as D,
     );
   }
 
   private createOptionsSelf(
-    o?: PartialOptions<TplOptions<O, D, DG>>
+    o?: PartialOptions<TplOptions<O, D, DG>>,
   ): TplOptionsSelf<D, DG> {
     const enabled = createEnabledArray<DG | keyof D>(
       o?.enabled as any,
-      this.config.depGroups
+      this.config.depGroups,
     );
 
     return {
@@ -153,7 +153,7 @@ export class Tpl<
       createDefaultsEnabled: (defaults) => {
         const enabled = createEnabledArray<DG | keyof D>(
           (o?.enabled ?? defaults) as any,
-          this.config.depGroups
+          this.config.depGroups,
         );
 
         return {
@@ -185,7 +185,7 @@ export class Tpl<
 
   private createTransformSelf(
     o: TplOptions<O, D, DG>,
-    resources: Resources
+    resources: Resources,
   ): TplTransformerSelf<D> {
     const enabled = createEnabledArray(o.enabled, this.config.depGroups);
     const self: TplTransformerSelf<D> = {
@@ -196,7 +196,7 @@ export class Tpl<
   }
 
   async setOptions(
-    o?: PartialOptions<TplOptions<O, D, DG>>
+    o?: PartialOptions<TplOptions<O, D, DG>>,
   ): Promise<TplOptions<O, D>> {
     o = this.config.defaultOptions
       ? merge(clone(this.config.defaultOptions), o)
@@ -220,7 +220,7 @@ export class Tpl<
     const depsOptions: Record<string, unknown> = {} as any;
     const enabled = createEnabledArray(
       configOptions.enabled,
-      this.config.depGroups
+      this.config.depGroups,
     );
 
     for (const [depName, depTpl] of Object.entries<Tpl>(this.deps)) {
@@ -309,15 +309,15 @@ export class Tpl<
 export function createTpl<O>(): <
   R,
   D extends { [name: string]: Tpl } = any,
-  DG extends string = never
+  DG extends string = never,
 >(
-  config: TplConfig<O, R, D, DG>
+  config: TplConfig<O, R, D, DG>,
 ) => Tpl<O, R, D, DG>;
 export function createTpl<
   O,
   R,
   D extends { [name: string]: Tpl } = any,
-  DG extends string = never
+  DG extends string = never,
 >(config: TplConfig<O, R, D, DG>): Tpl<O, R, D, DG>;
 export function createTpl(config?: TplConfig<any, any, any, any>): any {
   if (arguments.length === 0) {

@@ -15,7 +15,7 @@ export default async function options(options: OptionsOptions) {
     console.info(
       stringify(tplOptions, {
         version: "1.1",
-      })
+      }),
     );
   } else if (options.format === "json") {
     console.info(JSON.stringify(tplOptions, null, 2));
@@ -26,7 +26,7 @@ export default async function options(options: OptionsOptions) {
         items.push(`${tplName}Tpl(${JSON.stringify(options, null, 2)})`);
         return items;
       },
-      [] as string[]
+      [] as string[],
     );
     console.info(`[${items.join(",\n")}]`);
   } else {

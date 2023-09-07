@@ -8,7 +8,7 @@ export const alphaNumberCharset = `${alphaCharset}${numberCharset}`;
 
 export function randomString(
   length: number,
-  charset: string = alphaNumberCharset
+  charset: string = alphaNumberCharset,
 ) {
   let result = "";
   if (charset.length > 255) throw new Error("Charset length is over 255 bytes");

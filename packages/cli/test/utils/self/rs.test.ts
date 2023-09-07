@@ -13,7 +13,7 @@ describe("extractMap", () => {
     expect(
       rs.extractMap({
         name: "res1",
-      })
+      }),
     ).toMatchObject({
       res1: {},
     });
@@ -33,7 +33,7 @@ describe("extractMap", () => {
     expect(
       rs.extractMap({
         instanceOf: { data: Data },
-      })
+      }),
     ).toMatchObject({
       res1: data,
     });
@@ -57,7 +57,7 @@ describe("extractMap", () => {
     expect(
       rs.extractMap({
         instanceOf: CustomRes,
-      })
+      }),
     ).toMatchObject({
       res1: {},
     });

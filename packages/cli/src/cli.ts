@@ -48,14 +48,14 @@ export default (defaultOptions?: Partial<GlobalOptions>) => {
     .option(
       "-l,--lock-path <value>",
       "lock file path",
-      defaultOptions?.lockPath ?? "rtpl-lock.json"
+      defaultOptions?.lockPath ?? "rtpl-lock.json",
     )
     .option("-o,--out-path <value>", "out path", ".")
     .option(
       "-f,--filter <patterns>",
       "patterns filter",
       parseStringListValue,
-      defaultOptions?.filter ?? undefined
+      defaultOptions?.filter ?? undefined,
     );
   program.command("check").action(makeAction(check));
   program
@@ -75,7 +75,7 @@ export default (defaultOptions?: Partial<GlobalOptions>) => {
       "-l,--lines <value>",
       "diff context lines (interactive mode)",
       Number,
-      1
+      1,
     )
     .action(makeAction(install));
   program

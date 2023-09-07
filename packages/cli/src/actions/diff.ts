@@ -65,7 +65,7 @@ export default async function diff(options: DiffOptions) {
         } else {
           const lineIndexStr = lineIndex.toString().padStart(3, " ");
           console.info(
-            `${chalk.grey(lineIndexStr)} ${chalk.white("|")} ${result}`
+            `${chalk.grey(lineIndexStr)} ${chalk.white("|")} ${result}`,
           );
         }
       }
