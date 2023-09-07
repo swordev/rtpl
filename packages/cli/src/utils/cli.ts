@@ -19,12 +19,23 @@ export async function prompt(text: string, rl?: Interface) {
   });
 }
 
-export async function confirmPrompt(text: string, rl?: Interface) {
-  const result = await prompt(`${cyan("?")} ${text} ${grey("(Y/n)")}: `, rl);
+export async function confirmPrompt(
+  text: string,
+  defaults = true,
+  rl?: Interface,
+) {
+  const ynText = defaults ? "Y/n" : "y/N";
+  const result = await prompt(
+    `${cyan("?")} ${text} ${grey(`(${ynText})`)}: `,
+    rl,
+  );
 
   const yesRegex = /^y(es)?$/i;
   const noRegex = /^n(o)?$/i;
-  if (yesRegex.test(result) || result.trim() === "") {
+
+  if (result.trim() === "") {
+    return defaults;
+  } else if (yesRegex.test(result)) {
     return true;
   } else if (noRegex.test(result)) {
     return false;
