@@ -21,8 +21,8 @@
   ],
   "scripts": {
     "build": "tsc -b tsconfig.build.json",
-    "check": "pnpm check:format",
-    "check:eslint": "eslint .",
+    "check": "pnpm check:format && pnpm check:eslint",
+    "check:eslint": "eslint --cache .",
     "check:format": "prettier --cache -c .",
     "clean": "wspa clean",
     "compose": "wspa compose",
