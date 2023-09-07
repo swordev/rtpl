@@ -1,6 +1,6 @@
 {
   "name": "rtpl",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "CLI tool for resource templates",
   "scripts": {
     "build": "tsc -b",
