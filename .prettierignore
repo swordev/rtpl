@@ -3,6 +3,7 @@ pnpm-lock.yaml
 .eslintcache
 .history
 .pnpm-store
+.rtpl-backup
 coverage
 lib
 node_modules

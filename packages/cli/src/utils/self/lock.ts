@@ -2,18 +2,18 @@ import Ajv from "ajv";
 import { writeFile as _writeFile } from "fs/promises";
 import { JSONSchema7 } from "json-schema";
 
-export type LockDataFile = {
+export type LockDataFile<TFile = undefined> = {
   creationDate: string;
   updatingDate?: string;
-};
+} & (undefined extends TFile ? {} : TFile);
 
-export type LockDataTemplate = {
+export type LockDataTemplate<TFile = undefined> = {
   dirs: Record<string, Pick<LockDataFile, "creationDate">>;
-  files: Record<string, LockDataFile>;
+  files: Record<string, LockDataFile<TFile>>;
 };
 
-export type LockData = {
-  templates: Record<string, LockDataTemplate>;
+export type LockData<TFile = undefined> = {
+  templates: Record<string, LockDataTemplate<TFile>>;
 };
 
 export const schema: JSONSchema7 = {

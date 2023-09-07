@@ -1,10 +1,12 @@
 .eslintcache
 .history
 .pnpm-store
+.rtpl-backup
 coverage
 lib
 node_modules
 resources
 rtpl-lock.json
 rtpl.js
+rtpl.ts
 tsconfig.tsbuildinfo

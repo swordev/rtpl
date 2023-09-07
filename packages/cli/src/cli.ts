@@ -1,3 +1,4 @@
+import backup from "./actions/backup";
 import check from "./actions/check";
 import diff from "./actions/diff";
 import init from "./actions/init";
@@ -5,6 +6,7 @@ import install from "./actions/install";
 import options from "./actions/options";
 import render from "./actions/render";
 import repairLock from "./actions/repair-lock";
+import restore from "./actions/restore";
 import { resolveUnixPath } from "./utils/fs";
 import { GlobalOptions } from "./utils/self/options";
 import { parseStringListValue } from "./utils/string";
@@ -36,12 +38,14 @@ function makeAction(cb: (options: any) => Promise<any>) {
   };
 }
 
+export const pkg = require(`${__dirname}/package.json`);
+
 export default (defaultOptions?: Partial<GlobalOptions>) => {
-  const pkg = require(`${__dirname}/package.json`);
   program.name("rtpl");
   program.version(pkg.version);
   program
     .option("-t,--template-path <value>", "template file path", ".")
+    .option("--backup-path <value>", "backup path", "./.rtpl-backup")
     .option(
       "-l,--lock-path <value>",
       "lock file path",
@@ -67,6 +71,7 @@ export default (defaultOptions?: Partial<GlobalOptions>) => {
     .command("install")
     .alias("i")
     .option("-d,--dry-run", "dry run", false)
+    .option("--no-backup", "no backup", false)
     .option("-c,--confirm", "confirm changes", false)
     .option(
       "-l,--lines <value>",
@@ -82,5 +87,14 @@ export default (defaultOptions?: Partial<GlobalOptions>) => {
     .action(makeAction(options));
   program.command("render").alias("r").action(makeAction(render));
   program.command("repair-lock").action(makeAction(repairLock));
+  program.command("backup").alias("b").action(makeAction(backup));
+  program
+    .command("restore")
+    .option(
+      "-i,--input <value>",
+      "path, negative index or file without extension",
+      "-1",
+    )
+    .action(makeAction(restore));
   program.parse(process.argv);
 };

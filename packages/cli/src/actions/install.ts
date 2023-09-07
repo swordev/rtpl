@@ -9,6 +9,7 @@ import {
 import * as lock from "../utils/self/lock";
 import { splitGlobalOptions } from "../utils/self/options";
 import { readTplFile, resolveTpl } from "../utils/self/resolve";
+import backup from "./backup";
 import diff from "./diff";
 import chalk from "chalk";
 import { rmdir } from "fs/promises";
@@ -17,6 +18,7 @@ import { dirname, join } from "path";
 export type InstallActionOptions = GlobalOptions & {
   dryRun: boolean;
   confirm: boolean;
+  noBackup: boolean;
   lines: number;
 };
 
@@ -35,6 +37,15 @@ export default async function install(options: InstallActionOptions) {
     if (!(await confirmPrompt("Do you want to install the changes?")))
       return { changes: diffResult.changes, exitCode: 1 };
     console.info();
+  }
+
+  if (!options.noBackup) {
+    const backupResult = await backup({
+      ...globalOptions,
+      log: false,
+    });
+    if (backupResult.exitCode)
+      return { exitCode: backupResult.exitCode, changes: 0 };
   }
 
   const tpl = await readTplFile(options.templatePath);
