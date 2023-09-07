@@ -1,5 +1,11 @@
 # @rtpl/cli
 
+## 0.5.1
+
+### Patch Changes
+
+- [`78a9127`](https://github.com/swordev/rtpl/commit/78a91275a25ae248b8dff21b80650389dd608f99) Thanks [@juanrgm](https://github.com/juanrgm)! - Allow custom resources
+
 ## 0.5.0
 
 ### Minor Changes
