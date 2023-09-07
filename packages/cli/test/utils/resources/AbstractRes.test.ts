@@ -15,3 +15,27 @@ describe("AbstractRes.lastStacks", () => {
     expect(typeof stack.getLineNumber() == "number").toBe(true);
   });
 });
+
+describe("AbstractRes.isInstance", () => {
+  it("with custom resource", () => {
+    class CustomRes extends AbstractRes {
+      toString() {
+        return "";
+      }
+    }
+    const r1 = new CustomRes({});
+    const r2 = new StringRes({});
+
+    expect(CustomRes.isInstance(r2)).toBeFalsy();
+
+    expect(CustomRes.isInstance(r1)).toBeTruthy();
+    expect(AbstractRes.isInstance(r1)).toBeTruthy();
+    expect(StringRes.isInstance(r2)).toBeTruthy();
+  });
+  it("returns true", () => {
+    expect(AbstractRes.isInstance(new StringRes({}))).toBeTruthy();
+  });
+  it("returns false", () => {
+    expect(AbstractRes.isInstance(null)).toBeFalsy();
+  });
+});

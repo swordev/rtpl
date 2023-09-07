@@ -1,4 +1,4 @@
-import { JsonRes } from "../../../src";
+import { AbstractRes, JsonRes, RawRes } from "../../../src";
 import { createResourceSystem } from "../../../src/utils/self/rs";
 import { it, describe, expect } from "vitest";
 
@@ -75,5 +75,38 @@ describe("extractMap", () => {
     });
     expect(Object.keys(extracted)).toMatchObject(["res2"]);
     expect(extracted["res2"] === res2).toBeTruthy();
+  });
+});
+
+describe("findOne", () => {
+  it("filters by custom resource", () => {
+    class CustomRes extends AbstractRes<number> {
+      toString(): string {
+        return this.data.toString();
+      }
+    }
+
+    const res = createResourceSystem({
+      res1: new JsonRes({ data: "a" }),
+      res2: new CustomRes({ data: 1 }),
+    }).find({ instanceOf: CustomRes });
+
+    expect(res.length).toBe(1);
+    expect(res[0].data).toBe(1);
+  });
+  it("filters by string resource", () => {
+    class CustomRes extends AbstractRes<number> {
+      toString(): string {
+        return this.data.toString();
+      }
+    }
+
+    const res = createResourceSystem({
+      res1: new RawRes({ data: "a" }),
+      res2: new CustomRes({ data: 1 }),
+    }).find({ instanceOf: RawRes });
+
+    expect(res.length).toBe(1);
+    expect(res[0].data).toBe("a");
   });
 });

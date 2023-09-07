@@ -25,7 +25,7 @@ export enum ResType {
 
 export abstract class AbstractRes<
   TData = any,
-  TConf extends Record<string, unknown> = {}
+  TConf extends Record<string, unknown> = {},
 > {
   protected static _tplResType = ResType.Abstract;
   readonly name: string | undefined;
@@ -48,7 +48,7 @@ export abstract class AbstractRes<
     this.path = new DelayedValue((path) => `./${path}`, this.lastStacks);
     this.dirname = new DelayedValue(
       (path) => `./${posix.dirname(path)}`,
-      this.lastStacks
+      this.lastStacks,
     );
   }
 
@@ -57,16 +57,14 @@ export abstract class AbstractRes<
 
   static isInstance(value: unknown): value is AbstractRes {
     if (value instanceof this) return true;
-    const instanceType = (
-      (value as AbstractRes | undefined)?.constructor as
-        | typeof AbstractRes
-        | undefined
-    )?._tplResType;
-    return (
-      (this._tplResType === ResType.Abstract && !!instanceType) ||
-      (this._tplResType === instanceType &&
-        this.name === `${ResType[this._tplResType]}Res`)
-    );
+
+    const isThis = (type: ResType) =>
+      this._tplResType === type && this.name === `${ResType[type]}Res`;
+
+    const instanceType = (value?.constructor as typeof AbstractRes | undefined)
+      ?._tplResType;
+
+    return !!instanceType && (isThis(ResType.Abstract) || isThis(instanceType));
   }
 
   async onReady(path: string) {
