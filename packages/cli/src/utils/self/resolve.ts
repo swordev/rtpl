@@ -195,7 +195,7 @@ export async function resolveTpl(tpl: Tpl, options: ResolveConfigOptions) {
     },
   });
 
-  for (let path in resources) {
+  for (const path in resources) {
     const isRootPath = path.startsWith("../");
 
     const newPath = stripRootBackPaths(path);

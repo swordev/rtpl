@@ -34,10 +34,9 @@ export async function readIfExists(path: string) {
 }
 
 export async function resolvePackagePath(input: string) {
-  let resultPath: string | undefined;
   if (!basename(input).includes(".")) input = `${input}/package.json`;
   if (!isAbsolute(input)) input = join(process.cwd(), input);
-  resultPath = require.resolve(input);
+  const resultPath = require.resolve(input);
   if (basename(resultPath) === "package.json") {
     const pkg = await parseJsonFile<{ name: string; main: string }>(resultPath);
     return {
@@ -76,7 +75,7 @@ export function resolveUnixPath(path: string) {
 
 export async function mkrdir(dir: string, baseDir?: string) {
   const relativeDir = baseDir ? relative(baseDir, dir) : dir;
-  const folders = relativeDir.split(/[\\\/]/g);
+  const folders = relativeDir.split(/[\\/]/g);
   const dirs: string[] = [];
   let path = baseDir ?? "";
   for (const folder of folders) {

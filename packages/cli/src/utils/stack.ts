@@ -46,7 +46,7 @@ export function getLastStacks(afterOf?: AfterOf[], required?: boolean): Call[] {
       if (!afterOf) include = true;
       continue;
     } else if (
-      !!afterOf?.some((pattern) => {
+      afterOf?.some((pattern) => {
         if (typeof pattern === "string") {
           return fileName === pattern;
         } else {

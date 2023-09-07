@@ -55,7 +55,6 @@ export function forEach<T, F extends Filter<T>>(
     resources: Resources;
   }) => boolean | void,
 ) {
-  const resources = this;
   const instanceOf: Constructor<T> | undefined =
     "instanceOf" in filter && typeof filter.instanceOf === "function"
       ? filter.instanceOf
@@ -65,8 +64,8 @@ export function forEach<T, F extends Filter<T>>(
       ? filter.instanceOf.data
       : undefined;
 
-  for (const ref in resources) {
-    const res = resources[ref] as AbstractRes;
+  for (const ref in this) {
+    const res = this[ref] as AbstractRes;
     if (isPlainObject(res)) {
       forEach.bind(res)(filter, onFound as any);
       continue;
@@ -84,7 +83,7 @@ export function forEach<T, F extends Filter<T>>(
       }
     }
     if (filter.test && !filter.test(res)) continue;
-    if (onFound({ ref, resource: res as any, resources: resources }) === false)
+    if (onFound({ ref, resource: res as any, resources: this }) === false)
       return;
   }
 }
