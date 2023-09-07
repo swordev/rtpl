@@ -7,7 +7,7 @@ pnpm-lock.yaml
 coverage
 lib
 node_modules
-resources
+#resources
 rtpl-lock.json
 rtpl.js
 tsconfig.tsbuildinfo
