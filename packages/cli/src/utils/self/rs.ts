@@ -11,13 +11,13 @@ type FilteConstructor<T> = { new (...args: any[]): T };
 type Guard<T> = (val: unknown) => val is T;
 type UnsafeGuard = (val: unknown) => boolean;
 
-export type Filter<T = any> = {
+export type FilterInput<T = any> = {
   name?: string | { startsWith: string };
   test?: Guard<T> | UnsafeGuard;
   instanceOf?: FilteConstructor<T> | { data: FilteConstructor<T> };
 };
 
-export type FilterResult<F extends Filter> =
+export type FilterResult<F extends FilterInput> =
   F["instanceOf"] extends FilteConstructor<infer R>
     ? R
     : F["instanceOf"] extends { data: FilteConstructor<infer D> }
@@ -31,9 +31,9 @@ export type ResourceSystem = ReturnType<typeof createResourceSystem>;
 export function createResourceSystem(resources: Resources) {
   const helpers = {
     forEach,
+    filter,
     find,
-    findOne,
-    findOneOrFail,
+    findOrFail,
     remove,
     extractMap,
     move,
@@ -46,9 +46,9 @@ export function createResourceSystem(resources: Resources) {
   return { resources, ...helpers };
 }
 
-export function forEach<T, F extends Filter<T>>(
+export function forEach<T, F extends FilterInput<T>>(
   this: Resources,
-  filter: F,
+  input: F,
   onFound: (data: {
     ref: string;
     resource: T;
@@ -56,84 +56,87 @@ export function forEach<T, F extends Filter<T>>(
   }) => boolean | void,
 ) {
   const instanceOf: Constructor<T> | undefined =
-    "instanceOf" in filter && typeof filter.instanceOf === "function"
-      ? filter.instanceOf
+    "instanceOf" in input && typeof input.instanceOf === "function"
+      ? input.instanceOf
       : undefined;
   const instanceDataOf: Constructor<T> | undefined =
-    "instanceOf" in filter && filter.instanceOf && "data" in filter.instanceOf
-      ? filter.instanceOf.data
+    "instanceOf" in input && input.instanceOf && "data" in input.instanceOf
+      ? input.instanceOf.data
       : undefined;
 
   for (const ref in this) {
     const res = this[ref] as AbstractRes;
     if (isPlainObject(res)) {
-      forEach.bind(res)(filter, onFound as any);
+      forEach.bind(res)(input, onFound as any);
       continue;
     } else if (res instanceof DirRes && isPlainObject(res.data)) {
-      if (!res.resolved) forEach.bind(res.data)(filter, onFound as any);
+      if (!res.resolved) forEach.bind(res.data)(input, onFound as any);
     }
     if (instanceOf && !isInstanceOf(res, instanceOf)) continue;
     if (instanceDataOf && !isInstanceOf(res.data, instanceDataOf)) continue;
-    if (filter.name) {
+    if (input.name) {
       const name = basename(ref);
-      if (typeof filter.name === "string") {
-        if (filter.name !== name) continue;
-      } else if (!name.startsWith(filter.name.startsWith)) {
+      if (typeof input.name === "string") {
+        if (input.name !== name) continue;
+      } else if (!name.startsWith(input.name.startsWith)) {
         continue;
       }
     }
-    if (filter.test && !filter.test(res)) continue;
+    if (input.test && !input.test(res)) continue;
     if (onFound({ ref, resource: res as any, resources: this }) === false)
       return;
   }
 }
 
-export function find<T, F extends Filter<T>>(this: Resources, filter: F) {
+export function filter<T, F extends FilterInput<T>>(this: Resources, input: F) {
   const result: FilterResult<F>[] = [];
-  forEach.bind(this)(filter, ({ resource }) => {
+  forEach.bind(this)(input, ({ resource }) => {
     result.push(resource as any);
   });
   return result;
 }
 
-export function findOne<T, F extends Filter<T>>(
+export function find<T, F extends FilterInput<T>>(
   this: Resources,
-  filter: F,
+  input: F,
 ): FilterResult<F> | undefined {
-  return find.bind(this)(filter)[0] as any;
+  return filter.bind(this)(input)[0] as any;
 }
 
-export function findOneOrFail<T, F extends Filter<T>>(
+export function findOrFail<T, F extends FilterInput<T>>(
   this: Resources,
-  filter: F,
+  input: F,
 ): FilterResult<F> {
-  const resource = find.bind(this)(filter)[0] as any;
+  const resource = filter.bind(this)(input)[0] as any;
   if (!resource) throw new Error("Resource not found");
   return resource;
 }
 
-export function extractMap<T, F extends Filter<T>>(this: Resources, filter: F) {
+export function extractMap<T, F extends FilterInput<T>>(
+  this: Resources,
+  input: F,
+) {
   const extracted: Record<string, FilterResult<F>> = {};
-  forEach.bind(this)(filter, ({ ref, resource, resources }) => {
+  forEach.bind(this)(input, ({ ref, resource, resources }) => {
     extracted[ref] = resource as any;
     delete resources[ref];
   });
   return extracted;
 }
 
-export function remove<T, F extends Filter<T>>(
+export function remove<T, F extends FilterInput<T>>(
   this: Resources,
-  filter: F,
+  input: F,
 ): FilterResult<F>[] {
-  return Object.values(extractMap.bind(this)(filter)) as any;
+  return Object.values(extractMap.bind(this)(input)) as any;
 }
 
-export function move<T, F extends Filter<T>>(
+export function move<T, F extends FilterInput<T>>(
   this: Resources,
-  filter: F,
+  input: F,
   target: string,
 ) {
-  const extracted = extractMap.bind(this)(filter);
+  const extracted = extractMap.bind(this)(input);
 
   for (const path in extracted) {
     const base = basename(path);
@@ -143,8 +146,11 @@ export function move<T, F extends Filter<T>>(
   return Object.values(extracted);
 }
 
-export function moveToRoot<T, F extends Filter<T>>(this: Resources, filter: F) {
-  const extracted = extractMap.bind(this)(filter);
+export function moveToRoot<T, F extends FilterInput<T>>(
+  this: Resources,
+  input: F,
+) {
+  const extracted = extractMap.bind(this)(input);
 
   for (const path in extracted) {
     const base = basename(path);

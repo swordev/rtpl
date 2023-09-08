@@ -78,7 +78,7 @@ describe("extractMap", () => {
   });
 });
 
-describe("findOne", () => {
+describe("filter", () => {
   it("filters by custom resource", () => {
     class CustomRes extends AbstractRes<number> {
       toString(): string {
@@ -89,7 +89,7 @@ describe("findOne", () => {
     const res = createResourceSystem({
       res1: new JsonRes({ data: "a" }),
       res2: new CustomRes({ data: 1 }),
-    }).find({ instanceOf: CustomRes });
+    }).filter({ instanceOf: CustomRes });
 
     expect(res.length).toBe(1);
     expect(res[0].data).toBe(1);
@@ -104,7 +104,7 @@ describe("findOne", () => {
     const res = createResourceSystem({
       res1: new RawRes({ data: "a" }),
       res2: new CustomRes({ data: 1 }),
-    }).find({ instanceOf: RawRes });
+    }).filter({ instanceOf: RawRes });
 
     expect(res.length).toBe(1);
     expect(res[0].data).toBe("a");
