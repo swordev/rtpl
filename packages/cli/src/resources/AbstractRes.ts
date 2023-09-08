@@ -35,11 +35,15 @@ export abstract class AbstractRes<
   readonly path: DelayedValue<string>;
   readonly dirname: DelayedValue<string>;
   readonly resolved: boolean | undefined;
-  symbol: Symbol | undefined;
+  symbol: symbol | undefined;
 
-  constructor(readonly options: ResOptions<TData, TConf>) {
+  constructor(
+    readonly options: ResOptions<TData, TConf>,
+    symbol?: symbol,
+  ) {
     this.name = options.name;
     this.data = options.data as any;
+    this.symbol = symbol;
     this.config = Object.keys(options).reduce((config, key) => {
       if (key !== "name" && key !== "data") (config as any)[key] = options[key];
       return config;
