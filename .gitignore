@@ -5,7 +5,7 @@
 coverage
 lib
 node_modules
-resources
+/resources
 rtpl-lock.json
 rtpl.js
 rtpl.ts
