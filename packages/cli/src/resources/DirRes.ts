@@ -1,12 +1,23 @@
-import { Callable } from "../utils/object";
-import { AbstractRes, ResType } from "./AbstractRes";
+import { Callable, isPlainObject } from "../utils/object";
+import { AbstractRes, ResOptions, ResType } from "./AbstractRes";
 import { Writable } from "ts-essentials";
 
+export type DirData = Callable<
+  Record<string, unknown> | unknown[] | undefined,
+  any[]
+>;
 export class DirRes<
-  T extends Callable<Record<string, unknown> | unknown[] | undefined, any[]>,
+  T extends DirData,
   TConf extends Record<string, unknown> = {},
 > extends AbstractRes<T, TConf> {
   protected static _tplResType = ResType.Dir;
+  constructor(
+    readonly options: ResOptions<T, TConf>,
+    symbol?: symbol,
+  ) {
+    super(options, symbol);
+    if (this.symbol) attachSymbol(this.data, this.symbol);
+  }
   toString(): string {
     throw new Error("Not implemented");
   }
@@ -42,6 +53,22 @@ export class DirRes<
   ): DirRes<TData> {
     const self = this as Writable<typeof this>;
     self.data = self.options.data = data as any;
+
+    if (this.symbol) attachSymbol(self.data, this.symbol);
+
     return this as any as DirRes<TData>;
+  }
+}
+
+function attachSymbol(input: unknown, symbol: symbol) {
+  if (Array.isArray(input)) {
+    for (const item of input) attachSymbol(item, symbol);
+  } else if (isPlainObject(input)) {
+    for (const key in input) attachSymbol(input[key], symbol);
+  } else if (AbstractRes.isInstance(input)) {
+    if (!input.symbol) {
+      input.symbol = symbol;
+      if (DirRes.isInstance(input)) attachSymbol(input.data, symbol);
+    }
   }
 }
