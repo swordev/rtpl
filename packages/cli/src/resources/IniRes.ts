@@ -31,7 +31,7 @@ export type Config = {
 };
 
 export class IniRes<
-  T extends IniData | IniData[] | undefined
+  T extends IniData | IniData[] | undefined,
 > extends AbstractRes<T, Config> {
   protected static _tplResType = ResType.Ini;
   override getDefaultExtension() {
@@ -43,7 +43,7 @@ export class IniRes<
         padding: true,
         assignChar: "=",
       } as ConfigFormat,
-      this.options.format ?? {}
+      this.options.format ?? {},
     );
 
     const isValue = (value: unknown): value is Value => {
@@ -88,7 +88,7 @@ export class IniRes<
     const renderGroup = (
       key: string | null,
       value: IniData,
-      level = 0
+      level = 0,
     ): string[] => {
       const values = Object.entries(value)
         .flatMap(([subkey, subvalue]) => render(subkey, subvalue, level))

@@ -39,7 +39,7 @@ export class CronRes extends AbstractRes<CronData> {
         [
           ...[v.minute, v.hour, v.day, v.month, v.weekDay].map(formatSchedule),
           resolve(v.script),
-        ].join(" ")
+        ].join(" "),
       )
       .join("\n");
   }

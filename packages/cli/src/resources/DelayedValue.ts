@@ -8,7 +8,7 @@ export class DelayedValue<T = any> {
   readonly value!: T;
   constructor(
     protected readonly resolver?: Resolver<T>,
-    readonly lastStacks?: Call[]
+    readonly lastStacks?: Call[],
   ) {}
   static isInstance(value: unknown): value is DelayedValue {
     if (value instanceof this) return true;

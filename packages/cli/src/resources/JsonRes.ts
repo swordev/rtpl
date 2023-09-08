@@ -43,13 +43,13 @@ export const toString = (value: JSONValue): string => {
         return value;
       }
     },
-    2
+    2,
   );
 };
 
 export class JsonRes<
   T extends JSONValue | undefined,
-  TConf extends Record<string, unknown> = {}
+  TConf extends Record<string, unknown> = {},
 > extends AbstractRes<T, TConf> {
   protected static _tplResType = ResType.Json;
   override getDefaultExtension() {

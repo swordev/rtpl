@@ -41,8 +41,8 @@ describe("JsonRes.toString", () => {
           g: "test",
         },
         null,
-        2
-      )
+        2,
+      ),
     );
   });
 });
