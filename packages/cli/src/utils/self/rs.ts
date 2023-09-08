@@ -14,6 +14,7 @@ type UnsafeGuard = (val: unknown) => boolean;
 export type FilterInput<T = any> = {
   name?: string | { startsWith: string };
   test?: Guard<T> | UnsafeGuard;
+  symbol?: symbol;
   instanceOf?: FilteConstructor<T> | { data: FilteConstructor<T> };
 };
 
@@ -72,6 +73,7 @@ export function forEach<T, F extends FilterInput<T>>(
     } else if (res instanceof DirRes && isPlainObject(res.data)) {
       if (!res.resolved) forEach.bind(res.data)(input, onFound as any);
     }
+    if (input.symbol && res.symbol !== input.symbol) continue;
     if (instanceOf && !isInstanceOf(res, instanceOf)) continue;
     if (instanceDataOf && !isInstanceOf(res.data, instanceDataOf)) continue;
     if (input.name) {

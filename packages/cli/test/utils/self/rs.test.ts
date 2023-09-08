@@ -1,4 +1,4 @@
-import { AbstractRes, JsonRes, RawRes } from "../../../src";
+import { AbstractRes, DirRes, JsonRes, RawRes } from "../../../src";
 import { createResourceSystem } from "../../../src/utils/self/rs";
 import { it, describe, expect } from "vitest";
 
@@ -108,5 +108,35 @@ describe("filter", () => {
 
     expect(res.length).toBe(1);
     expect(res[0].data).toBe("a");
+  });
+
+  it("filters with symbols", () => {
+    const res = {
+      r1: new RawRes({}, Symbol()),
+      r2: new DirRes(
+        {
+          data: {
+            r3: new RawRes({}),
+            r4: new RawRes({}, Symbol()),
+          },
+        },
+        Symbol(),
+      ),
+    };
+
+    const rs = createResourceSystem(res);
+
+    const f1 = rs.filter({ symbol: res.r1.symbol });
+    expect(f1.length).toBe(1);
+    expect(f1.includes(res.r1)).toBeTruthy();
+
+    const f2 = rs.filter({ symbol: res.r2.symbol });
+    expect(f2.length).toBe(2);
+    expect(f2.includes(res.r2)).toBeTruthy();
+    expect(f2.includes(res.r2.data.r3)).toBeTruthy();
+
+    const f3 = rs.filter({ symbol: res.r2.symbol, instanceOf: DirRes });
+    expect(f3.length).toBe(1);
+    expect(f3.includes(res.r2)).toBeTruthy();
   });
 });
