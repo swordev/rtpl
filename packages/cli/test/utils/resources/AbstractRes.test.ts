@@ -1,3 +1,4 @@
+import { DirData, DirRes } from "../../../src";
 import { AbstractRes } from "../../../src/resources/AbstractRes";
 import { it, describe, expect } from "vitest";
 
@@ -17,6 +18,11 @@ describe("AbstractRes.lastStacks", () => {
 });
 
 describe("AbstractRes.isInstance", () => {
+  it("with custom DirRes", () => {
+    class Dir<T extends DirData> extends DirRes<T> {}
+    expect(DirRes.isInstance(new Dir({}))).toBeTruthy();
+  });
+
   it("with custom resource", () => {
     class CustomRes extends AbstractRes {
       toString() {
