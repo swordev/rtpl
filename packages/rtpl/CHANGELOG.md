@@ -1,5 +1,12 @@
 # rtpl
 
+## 0.7.0
+
+### Patch Changes
+
+- Updated dependencies [[`94b7795`](https://github.com/swordev/rtpl/commit/94b7795108d156f0873fc4b48d15a4b4965eda1b)]:
+  - @rtpl/cli@0.7.0
+
 ## 0.6.0
 
 ### Patch Changes
