@@ -4,6 +4,12 @@ import { checkPath, statIfExists } from "../fs";
 import { isPlainObject } from "../object";
 import { isDir, isPath, stripRootBackPaths } from "../path";
 import { makeFilter } from "../string";
+import {
+  ResourcesResultItem,
+  TplResolveSelf,
+  createEnabledArray,
+} from "./config";
+import { createResourceSystem } from "./rs";
 import { isMatch } from "micromatch";
 import { basename, dirname, join, relative } from "path";
 import * as posix from "path/posix";
@@ -168,10 +174,10 @@ export async function resolveTpl(tpl: Tpl, options: ResolveConfigOptions) {
   };
 
   const outFolder = "resources";
-
+  const resultItems: ResourcesResultItem[] = [];
   const inResources = await resolveResources({
     ...resolveOptions,
-    resources: await tpl.resources(),
+    resources: await tpl.resources(resultItems),
     onValue: async (path, res, actions) => {
       if (res.resolved === false) {
         actions.process = false;
@@ -181,7 +187,20 @@ export async function resolveTpl(tpl: Tpl, options: ResolveConfigOptions) {
     },
   });
 
-  await tpl.transformer(inResources);
+  const rs = createResourceSystem(inResources);
+
+  for (const item of resultItems) {
+    const tplOptions = await item.tpl.options();
+    const enabled = createEnabledArray(
+      tplOptions.enabled,
+      item.tpl.config.depGroups,
+    );
+    const self: TplResolveSelf<any> = {
+      isEnabled: (name) => enabled.includes(name),
+      ...rs,
+    };
+    await item.tpl.config.onResolve?.bind(self)(item.resources);
+  }
 
   const resources = await resolveResources({
     ...resolveOptions,

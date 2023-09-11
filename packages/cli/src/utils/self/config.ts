@@ -1,7 +1,7 @@
 import { DirRes } from "../../resources/DirRes";
 import { clone, merge } from "../object";
 import { DeepPartial } from "../ts";
-import { createResourceSystem, ResourceSystem } from "./rs";
+import { ResourceSystem } from "./rs";
 import { Builtin } from "ts-essentials";
 import { z } from "zod";
 
@@ -15,6 +15,11 @@ export type Enabled<
       [N in T]?: boolean;
     }
   | T[];
+
+export type ResourcesResultItem = {
+  tpl: Tpl<any, any, any, any>;
+  resources: unknown;
+};
 
 function normalizeEnabled<
   T extends string | number | symbol = string | number | symbol,
@@ -76,7 +81,7 @@ export type TplOptionsSelf<
   };
 };
 
-export type TplTransformerSelf<D extends DepsTpl = {}> = TplSelf<D> &
+export type TplResolveSelf<D extends DepsTpl = {}> = TplSelf<D> &
   ResourceSystem;
 
 export type TplResourcesSelf<D extends DepsTpl = {}> = TplSelf<D> & {
@@ -121,7 +126,7 @@ export type TplConfig<
     this: TplResourcesSelf<D>,
     o: TplOptions<O, D, DG>,
   ) => Promise<R>;
-  transformer?: (this: TplTransformerSelf<D>) => Promise<void | undefined>;
+  onResolve?: (this: TplResolveSelf<D>, res: R) => Promise<void | undefined>;
 };
 
 export class Tpl<
@@ -166,7 +171,10 @@ export class Tpl<
     };
   }
 
-  private createResourcesSelf(o: TplOptions<O, D, DG>): TplResourcesSelf<D> {
+  private createResourcesSelf(
+    o: TplOptions<O, D, DG>,
+    items: ResourcesResultItem[],
+  ): TplResourcesSelf<D> {
     const enabled = createEnabledArray(o.enabled, this.config.depGroups);
     const self: TplResourcesSelf<D> = {
       isEnabled: (name) => enabled.includes(name),
@@ -178,22 +186,10 @@ export class Tpl<
       (self.deps as any)[depName] = async (o: any) => {
         self.depNames.push(depName);
         await depTpl.updateOptions(o);
-        return await depTpl.resources();
+        return depTpl.resources(items);
       };
     }
 
-    return self;
-  }
-
-  private createTransformSelf(
-    o: TplOptions<O, D, DG>,
-    resources: Resources,
-  ): TplTransformerSelf<D> {
-    const enabled = createEnabledArray(o.enabled, this.config.depGroups);
-    const self: TplTransformerSelf<D> = {
-      isEnabled: (name) => enabled.includes(name),
-      ...createResourceSystem(resources),
-    };
     return self;
   }
 
@@ -258,10 +254,10 @@ export class Tpl<
     return this.#options ?? (await this.setOptions());
   }
 
-  async resources() {
+  async resources(items: ResourcesResultItem[] = []) {
     const { config } = this;
     const options = await this.options();
-    const self = this.createResourcesSelf(options);
+    const self = this.createResourcesSelf(options, items);
     const res =
       (await config.resources?.bind(self as any)(options)) || ({} as R);
     const depRes: Record<string, any> = {};
@@ -271,27 +267,14 @@ export class Tpl<
         depRes[depName] = await self.deps[depName]();
     }
 
-    if (res instanceof DirRes) {
-      return res.add(depRes) as ResResult<R, D>;
-    } else {
-      return {
-        ...res,
-        ...depRes,
-      } as ResResult<R, D>;
-    }
-  }
+    const resources =
+      res instanceof DirRes
+        ? (res.add(depRes) as ResResult<R, D>)
+        : ({ ...res, ...depRes } as ResResult<R, D>);
 
-  async transformer(resources: Resources) {
-    const { config } = this;
-    const options = await this.options();
-    const self = this.createTransformSelf(options, resources);
-    const enabled = createEnabledArray(options.enabled, this.config.depGroups);
+    items.push({ tpl: this, resources });
 
-    for (const [depName, depTpl] of Object.entries<Tpl>(this.deps)) {
-      if (enabled.includes(depName)) await depTpl.transformer(self);
-    }
-
-    await config.transformer?.bind(self)();
+    return resources;
   }
 
   fork(defaultOptions?: PartialOptions<TplOptions<O, D, DG>>) {

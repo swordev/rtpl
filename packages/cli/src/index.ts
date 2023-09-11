@@ -1,5 +1,5 @@
 export { DelayedValue } from "./resources/DelayedValue";
-export { createTpl, Tpl, TplTransformerSelf } from "./utils/self/config";
+export { createTpl, Tpl, TplResolveSelf } from "./utils/self/config";
 export { AbstractRes } from "./resources/AbstractRes";
 export { CronRes, CronData } from "./resources/CronRes";
 export { DirRes, DirData } from "./resources/DirRes";
