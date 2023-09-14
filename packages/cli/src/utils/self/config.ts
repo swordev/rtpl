@@ -126,7 +126,11 @@ export type TplConfig<
     this: TplResourcesSelf<D>,
     o: TplOptions<O, D, DG>,
   ) => Promise<R>;
-  onResolve?: (this: TplResolveSelf<D>, res: R) => Promise<void | undefined>;
+  onResolve?: (
+    this: TplResolveSelf<D>,
+    r: R,
+    o: TplOptions<O, D, DG>,
+  ) => Promise<void | undefined>;
 };
 
 export class Tpl<

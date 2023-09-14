@@ -199,7 +199,7 @@ export async function resolveTpl(tpl: Tpl, options: ResolveConfigOptions) {
       isEnabled: (name) => enabled.includes(name),
       ...rs,
     };
-    await item.tpl.config.onResolve?.bind(self)(item.resources);
+    await item.tpl.config.onResolve?.bind(self)(item.resources, tplOptions);
   }
 
   const resources = await resolveResources({
