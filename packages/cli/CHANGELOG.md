@@ -1,5 +1,11 @@
 # @rtpl/cli
 
+## 0.8.0
+
+### Minor Changes
+
+- [`d0550d4`](https://github.com/swordev/rtpl/commit/d0550d49d45b30c94eafb4ecf20ce94f1cc14681) Thanks [@juanrgm](https://github.com/juanrgm)! - Add options param to `onResolve`
+
 ## 0.7.0
 
 ### Minor Changes
