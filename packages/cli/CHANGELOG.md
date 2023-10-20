@@ -1,5 +1,11 @@
 # @rtpl/cli
 
+## 0.9.1
+
+### Patch Changes
+
+- [`2624193`](https://github.com/swordev/rtpl/commit/2624193c0109ff0c17aec88167df3bb0ff8ed901) Thanks [@juanrgm](https://github.com/juanrgm)! - Fix fatal error
+
 ## 0.9.0
 
 ### Minor Changes
