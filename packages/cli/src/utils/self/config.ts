@@ -1,7 +1,7 @@
-import { DirRes } from "../../resources/DirRes";
-import { clone, merge } from "../object";
-import { DeepPartial } from "../ts";
-import { ResourceSystem } from "./rs";
+import { DirRes } from "../../resources/DirRes.js";
+import { clone, merge } from "../object.js";
+import { DeepPartial } from "../ts.js";
+import { ResourceSystem } from "./rs.js";
 import { Builtin } from "ts-essentials";
 import { z } from "zod";
 

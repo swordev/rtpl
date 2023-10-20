@@ -1,7 +1,7 @@
-import { AbstractRes } from "../../resources/AbstractRes";
-import { checkPath, mkrdir } from "../fs";
-import { sort } from "../object";
-import * as lock from "./lock";
+import { AbstractRes } from "../../resources/AbstractRes.js";
+import { checkPath, mkrdir } from "../fs.js";
+import { sort } from "../object.js";
+import * as lock from "./lock.js";
 import chalk from "chalk";
 import { readFile, rm, rmdir, writeFile } from "fs/promises";
 import { dirname, join, relative } from "path";

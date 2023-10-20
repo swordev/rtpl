@@ -1,8 +1,13 @@
-import { AbstractRes } from "../..";
-import { DelayedValue } from "../../resources/DelayedValue";
-import { DirRes } from "../../resources/DirRes";
-import { Constructor, isInstanceOf, isPlainObject, JSONClass } from "../object";
-import { Resources } from "./config";
+import { AbstractRes } from "../../index.js";
+import { DelayedValue } from "../../resources/DelayedValue.js";
+import { DirRes } from "../../resources/DirRes.js";
+import {
+  Constructor,
+  isInstanceOf,
+  isPlainObject,
+  JSONClass,
+} from "../object.js";
+import { Resources } from "./config.js";
 import { basename } from "path";
 import { join } from "path/posix";
 

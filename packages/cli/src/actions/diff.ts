@@ -1,6 +1,6 @@
-import { GlobalOptions } from "../cli";
-import { readIfExists } from "../utils/fs";
-import { readTplFile, resolveTpl } from "../utils/self/resolve";
+import { GlobalOptions } from "../cli.js";
+import { readIfExists } from "../utils/fs.js";
+import { readTplFile, resolveTpl } from "../utils/self/resolve.js";
 import chalk from "chalk";
 import { diffLines } from "diff";
 

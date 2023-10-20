@@ -1,5 +1,5 @@
-import { AbstractRes, DirRes, JsonRes, RawRes } from "../../../src";
-import { createResourceSystem } from "../../../src/utils/self/rs";
+import { AbstractRes, DirRes, JsonRes, RawRes } from "../../../src/index.js";
+import { createResourceSystem } from "../../../src/utils/self/rs.js";
 import { it, describe, expect } from "vitest";
 
 describe("extractMap", () => {

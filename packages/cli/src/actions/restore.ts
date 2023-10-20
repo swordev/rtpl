@@ -1,6 +1,6 @@
-import { GlobalOptions } from "../cli";
-import { confirmPrompt } from "../utils/cli";
-import { LockData } from "../utils/self/lock";
+import { GlobalOptions } from "../cli.js";
+import { confirmPrompt } from "../utils/cli.js";
+import { LockData } from "../utils/self/lock.js";
 import chalk from "chalk";
 import { existsSync } from "fs";
 import { mkdir, readFile, readdir, writeFile } from "fs/promises";

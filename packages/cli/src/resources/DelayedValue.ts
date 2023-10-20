@@ -1,4 +1,4 @@
-import { Call } from "../utils/stack";
+import { Call } from "../utils/stack.js";
 import { Writable } from "ts-essentials";
 
 type Resolver<T> = (value: T) => any;

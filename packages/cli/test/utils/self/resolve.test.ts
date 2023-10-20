@@ -1,5 +1,5 @@
-import { DirRes, RawRes } from "../../../src";
-import { resolveResources } from "../../../src/utils/self/resolve";
+import { DirRes, RawRes } from "../../../src/index.js";
+import { resolveResources } from "../../../src/utils/self/resolve.js";
 import { it, describe, expect } from "vitest";
 
 describe("resolveResources", () => {

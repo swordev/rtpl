@@ -1,5 +1,5 @@
-import { stringify } from "../utils/object";
-import { AbstractRes, ResType } from "./AbstractRes";
+import { stringify } from "../utils/object.js";
+import { AbstractRes, ResType } from "./AbstractRes.js";
 
 export class RawRes<T = any> extends AbstractRes<T> {
   protected static _tplResType = ResType.Raw;

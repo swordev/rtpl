@@ -1,5 +1,5 @@
-import { ResType } from "./AbstractRes";
-import { JsonRes, JSONValue, toString } from "./JsonRes";
+import { ResType } from "./AbstractRes.js";
+import { JsonRes, JSONValue, toString } from "./JsonRes.js";
 import { stringify } from "yaml";
 
 export type Config = {

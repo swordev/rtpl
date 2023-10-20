@@ -1,5 +1,5 @@
-import { Callable, resolve } from "../utils/object";
-import { AbstractRes, ResType } from "./AbstractRes";
+import { Callable, resolve } from "../utils/object.js";
+import { AbstractRes, ResType } from "./AbstractRes.js";
 
 export type Schedule = number | [number, number] | { each: number };
 

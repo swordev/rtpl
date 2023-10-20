@@ -5,10 +5,10 @@ import {
   numberCharset,
   randomString,
   upperAlphaCharset,
-} from "../utils/crypto";
-import { readIfExists } from "../utils/fs";
-import { AbstractRes, ResOptions, ResType } from "./AbstractRes";
-import { DelayedValue, setDelayedValue } from "./DelayedValue";
+} from "../utils/crypto.js";
+import { readIfExists } from "../utils/fs.js";
+import { AbstractRes, ResOptions, ResType } from "./AbstractRes.js";
+import { DelayedValue, setDelayedValue } from "./DelayedValue.js";
 
 export type SecretData = {
   /**

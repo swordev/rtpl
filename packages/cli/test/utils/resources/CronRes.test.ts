@@ -1,4 +1,4 @@
-import { CronRes } from "../../../src/resources/CronRes";
+import { CronRes } from "../../../src/resources/CronRes.js";
 import { it, describe, expect } from "vitest";
 
 describe("CronRes.toString", () => {

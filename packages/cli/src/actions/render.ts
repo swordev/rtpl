@@ -1,5 +1,5 @@
-import { GlobalOptions } from "../cli";
-import { readTplFile, resolveTpl } from "../utils/self/resolve";
+import { GlobalOptions } from "../cli.js";
+import { readTplFile, resolveTpl } from "../utils/self/resolve.js";
 
 export default async function render(options: GlobalOptions) {
   const tpl = await readTplFile(options.templatePath);

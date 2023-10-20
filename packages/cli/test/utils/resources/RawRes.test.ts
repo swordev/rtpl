@@ -1,4 +1,4 @@
-import { RawRes } from "../../../src/resources/RawRes";
+import { RawRes } from "../../../src/resources/RawRes.js";
 import { it, describe, expect } from "vitest";
 
 describe("RawRes.toString", () => {

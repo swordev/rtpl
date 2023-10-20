@@ -1,5 +1,5 @@
-import { DirData, DirRes } from "../../../src";
-import { AbstractRes } from "../../../src/resources/AbstractRes";
+import { DirData, DirRes } from "../../../src/index.js";
+import { AbstractRes } from "../../../src/resources/AbstractRes.js";
 import { it, describe, expect } from "vitest";
 
 class StringRes extends AbstractRes<string | undefined> {
@@ -12,7 +12,7 @@ describe("AbstractRes.lastStacks", () => {
   it("returns current source", () => {
     const [stack] = new StringRes({}).lastStacks;
     const normalize = (v: string) => v.replaceAll("\\", "/");
-    expect(normalize(stack.getFileName())).toBe(normalize(__filename));
+    expect(normalize(stack.getFileName())).toBe(import.meta.url);
     expect(typeof stack.getLineNumber() == "number").toBe(true);
   });
 });

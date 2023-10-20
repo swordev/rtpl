@@ -1,5 +1,5 @@
-import { GlobalOptions } from "../cli";
-import install, { InstallActionOptions } from "./install";
+import { GlobalOptions } from "../cli.js";
+import install, { InstallActionOptions } from "./install.js";
 
 export type CheckOptions = GlobalOptions & Omit<InstallActionOptions, "dryRun">;
 

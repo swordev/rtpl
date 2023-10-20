@@ -1,4 +1,4 @@
-import { EnvRes } from "../../../src/resources/EnvRes";
+import { EnvRes } from "../../../src/resources/EnvRes.js";
 import { it, describe, expect } from "vitest";
 
 describe("EnvRes.toString", () => {

@@ -1,5 +1,5 @@
-import { GlobalOptions } from "../cli";
-import { readTplFile } from "../utils/self/resolve";
+import { GlobalOptions } from "../cli.js";
+import { readTplFile } from "../utils/self/resolve.js";
 import camelCase from "lodash.camelcase";
 import { stringify } from "yaml";
 

@@ -1,6 +1,6 @@
-import { Callable, stringify } from "../utils/object";
-import { StringifyClass } from "../utils/self/rs";
-import { AbstractRes, ResType } from "./AbstractRes";
+import { Callable, stringify } from "../utils/object.js";
+import { StringifyClass } from "../utils/self/rs.js";
+import { AbstractRes, ResType } from "./AbstractRes.js";
 
 export type EnvData = Record<
   string,

@@ -1,7 +1,7 @@
-import { Callable, resolve, stringify } from "../utils/object";
-import { StringifyClass } from "../utils/self/rs";
-import { AbstractRes, ResType } from "./AbstractRes";
-import { DelayedValue } from "./DelayedValue";
+import { Callable, resolve, stringify } from "../utils/object.js";
+import { StringifyClass } from "../utils/self/rs.js";
+import { AbstractRes, ResType } from "./AbstractRes.js";
+import { DelayedValue } from "./DelayedValue.js";
 
 type Value = Callable<
   string | number | boolean | null | StringifyClass | undefined

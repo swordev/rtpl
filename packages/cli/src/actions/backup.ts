@@ -1,5 +1,5 @@
-import { GlobalOptions, pkg } from "../cli";
-import * as lock from "../utils/self/lock";
+import { GlobalOptions, pkg } from "../cli.js";
+import * as lock from "../utils/self/lock.js";
 import chalk from "chalk";
 import { createHash } from "crypto";
 import { mkdir, readFile, writeFile } from "fs/promises";

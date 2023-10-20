@@ -1,4 +1,4 @@
-import { DirRes, JsonRes } from "../../../src";
+import { DirRes, JsonRes } from "../../../src/index.js";
 import { it, describe, expect } from "vitest";
 
 describe("DirRes.symbol", () => {

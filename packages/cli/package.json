@@ -2,6 +2,7 @@
   "name": "@rtpl/cli",
   "version": "0.8.0",
   "description": "CLI tool for resource templates",
+  "type": "module",
   "scripts": {
     "build": "tsc -b",
     "clean": "tsc -b --clean",
@@ -11,7 +12,7 @@
     "@types/json-schema": "^7.0.12",
     "ajv": "^8.12.0",
     "brace-expansion": "^2.0.1",
-    "chalk": "^4.1.2",
+    "chalk": "^5.3.0",
     "commander": "^11.0.0",
     "diff": "^5.1.0",
     "lodash.camelcase": "^4.3.0",

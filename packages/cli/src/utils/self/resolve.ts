@@ -1,16 +1,16 @@
-import { AbstractRes, Tpl } from "../..";
-import { DirRes } from "../../resources/DirRes";
-import { checkPath, statIfExists } from "../fs";
-import { isPlainObject } from "../object";
-import { isDir, isPath, stripRootBackPaths } from "../path";
-import { makeFilter } from "../string";
+import { AbstractRes, Tpl } from "../../index.js";
+import { DirRes } from "../../resources/DirRes.js";
+import { checkPath, statIfExists } from "../fs.js";
+import { isPlainObject } from "../object.js";
+import { isDir, isPath, stripRootBackPaths } from "../path.js";
+import { makeFilter } from "../string.js";
 import {
   ResourcesResultItem,
   TplResolveSelf,
   createEnabledArray,
-} from "./config";
-import { createResourceSystem } from "./rs";
-import { isMatch } from "micromatch";
+} from "./config.js";
+import { createResourceSystem } from "./rs.js";
+import mm from "micromatch";
 import { basename, dirname, join, relative } from "path";
 import * as posix from "path/posix";
 
@@ -116,7 +116,7 @@ export async function resolveResources(options: {
 
       if (
         patterns &&
-        !isMatch(path, patterns, {
+        !mm.isMatch(path, patterns, {
           dot: true,
         })
       )

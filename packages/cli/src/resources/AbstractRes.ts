@@ -1,5 +1,5 @@
-import { Call, getLastStacks } from "../utils/stack";
-import { DelayedValue, setDelayedValue } from "./DelayedValue";
+import { Call, getLastStacks } from "../utils/stack.js";
+import { DelayedValue, setDelayedValue } from "./DelayedValue.js";
 import { posix } from "path";
 
 export type ResDataObject<TData> = TData extends undefined

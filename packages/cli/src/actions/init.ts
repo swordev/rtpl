@@ -1,5 +1,5 @@
-import { GlobalOptions } from "../cli";
-import { checkPath } from "../utils/fs";
+import { GlobalOptions } from "../cli.js";
+import { checkPath } from "../utils/fs.js";
 import chalk from "chalk";
 import { writeFile } from "fs/promises";
 import { join } from "path";

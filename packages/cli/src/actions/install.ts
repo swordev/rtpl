@@ -1,16 +1,16 @@
-import { GlobalOptions } from "../cli";
-import { confirmPrompt } from "../utils/cli";
+import { GlobalOptions } from "../cli.js";
+import { confirmPrompt } from "../utils/cli.js";
 import {
   ActionEnum,
   execFileAction,
   getFileActions,
   logAction,
-} from "../utils/self/install";
-import * as lock from "../utils/self/lock";
-import { splitGlobalOptions } from "../utils/self/options";
-import { readTplFile, resolveTpl } from "../utils/self/resolve";
-import backup from "./backup";
-import diff from "./diff";
+} from "../utils/self/install.js";
+import * as lock from "../utils/self/lock.js";
+import { splitGlobalOptions } from "../utils/self/options.js";
+import { readTplFile, resolveTpl } from "../utils/self/resolve.js";
+import backup from "./backup.js";
+import diff from "./diff.js";
 import chalk from "chalk";
 import { rmdir } from "fs/promises";
 import { dirname, join } from "path";

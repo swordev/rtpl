@@ -1,5 +1,5 @@
-import { RawRes } from "../../../src";
-import { JsonRes } from "../../../src/resources/JsonRes";
+import { RawRes } from "../../../src/index.js";
+import { JsonRes } from "../../../src/resources/JsonRes.js";
 import { it, describe, expect } from "vitest";
 
 describe("JsonRes.toString", () => {

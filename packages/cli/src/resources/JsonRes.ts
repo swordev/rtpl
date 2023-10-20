@@ -1,5 +1,5 @@
-import { Callable, isPlainObject, resolve } from "../utils/object";
-import { AbstractRes, ResType } from "./AbstractRes";
+import { Callable, isPlainObject, resolve } from "../utils/object.js";
+import { AbstractRes, ResType } from "./AbstractRes.js";
 
 export type JSONPrimitive =
   | string
