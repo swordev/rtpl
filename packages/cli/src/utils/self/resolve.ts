@@ -145,7 +145,9 @@ export async function readTplFile(path: string): Promise<Tpl> {
   let filePath: string | undefined;
 
   if (info.isDirectory()) {
-    const paths = [".js", ".ts"].map((ext) => join(path, `rtpl${ext}`));
+    const paths = [".js", ".cjs", ".mjs", ".ts", ".cts", ".mts"].map((ext) =>
+      join(path, `rtpl${ext}`),
+    );
     for (const v of paths) {
       if (await checkPath(v)) filePath = v;
     }
@@ -154,9 +156,8 @@ export async function readTplFile(path: string): Promise<Tpl> {
     filePath = path;
   }
 
-  if (/\.(j|t)s$/i.test(filePath)) {
-    if (/\.ts$/i.test(filePath)) require("ts-node/register");
-    const object = require(filePath);
+  if (/\.[cm]?[jt]s$/i.test(filePath)) {
+    const object = await import(`file://${filePath}`);
     return object.default ?? object;
   } else {
     throw new Error(`Invalid values path: ${path}`);

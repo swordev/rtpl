@@ -4,6 +4,7 @@
     "rootDir": "src",
     "baseUrl": ".",
     "paths": {
+      "@rtpl/cli": ["./../cli/src/index.ts"],
       "@rtpl/cli/*": ["./../cli/src/*"]
     }
   },

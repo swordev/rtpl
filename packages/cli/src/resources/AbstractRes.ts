@@ -48,7 +48,10 @@ export abstract class AbstractRes<
       if (key !== "name" && key !== "data") (config as any)[key] = options[key];
       return config;
     }, {} as TConf);
-    this.lastStacks = getLastStacks([{ startsWith: __dirname }], true);
+    this.lastStacks = getLastStacks(
+      [{ startsWith: new URL(".", import.meta.url).href }],
+      true,
+    );
     this.path = new DelayedValue((path) => `./${path}`, this.lastStacks);
     this.dirname = new DelayedValue(
       (path) => `./${posix.dirname(path)}`,

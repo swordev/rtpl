@@ -12,7 +12,9 @@ import { GlobalOptions } from "./utils/self/options.js";
 import { parseStringListValue } from "./utils/string.js";
 import chalk from "chalk";
 import { program } from "commander";
+import { readFileSync } from "fs";
 import { resolve } from "path";
+import { fileURLToPath } from "url";
 
 export type { GlobalOptions };
 
@@ -38,7 +40,11 @@ function makeAction(cb: (options: any) => Promise<any>) {
   };
 }
 
-export const pkg = require(`${__dirname}/package.json`);
+const $dirname = fileURLToPath(new URL(".", import.meta.url));
+
+export const pkg = JSON.parse(
+  readFileSync(`${$dirname}/../package.json`).toString(),
+);
 
 export default (defaultOptions?: Partial<GlobalOptions>) => {
   program.name("rtpl");

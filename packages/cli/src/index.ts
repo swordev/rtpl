@@ -9,3 +9,4 @@ export { JsonRes } from "./resources/JsonRes.js";
 export { RawRes } from "./resources/RawRes.js";
 export { SecretRes, SecretData } from "./resources/SecretRes.js";
 export { YamlRes } from "./resources/YamlRes.js";
+export { default as cli } from "./cli.js";

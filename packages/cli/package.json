@@ -2,7 +2,37 @@
   "name": "@rtpl/cli",
   "version": "0.8.0",
   "description": "CLI tool for resource templates",
+  "homepage": "https://github.com/swordev/rtpl",
+  "bugs": {
+    "url": "https://github.com/swordev/rtpl/issues",
+    "email": "juanrgm724@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/swordev/rtpl"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Juanra GM",
+    "email": "juanrgm724@gmail.com",
+    "url": "https://github.com/juanrgm"
+  },
   "type": "module",
+  "exports": {
+    ".": {
+      "import": "./lib/index.js"
+    },
+    "./*": {
+      "import": "./lib/*"
+    }
+  },
+  "module": "./lib/index.js",
+  "bin": {
+    "rtpl": "lib/bin.js"
+  },
+  "files": [
+    "lib"
+  ],
   "scripts": {
     "build": "tsc -b",
     "clean": "tsc -b --clean",
@@ -38,14 +68,7 @@
   "peerDependencies": {
     "ts-node": "^10.4.0"
   },
-  "publishConfig": {
-    "directory": "lib"
-  },
-  "x-wspa": {
-    "pkgManifest": {
-      "bin": {
-        "rtpl": "bin.js"
-      }
-    }
+  "engine": {
+    "node": ">=16.0.0"
   }
 }

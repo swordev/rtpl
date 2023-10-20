@@ -11,7 +11,17 @@ export function captureStackTrace(limit = 15): Call[] {
     Error.prepareStackTrace = (_, stack) => stack;
     const err = new Error();
     Error.captureStackTrace(err);
-    return err.stack as any;
+    return (err.stack as any as Call[]).map((stack) => {
+      return {
+        getFileName() {
+          const fileName = stack.getFileName();
+          return fileName.startsWith("file://")
+            ? stack.getFileName()
+            : new URL(`file://${fileName}`).href;
+        },
+        getLineNumber: stack.getLineNumber.bind(stack),
+      };
+    });
   } catch (error) {
     return [];
   } finally {
@@ -42,7 +52,7 @@ export function getLastStacks(afterOf?: AfterOf[], required?: boolean): Call[] {
     const fileName = stack.getFileName();
     if (include) {
       stacks.push(stack);
-    } else if (fileName === __filename) {
+    } else if (fileName === import.meta.url) {
       if (!afterOf) include = true;
       continue;
     } else if (

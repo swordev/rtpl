@@ -7,6 +7,5 @@ lib
 node_modules
 /resources
 rtpl-lock.json
-rtpl.js
-rtpl.ts
+/rtpl.*
 tsconfig.tsbuildinfo

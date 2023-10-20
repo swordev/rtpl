@@ -16,6 +16,7 @@
     "email": "juanrgm724@gmail.com",
     "url": "https://github.com/juanrgm"
   },
+  "type": "module",
   "workspaces": [
     "packages/*"
   ],
@@ -25,9 +26,7 @@
     "check:eslint": "eslint --cache .",
     "check:format": "prettier --cache -c .",
     "clean": "wspa clean",
-    "compose": "wspa compose",
     "format": "prettier --cache -w .",
-    "postinstall": "wspa compose",
     "start": "node packages/cli/lib/bin.js",
     "test": "vitest run",
     "watch": "tsc -b tsconfig.build.json -w"
@@ -36,7 +35,6 @@
     "@changesets/changelog-github": "^0.4.8",
     "@changesets/cli": "^2.26.2",
     "@trivago/prettier-plugin-sort-imports": "^4.2.0",
-    "@tsconfig/node18": "^18.2.1",
     "@types/node": "^20.5.9",
     "@typescript-eslint/eslint-plugin": "^6.6.0",
     "@wspa/cli": "^0.6.0",
@@ -49,30 +47,10 @@
     "typescript": "^5.2.2",
     "vitest": "^0.34.3"
   },
+  "peerDependencies": {
+    "ts-node": "^10.4.0"
+  },
   "engine": {
     "node": ">=16.0.0"
-  },
-  "x-wspa": {
-    "extends": "@wspa/config/auto",
-    "pkgManifest": {
-      "homepage": "https://github.com/swordev/rtpl",
-      "bugs": {
-        "url": "https://github.com/swordev/rtpl/issues",
-        "email": "juanrgm724@gmail.com"
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/swordev/rtpl"
-      },
-      "license": "MIT",
-      "author": {
-        "name": "Juanra GM",
-        "email": "juanrgm724@gmail.com",
-        "url": "https://github.com/juanrgm"
-      },
-      "engine": {
-        "node": ">=16.0.0"
-      }
-    }
   }
 }
