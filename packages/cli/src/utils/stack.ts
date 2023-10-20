@@ -1,7 +1,4 @@
-import { readFileSync } from "fs";
-import { dirname } from "path";
-
-export type Call = { getFileName(): string; getLineNumber(): number };
+export type Call = { getFileName(): string | null; getLineNumber(): number };
 
 export function captureStackTrace(limit = 15): Call[] {
   const prepareStackTrace = Error.prepareStackTrace;
@@ -15,9 +12,11 @@ export function captureStackTrace(limit = 15): Call[] {
       return {
         getFileName() {
           const fileName = stack.getFileName();
-          return fileName.startsWith("file://")
-            ? stack.getFileName()
-            : new URL(`file://${fileName}`).href;
+          return fileName
+            ? fileName.startsWith("file://")
+              ? stack.getFileName()
+              : new URL(`file://${fileName}`).href
+            : fileName;
         },
         getLineNumber: stack.getLineNumber.bind(stack),
       };
@@ -60,7 +59,7 @@ export function getLastStacks(afterOf?: AfterOf[], required?: boolean): Call[] {
         if (typeof pattern === "string") {
           return fileName === pattern;
         } else {
-          return fileName.startsWith(pattern.startsWith);
+          return fileName?.startsWith(pattern.startsWith);
         }
       })
     ) {
@@ -70,27 +69,4 @@ export function getLastStacks(afterOf?: AfterOf[], required?: boolean): Call[] {
   if (required && !stacks.length)
     throw new Error("Could not capture file name from stack trace");
   return stacks;
-}
-
-export function parseSourceMap(path: string, ifExists?: boolean) {
-  let sourceMap: string | undefined;
-  try {
-    sourceMap = readFileSync(path).toString();
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT" && ifExists) return;
-    throw error;
-  }
-  return JSON.parse(sourceMap) as {
-    sources: string[];
-  };
-}
-
-export function sourceFilename(exclude?: string[]) {
-  const [stack] = getLastStacks(exclude, true);
-  const fileName = stack.getFileName();
-  return fileName;
-}
-
-export function sourceDirname(exclude?: string[]) {
-  return dirname(sourceFilename(exclude));
 }
