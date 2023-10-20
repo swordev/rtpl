@@ -1,5 +1,15 @@
 # @rtpl/cli
 
+## 0.9.0
+
+### Minor Changes
+
+- [`e730804`](https://github.com/swordev/rtpl/commit/e73080464b0dcd5ca09aec0b34bd23c92c1d21a5) Thanks [@juanrgm](https://github.com/juanrgm)! - Convert packages to ESM
+
+### Patch Changes
+
+- [`3ce405c`](https://github.com/swordev/rtpl/commit/3ce405c18dafb1b8206bbbab68dbbd5cb6378218) Thanks [@juanrgm](https://github.com/juanrgm)! - Update dependencies
+
 ## 0.8.0
 
 ### Minor Changes
