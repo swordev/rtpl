@@ -1,14 +1,5 @@
 import { mkdir, readFile, stat } from "fs/promises";
-import {
-  basename,
-  dirname,
-  isAbsolute,
-  join,
-  normalize,
-  posix,
-  relative,
-} from "path";
-import { parse as parseYaml } from "yaml";
+import { isAbsolute, join, posix, relative } from "path";
 
 export async function statIfExists(path: string) {
   try {

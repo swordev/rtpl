@@ -1,4 +1,5 @@
 import Ajv from "ajv";
+import { readFileSync } from "fs";
 import { writeFile as _writeFile } from "fs/promises";
 import { JSONSchema7 } from "json-schema";
 
@@ -89,15 +90,15 @@ export async function writeFile(path: string, data: LockData) {
   await _writeFile(path, JSON.stringify(data, null, 2));
 }
 
-export function parseFile(path: string, ifExists?: boolean) {
+export function parseFile(
+  path: string,
+  ifExists?: boolean,
+): LockData | undefined {
   try {
-    return require(path) as LockData;
+    const json = readFileSync(path).toString();
+    return JSON.parse(json);
   } catch (error) {
-    if (
-      ifExists &&
-      (error as NodeJS.ErrnoException).code === "MODULE_NOT_FOUND"
-    )
-      return;
+    if (ifExists && (error as NodeJS.ErrnoException).code === "ENOENT") return;
     throw error;
   }
 }
