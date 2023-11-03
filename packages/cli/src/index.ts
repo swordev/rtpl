@@ -1,5 +1,5 @@
 export { DelayedValue } from "./resources/DelayedValue.js";
-export { createTpl, Tpl, TplResolveSelf } from "./utils/self/config.js";
+export { createTpl, Tpl } from "./utils/self/config.js";
 export { AbstractRes } from "./resources/AbstractRes.js";
 export { CronRes, CronData } from "./resources/CronRes.js";
 export { DirRes, DirData } from "./resources/DirRes.js";

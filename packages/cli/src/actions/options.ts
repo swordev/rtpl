@@ -20,7 +20,7 @@ export default async function options(options: OptionsOptions) {
   } else if (options.format === "json") {
     console.info(JSON.stringify(tplOptions, null, 2));
   } else if (options.format === "js") {
-    const items = Object.entries(tplOptions).reduce(
+    const items = Object.entries(tplOptions || {}).reduce(
       (items, [name, options]) => {
         const tplName = camelCase(name);
         items.push(`${tplName}Tpl(${JSON.stringify(options, null, 2)})`);

@@ -2,10 +2,10 @@ import { DirRes } from "../../resources/DirRes.js";
 import { clone, merge } from "../object.js";
 import { DeepPartial } from "../ts.js";
 import { ResourceSystem } from "./rs.js";
+import { MinimalTpl, ResourcesResultItem } from "./tpl.js";
 import { Builtin } from "ts-essentials";
 import { z } from "zod";
 
-export type Resources = Record<string, unknown>;
 export type PartialOptions<O> = DeepPartial<O, Builtin>;
 export type DepsTpl = { [name: string]: Tpl };
 export type Enabled<
@@ -15,11 +15,6 @@ export type Enabled<
       [N in T]?: boolean;
     }
   | T[];
-
-export type ResourcesResultItem = {
-  tpl: Tpl<any, any, any, any>;
-  resources: unknown;
-};
 
 function normalizeEnabled<
   T extends string | number | symbol = string | number | symbol,
@@ -81,9 +76,6 @@ export type TplOptionsSelf<
   };
 };
 
-export type TplResolveSelf<D extends DepsTpl = {}> = TplSelf<D> &
-  ResourceSystem;
-
 export type TplResourcesSelf<D extends DepsTpl = {}> = TplSelf<D> & {
   depNames: (keyof D)[];
   deps: {
@@ -127,7 +119,7 @@ export type TplConfig<
     o: TplOptions<O, D, DG>,
   ) => Promise<R>;
   onResolve?: (
-    this: TplResolveSelf<D>,
+    this: ResourceSystem,
     r: R,
     o: TplOptions<O, D, DG>,
   ) => Promise<void | undefined>;
@@ -138,7 +130,8 @@ export class Tpl<
   R = any,
   D extends DepsTpl = any,
   DG extends string = never,
-> {
+> implements MinimalTpl
+{
   #options: TplOptions<O, D> | undefined;
   protected deps: D;
   constructor(readonly config: TplConfig<O, R, D, DG>) {

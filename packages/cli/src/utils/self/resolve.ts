@@ -1,15 +1,11 @@
-import { AbstractRes, Tpl } from "../../index.js";
+import { AbstractRes } from "../../resources/AbstractRes.js";
 import { DirRes } from "../../resources/DirRes.js";
 import { checkPath, statIfExists } from "../fs.js";
 import { isPlainObject } from "../object.js";
 import { isDir, isPath, stripRootBackPaths } from "../path.js";
 import { makeFilter } from "../string.js";
-import {
-  ResourcesResultItem,
-  TplResolveSelf,
-  createEnabledArray,
-} from "./config.js";
 import { createResourceSystem } from "./rs.js";
+import { MinimalTpl, ResourcesResultItem } from "./tpl.js";
 import mm from "micromatch";
 import { basename, dirname, join, relative } from "path";
 import * as posix from "path/posix";
@@ -137,7 +133,7 @@ export async function resolveResources(options: {
   return values;
 }
 
-export async function readTplFile(path: string): Promise<Tpl> {
+export async function readTplFile(path: string): Promise<MinimalTpl> {
   const info = await statIfExists(path);
 
   if (!info) throw new Error(`Invalid path: ${path}`);
@@ -164,7 +160,10 @@ export async function readTplFile(path: string): Promise<Tpl> {
   }
 }
 
-export async function resolveTpl(tpl: Tpl, options: ResolveConfigOptions) {
+export async function resolveTpl(
+  tpl: MinimalTpl,
+  options: ResolveConfigOptions,
+) {
   const lockDir = dirname(options.lockPath);
   const outPath = options.outPath;
   const filter = options.filter;
@@ -192,15 +191,7 @@ export async function resolveTpl(tpl: Tpl, options: ResolveConfigOptions) {
 
   for (const item of resultItems) {
     const tplOptions = await item.tpl.options();
-    const enabled = createEnabledArray(
-      tplOptions.enabled,
-      item.tpl.config.depGroups,
-    );
-    const self: TplResolveSelf<any> = {
-      isEnabled: (name) => enabled.includes(name),
-      ...rs,
-    };
-    await item.tpl.config.onResolve?.bind(self)(item.resources, tplOptions);
+    await item.tpl.config.onResolve?.bind(rs)(item.resources, tplOptions);
   }
 
   const resources = await resolveResources({
