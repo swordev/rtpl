@@ -1,5 +1,14 @@
 # rtpl
 
+## 0.9.2
+
+### Patch Changes
+
+- [`9d15667`](https://github.com/swordev/rtpl/commit/9d15667bb21dd5f3ad89b98100ccae7783d8478a) Thanks [@juanrgm](https://github.com/juanrgm)! - Fix package resolution
+
+- Updated dependencies [[`9d15667`](https://github.com/swordev/rtpl/commit/9d15667bb21dd5f3ad89b98100ccae7783d8478a)]:
+  - @rtpl/cli@0.9.2
+
 ## 0.9.1
 
 ### Patch Changes
