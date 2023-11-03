@@ -26,6 +26,7 @@
       "import": "./lib/*"
     }
   },
+  "main": "./lib/index.js",
   "module": "./lib/index.js",
   "bin": {
     "rtpl": "lib/bin.js"
