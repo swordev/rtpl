@@ -26,7 +26,7 @@ export enum ResType {
 const kindType = "_tplRes";
 
 export class MinimalRes<T = any, D = any> {
-  protected [kindType]!: true;
+  protected [kindType] = true;
   protected readonly type!: T;
   protected readonly _data!: D;
 }
