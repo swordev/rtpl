@@ -1,5 +1,11 @@
 # @rtpl/cli
 
+## 0.9.3
+
+### Patch Changes
+
+- [`795ecb4`](https://github.com/swordev/rtpl/commit/795ecb4b27affdeae39a4f0e4d2d2ecdd8522348) Thanks [@juanrgm](https://github.com/juanrgm)! - Add internal kinds for introspection
+
 ## 0.9.2
 
 ### Patch Changes
