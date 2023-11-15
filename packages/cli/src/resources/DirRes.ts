@@ -21,7 +21,8 @@ export abstract class MinimalDirRes<
     } else if (input instanceof AbstractRes) {
       if (!input.symbol) {
         input.symbol = symbol;
-        if (input instanceof DirRes) this.attachSymbol(input.data, symbol);
+        if (MinimalDirRes.isInstance(input))
+          this.attachSymbol(input.data, symbol);
       }
     }
   }

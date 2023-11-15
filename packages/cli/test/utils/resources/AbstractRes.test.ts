@@ -1,5 +1,6 @@
 import { DirData, DirRes } from "../../../src/index.js";
 import { AbstractRes } from "../../../src/resources/AbstractRes.js";
+import { MinimalDirRes } from "../../../src/resources/DirRes.js";
 import { it, describe, expect } from "vitest";
 
 class StringRes extends AbstractRes<string | undefined> {
@@ -19,7 +20,7 @@ describe("AbstractRes.lastStacks", () => {
 describe("AbstractRes.isInstance", () => {
   it("with custom DirRes", () => {
     class Dir<T extends DirData> extends DirRes<T> {}
-    expect(DirRes.isInstance(new Dir({}))).toBeTruthy();
+    expect(MinimalDirRes.isInstance(new Dir({}))).toBeTruthy();
   });
 
   it("with custom resource", () => {

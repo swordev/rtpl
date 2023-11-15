@@ -1,5 +1,5 @@
 import { AbstractRes } from "../../resources/AbstractRes.js";
-import { DirRes } from "../../resources/DirRes.js";
+import { MinimalDirRes } from "../../resources/DirRes.js";
 import { checkPath, statIfExists } from "../fs.js";
 import { isPlainObject } from "../object.js";
 import { isDir, isPath, stripRootBackPaths } from "../path.js";
@@ -47,7 +47,7 @@ function splitLevels(res: AbstractRes, levels: string[]): [string[], string] {
 
 function resolvePathLevels(res: AbstractRes, levels: string[]) {
   const isRootDir =
-    !levels.length && DirRes.isInstance(res) && !res.name?.length;
+    !levels.length && MinimalDirRes.isInstance(res) && !res.name?.length;
   if (isRootDir) return [];
 
   const [pathLevels, tag] = splitLevels(res, levels);
@@ -125,7 +125,7 @@ export async function resolveResources(options: {
           throw new Error(`Duplicated resource path: ${path}`);
         values[path] = input as any;
       }
-      if (actions.process && DirRes.isInstance(input))
+      if (actions.process && MinimalDirRes.isInstance(input))
         await process(input.data, pathLevels);
     }
   };
@@ -199,7 +199,7 @@ export async function resolveTpl(
     resources: inResources,
     onValue: async (path, res, actions) => {
       await res.onReady(posix.join(outFolder, path));
-      if (DirRes.isInstance(res)) {
+      if (MinimalDirRes.isInstance(res)) {
         actions.add = false;
         actions.process = !res.resolved;
       }

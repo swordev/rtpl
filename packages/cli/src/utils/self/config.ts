@@ -1,4 +1,4 @@
-import { DirRes } from "../../resources/DirRes.js";
+import { DirRes, MinimalDirRes } from "../../resources/DirRes.js";
 import { clone, merge } from "../object.js";
 import { DeepPartial } from "../ts.js";
 import { ResourceSystem } from "./rs.js";
@@ -264,10 +264,9 @@ export class Tpl<
         depRes[depName] = await self.deps[depName]();
     }
 
-    const resources =
-      res instanceof DirRes
-        ? (res.add(depRes) as ResResult<R, D>)
-        : ({ ...res, ...depRes } as ResResult<R, D>);
+    const resources = MinimalDirRes.isInstance(res)
+      ? ((res as any as MinimalDirRes).add(depRes) as ResResult<R, D>)
+      : ({ ...res, ...depRes } as ResResult<R, D>);
 
     items.push({ tpl: this, resources });
 

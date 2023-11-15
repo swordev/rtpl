@@ -1,6 +1,6 @@
 import { AbstractRes } from "../../index.js";
 import { DelayedValue } from "../../resources/DelayedValue.js";
-import { DirRes } from "../../resources/DirRes.js";
+import { MinimalDirRes } from "../../resources/DirRes.js";
 import {
   Constructor,
   isInstanceOf,
@@ -75,7 +75,7 @@ export function forEach<T, F extends FilterInput<T>>(
     if (isPlainObject(res)) {
       forEach.bind(res)(input, onFound as any);
       continue;
-    } else if (res instanceof DirRes && isPlainObject(res.data)) {
+    } else if (MinimalDirRes.isInstance(res) && isPlainObject(res.data)) {
       if (!res.resolved) forEach.bind(res.data)(input, onFound as any);
     }
     if (input.symbol && res.symbol !== input.symbol) continue;
