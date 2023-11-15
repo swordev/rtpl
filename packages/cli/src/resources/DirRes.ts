@@ -6,27 +6,48 @@ export type DirData = Callable<
   Record<string, unknown> | unknown[] | undefined,
   any[]
 >;
+
+export abstract class MinimalDirRes<
+  T = any,
+  TConf extends Record<string, unknown> = any,
+> extends AbstractRes<ResType.Dir, T, TConf> {
+  protected static override type = ResType.Dir;
+  protected override readonly type = ResType.Dir;
+  protected attachSymbol(input: unknown, symbol: symbol) {
+    if (Array.isArray(input)) {
+      for (const item of input) this.attachSymbol(item, symbol);
+    } else if (isPlainObject(input)) {
+      for (const key in input) this.attachSymbol(input[key], symbol);
+    } else if (input instanceof AbstractRes) {
+      if (!input.symbol) {
+        input.symbol = symbol;
+        if (input instanceof DirRes) this.attachSymbol(input.data, symbol);
+      }
+    }
+  }
+  abstract add(data: unknown): any;
+}
+
 export class DirRes<
-  T extends DirData,
+  T extends DirData = undefined,
   TConf extends Record<string, unknown> = {},
-> extends AbstractRes<T, TConf> {
-  protected static _tplResType = ResType.Dir;
+> extends MinimalDirRes<T, TConf> {
   constructor(
     readonly options: ResOptions<T, TConf>,
     symbol?: symbol,
   ) {
     super(options, symbol);
-    if (this.symbol) attachSymbol(this.data, this.symbol);
+    if (this.symbol) this.attachSymbol(this.data, this.symbol);
   }
   toString(): string {
     throw new Error("Not implemented");
   }
-  add<ST extends Record<string, unknown>>(
+  override add<ST extends Record<string, unknown>>(
     data: T extends (...args: any[]) => any ? never : ST,
   ): DirRes<
     T extends () => any ? any : T extends Record<string, unknown> ? T & ST : ST
   >;
-  add<ST extends unknown[]>(
+  override add<ST extends unknown[]>(
     data: T extends (...args: any[]) => any ? never : ST,
   ): DirRes<
     T extends () => any
@@ -35,7 +56,7 @@ export class DirRes<
       ? (T[number] | ST[number])[]
       : ST
   >;
-  add<ST extends Record<string, unknown> | unknown[]>(
+  override add<ST extends Record<string, unknown> | unknown[]>(
     data: ST,
   ): DirRes<T & ST> {
     return this.set(
@@ -54,21 +75,8 @@ export class DirRes<
     const self = this as Writable<typeof this>;
     self.data = self.options.data = data as any;
 
-    if (this.symbol) attachSymbol(self.data, this.symbol);
+    if (this.symbol) this.attachSymbol(self.data, this.symbol);
 
     return this as any as DirRes<TData>;
-  }
-}
-
-function attachSymbol(input: unknown, symbol: symbol) {
-  if (Array.isArray(input)) {
-    for (const item of input) attachSymbol(item, symbol);
-  } else if (isPlainObject(input)) {
-    for (const key in input) attachSymbol(input[key], symbol);
-  } else if (AbstractRes.isInstance(input)) {
-    if (!input.symbol) {
-      input.symbol = symbol;
-      if (DirRes.isInstance(input)) attachSymbol(input.data, symbol);
-    }
   }
 }

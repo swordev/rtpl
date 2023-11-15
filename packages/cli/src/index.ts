@@ -1,6 +1,11 @@
 export { DelayedValue } from "./resources/DelayedValue.js";
 export { createTpl, Tpl } from "./utils/self/config.js";
-export { AbstractRes } from "./resources/AbstractRes.js";
+export { MinimalTpl, MinimalTplConfig } from "./utils/self/tpl.js";
+export {
+  AbstractRes,
+  type ResOptions,
+  ResType,
+} from "./resources/AbstractRes.js";
 export { CronRes, CronData } from "./resources/CronRes.js";
 export { DirRes, DirData } from "./resources/DirRes.js";
 export { EnvRes, EnvData } from "./resources/EnvRes.js";
@@ -10,3 +15,4 @@ export { RawRes } from "./resources/RawRes.js";
 export { SecretRes, SecretData } from "./resources/SecretRes.js";
 export { YamlRes } from "./resources/YamlRes.js";
 export { default as cli } from "./cli.js";
+export { type ResourceSystem } from "./utils/self/rs.js";

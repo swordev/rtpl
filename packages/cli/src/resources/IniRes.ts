@@ -31,9 +31,10 @@ export type Config = {
 };
 
 export class IniRes<
-  T extends IniData | IniData[] | undefined,
-> extends AbstractRes<T, Config> {
-  protected static _tplResType = ResType.Ini;
+  T extends IniData | IniData[] | undefined = IniData | IniData[] | undefined,
+> extends AbstractRes<ResType.Ini, T, Config> {
+  protected static override type = ResType.Ini;
+  protected override readonly type = ResType.Ini;
   override getDefaultExtension() {
     return "ini";
   }
@@ -50,7 +51,7 @@ export class IniRes<
       const type = typeof value;
       return (
         value === null ||
-        AbstractRes.isInstance(value) ||
+        value instanceof AbstractRes ||
         DelayedValue.isInstance(value) ||
         type === "function" ||
         type === "string" ||

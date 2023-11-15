@@ -15,8 +15,8 @@ export interface MinimalTplConfig {
   ) => Promise<void | undefined>;
 }
 
-export interface MinimalTpl {
+export interface MinimalTpl<O = unknown, R = unknown> {
   readonly config: MinimalTplConfig;
-  resources(items?: ResourcesResultItem[]): Promise<unknown>;
-  options(): Promise<unknown>;
+  resources(items?: ResourcesResultItem[]): Promise<R>;
+  options(): Promise<O>;
 }

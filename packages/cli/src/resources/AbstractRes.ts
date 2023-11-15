@@ -23,11 +23,20 @@ export enum ResType {
   Yaml,
 }
 
+const kindType = "_tplRes";
+
+export class MinimalRes<T = any, D = any> {
+  protected [kindType]!: true;
+  protected readonly type!: T;
+  protected readonly _data!: D;
+}
+
 export abstract class AbstractRes<
+  Type = any,
   TData = any,
   TConf extends Record<string, unknown> = {},
-> {
-  protected static _tplResType = ResType.Abstract;
+> extends MinimalRes<Type, TData> {
+  protected static type = ResType.Abstract;
   readonly name: string | undefined;
   readonly data: TData;
   readonly config: TConf;
@@ -36,11 +45,11 @@ export abstract class AbstractRes<
   readonly dirname: DelayedValue<string>;
   readonly resolved: boolean | undefined;
   symbol: symbol | undefined;
-
   constructor(
     readonly options: ResOptions<TData, TConf>,
     symbol?: symbol,
   ) {
+    super();
     this.name = options.name;
     this.data = options.data as any;
     this.symbol = symbol;
@@ -66,12 +75,17 @@ export abstract class AbstractRes<
     if (value instanceof this) return true;
 
     const isThis = (type: ResType) =>
-      this._tplResType === type && this.name === `${ResType[type]}Res`;
+      this.type === type && this.name === `${ResType[type]}Res`;
 
     const instanceType = (value?.constructor as typeof AbstractRes | undefined)
-      ?._tplResType;
+      ?.type;
 
-    return !!instanceType && (isThis(ResType.Abstract) || isThis(instanceType));
+    return (
+      !!instanceType &&
+      !!value &&
+      (value as any)[kindType] &&
+      (isThis(ResType.Abstract) || isThis(instanceType))
+    );
   }
 
   async onReady(path: string) {

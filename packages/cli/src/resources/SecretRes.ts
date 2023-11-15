@@ -38,8 +38,12 @@ export type SecretData = {
   }) => Promise<string | undefined>;
 };
 
-export class SecretRes extends AbstractRes<SecretData | undefined> {
-  protected static _tplResType = ResType.Secret;
+export class SecretRes extends AbstractRes<
+  ResType.Secret,
+  SecretData | undefined
+> {
+  protected static override type = ResType.Secret;
+  protected override readonly type = ResType.Secret;
   private value: DelayedValue<string>;
   readonly hasNewValue: DelayedValue<boolean>;
   constructor(readonly options: ResOptions<SecretData>) {

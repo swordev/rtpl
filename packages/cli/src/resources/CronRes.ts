@@ -29,8 +29,9 @@ export function formatSchedule(schedule: Schedule | undefined) {
   }
 }
 
-export class CronRes extends AbstractRes<CronData> {
-  protected static _tplResType = ResType.Cron;
+export class CronRes extends AbstractRes<ResType.Cron, CronData> {
+  protected static override type = ResType.Cron;
+  protected override readonly type = ResType.Cron;
   override toString() {
     return (this.data ?? [])
       .map(resolve)

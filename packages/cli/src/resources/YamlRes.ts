@@ -1,5 +1,5 @@
-import { ResType } from "./AbstractRes.js";
-import { JsonRes, JSONValue, toString } from "./JsonRes.js";
+import { AbstractRes, ResType } from "./AbstractRes.js";
+import { JSONValue, toString } from "./JsonRes.js";
 import { stringify } from "yaml";
 
 export type Config = {
@@ -8,11 +8,11 @@ export type Config = {
   };
 };
 
-export class YamlRes<T extends JSONValue | undefined> extends JsonRes<
-  T,
-  Config
-> {
-  protected static _tplResType = ResType.Yaml;
+export class YamlRes<
+  T extends JSONValue | undefined = JSONValue | undefined,
+> extends AbstractRes<ResType.Yaml, T, Config> {
+  protected static override type = ResType.Yaml;
+  protected override readonly type = ResType.Yaml;
   override getDefaultExtension() {
     return "yaml";
   }
@@ -30,5 +30,8 @@ export class YamlRes<T extends JSONValue | undefined> extends JsonRes<
     } else {
       return toYaml(input);
     }
+  }
+  toJSON() {
+    return JSON.parse(this.toString());
   }
 }
