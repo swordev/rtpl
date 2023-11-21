@@ -1,5 +1,13 @@
 # @rtpl/cli
 
+## 0.10.1
+
+### Patch Changes
+
+- [`e5952f0`](https://github.com/swordev/rtpl/commit/e5952f0d794c8664c003b7af7a986154a1c880e5) Thanks [@juanrgm](https://github.com/juanrgm)! - Add secrets to backup
+
+- [`561fddc`](https://github.com/swordev/rtpl/commit/561fddcb6aeb52d3d546f22e7ffa7187b8f9912f) Thanks [@juanrgm](https://github.com/juanrgm)! - Fix secrets
+
 ## 0.10.0
 
 ### Minor Changes
