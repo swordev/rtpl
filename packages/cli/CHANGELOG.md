@@ -1,5 +1,11 @@
 # @rtpl/cli
 
+## 0.10.2
+
+### Patch Changes
+
+- [`397c3d5`](https://github.com/swordev/rtpl/commit/397c3d548e66fa4294c79ac183259d0b0366318a) Thanks [@juanrgm](https://github.com/juanrgm)! - Fix secrets file
+
 ## 0.10.1
 
 ### Patch Changes
