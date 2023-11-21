@@ -1,6 +1,6 @@
 export { DelayedValue } from "./resources/DelayedValue.js";
-export { createTpl, Tpl } from "./utils/self/config.js";
-export { MinimalTpl, MinimalTplConfig } from "./utils/self/tpl.js";
+export { createTpl, Tpl } from "./utils/self/tpl.js";
+export { MinimalTpl, MinimalTplConfig } from "./utils/self/minimal-tpl.js";
 export {
   AbstractRes,
   type ResOptions,

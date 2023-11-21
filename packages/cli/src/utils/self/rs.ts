@@ -7,7 +7,7 @@ import {
   isPlainObject,
   JSONClass,
 } from "../object.js";
-import { Resources } from "./tpl.js";
+import { Resources } from "./minimal-tpl.js";
 import { basename } from "path";
 import { join } from "path/posix";
 
