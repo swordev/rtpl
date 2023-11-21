@@ -12,11 +12,12 @@ export function captureStackTrace(limit = 15): Call[] {
       return {
         getFileName() {
           const fileName = stack.getFileName();
-          return fileName
-            ? fileName.startsWith("file://")
-              ? stack.getFileName()
-              : new URL(`file://${fileName}`).href
-            : fileName;
+          if (!fileName) return null;
+          return fileName.startsWith("file://")
+            ? stack.getFileName()
+            : fileName.startsWith("node:")
+            ? fileName
+            : new URL(`file://${fileName}`).href;
         },
         getLineNumber: stack.getLineNumber.bind(stack),
       };
