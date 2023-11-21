@@ -1,5 +1,5 @@
 import { GlobalOptions } from "../cli.js";
-import { AbstractRes } from "../index.js";
+import type { AbstractRes } from "../resources/AbstractRes.js";
 import { readIfExists } from "../utils/fs.js";
 import { parseConfigFile } from "../utils/self/config.js";
 import {

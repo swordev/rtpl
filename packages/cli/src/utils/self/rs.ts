@@ -1,4 +1,4 @@
-import { AbstractRes } from "../../index.js";
+import type { AbstractRes } from "../../resources/AbstractRes.js";
 import { DelayedValue } from "../../resources/DelayedValue.js";
 import { MinimalDirRes } from "../../resources/DirRes.js";
 import {
