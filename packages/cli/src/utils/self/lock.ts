@@ -1,6 +1,5 @@
 import Ajv from "ajv";
-import { readFileSync } from "fs";
-import { writeFile as _writeFile } from "fs/promises";
+import { readFile, writeFile } from "fs/promises";
 import { JSONSchema7 } from "json-schema";
 
 export type LockDataFile<TFile = undefined> = {
@@ -17,7 +16,7 @@ export type LockData<TFile = undefined> = {
   templates: Record<string, LockDataTemplate<TFile>>;
 };
 
-export const schema: JSONSchema7 = {
+export const lockSchema: JSONSchema7 = {
   definitions: {
     template: {
       type: "object",
@@ -71,34 +70,28 @@ export const schema: JSONSchema7 = {
   },
 };
 
-export function initData(): LockData {
-  return {
-    templates: {},
-  };
-}
-
-export function validate(data: LockData) {
-  const validate = new Ajv.default().compile(schema);
+export function assertLockData(data: LockData): asserts data is LockData {
+  const validate = new Ajv.default().compile(lockSchema);
   if (!validate(data))
     throw new Error(
       `Invalid json schema: ${JSON.stringify(validate.errors, null, 2)}`,
     );
 }
 
-export async function writeFile(path: string, data: LockData) {
-  validate(data);
-  await _writeFile(path, JSON.stringify(data, null, 2));
+export async function writeLockFile(path: string, data: LockData) {
+  assertLockData(data);
+  await writeFile(path, JSON.stringify(data, null, 2));
 }
 
-export function parseFile(path: string): LockData {
+export async function parseLockFile<TFile = undefined>(
+  path: string,
+): Promise<LockData<TFile>> {
   try {
-    const json = readFileSync(path).toString();
+    const json = (await readFile(path)).toString();
     return JSON.parse(json);
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT")
-      return {
-        templates: {},
-      };
+      return { templates: {} };
     throw error;
   }
 }

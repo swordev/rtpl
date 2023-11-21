@@ -1,6 +1,6 @@
 import { GlobalOptions, pkg } from "../cli.js";
 import { parseConfigFile } from "../utils/self/config.js";
-import * as lock from "../utils/self/lock.js";
+import { parseLockFile } from "../utils/self/lock.js";
 import chalk from "chalk";
 import { createHash } from "crypto";
 import { mkdir, readFile, writeFile } from "fs/promises";
@@ -18,9 +18,7 @@ export default async function backup(options: BackupOptions) {
   const config = await parseConfigFile(options.config);
 
   const log = options.log ?? true;
-  const lockData = lock.parseFile(config.lock.path) as any as lock.LockData<{
-    contents: string;
-  }>;
+  const lockData = await parseLockFile<{ contents: string }>(config.lock.path);
 
   let files = 0;
 

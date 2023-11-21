@@ -1,7 +1,7 @@
 import { AbstractRes } from "../../resources/AbstractRes.js";
 import { checkPath, mkrdir } from "../fs.js";
 import { sort } from "../object.js";
-import * as lock from "./lock.js";
+import { LockDataFile, LockDataTemplate } from "./lock.js";
 import chalk from "chalk";
 import { readFile, rm, rmdir, writeFile } from "fs/promises";
 import { dirname, join, relative } from "path";
@@ -16,21 +16,21 @@ export enum ActionEnum {
 type ActionResult =
   | {
       type: ActionEnum.NONE;
-      lock: lock.LockDataFile;
+      lock: LockDataFile;
     }
   | {
       type: ActionEnum.ADD;
       data: string;
-      lock: lock.LockDataFile;
+      lock: LockDataFile;
     }
   | {
       type: ActionEnum.UPDATE;
       data: string;
-      lock: lock.LockDataFile | false;
+      lock: LockDataFile | false;
     }
   | {
       type: ActionEnum.DELETE;
-      lock: lock.LockDataFile | false | undefined;
+      lock: LockDataFile | false | undefined;
     };
 
 export function logAction(action: ActionEnum, path: string) {
@@ -48,9 +48,9 @@ export function logAction(action: ActionEnum, path: string) {
 export async function getFileAction(
   path: string,
   res: AbstractRes,
-  previousLock?: lock.LockDataFile,
+  previousLock?: LockDataFile,
 ): Promise<ActionResult> {
-  const lock: lock.LockDataFile = previousLock
+  const lock: LockDataFile = previousLock
     ? {
         ...previousLock,
       }
@@ -89,7 +89,7 @@ export async function getFileAction(
 
 export async function getFileActions(
   resMap: Record<string, AbstractRes>,
-  lockDataEntrypoint: lock.LockDataTemplate,
+  lockDataEntrypoint: LockDataTemplate,
 ) {
   const result: Record<string, ActionResult> = {};
   const lockFilePaths = Object.keys(lockDataEntrypoint.files);

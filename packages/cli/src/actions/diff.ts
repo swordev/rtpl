@@ -7,7 +7,7 @@ import {
   getFileActions,
   logAction,
 } from "../utils/self/install.js";
-import { parseFile } from "../utils/self/lock.js";
+import { parseLockFile } from "../utils/self/lock.js";
 import { parseTplFile, resolveTpl } from "../utils/self/resolve.js";
 import chalk from "chalk";
 import { diffLines } from "diff";
@@ -25,7 +25,7 @@ export default async function diff(options: DiffOptions) {
     filter: options.filter,
   });
   let changes = 0;
-  const lockData = parseFile(config.lock.path);
+  const lockData = await parseLockFile(config.lock.path);
   const selfLockData = lockData.templates[tpl.config.name] || {
     files: {},
     dirs: {},

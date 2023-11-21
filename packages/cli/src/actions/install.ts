@@ -7,14 +7,14 @@ import {
   getFileActions,
   logAction,
 } from "../utils/self/install.js";
-import * as lock from "../utils/self/lock.js";
+import { parseLockFile, writeLockFile } from "../utils/self/lock.js";
 import { splitGlobalOptions } from "../utils/self/options.js";
 import { parseTplFile, resolveTpl } from "../utils/self/resolve.js";
 import { writeSecretsFile } from "../utils/self/secrets.js";
 import backup from "./backup.js";
 import diff from "./diff.js";
 import chalk from "chalk";
-import { rmdir, writeFile } from "fs/promises";
+import { rmdir } from "fs/promises";
 import { join } from "path";
 
 export type InstallActionOptions = GlobalOptions & {
@@ -58,7 +58,7 @@ export default async function install(options: InstallActionOptions) {
     filter: options.filter,
   });
 
-  const lockData = lock.parseFile(config.lock.path);
+  const lockData = await parseLockFile(config.lock.path);
   const selfLockData = lockData.templates[tpl.config.name] || {
     files: {},
     dirs: {},
@@ -114,7 +114,7 @@ export default async function install(options: InstallActionOptions) {
 
   if (!options.dryRun) {
     if (secrets) await writeSecretsFile(config.secrets.path, secrets);
-    await lock.writeFile(config.lock.path, lockData);
+    await writeLockFile(config.lock.path, lockData);
   }
 
   if (!changes) process.stderr.write(`${chalk.grey("No changes")}\n`);
