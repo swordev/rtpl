@@ -5,6 +5,7 @@ import { isPlainObject } from "../object.js";
 import { isDir, isPath, stripRootBackPaths } from "../path.js";
 import { makeFilter } from "../string.js";
 import { createResourceSystem } from "./rs.js";
+import { getSecretsPath, parseSecretsFile } from "./secrets.js";
 import { MinimalTpl, ResourcesResultItem } from "./tpl.js";
 import mm from "micromatch";
 import { basename, dirname, join, relative } from "path";
@@ -194,11 +195,13 @@ export async function resolveTpl(
     await item.tpl.config.onResolve?.bind(rs)(item.resources, tplOptions);
   }
 
+  const secretsPath = getSecretsPath(lockDir);
+  const secrets = await parseSecretsFile(secretsPath);
   const resources = await resolveResources({
     ...resolveOptions,
     resources: inResources,
     onValue: async (path, res, actions) => {
-      await res.onReady(posix.join(outFolder, path));
+      await res.onReady(posix.join(outFolder, path), secrets);
       if (MinimalDirRes.isInstance(res)) {
         actions.add = false;
         actions.process = !res.resolved;
@@ -218,5 +221,5 @@ export async function resolveTpl(
     delete resources[path];
   }
 
-  return resources;
+  return { resources, secrets };
 }

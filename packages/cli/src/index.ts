@@ -4,10 +4,11 @@ export { MinimalTpl, MinimalTplConfig } from "./utils/self/tpl.js";
 export {
   AbstractRes,
   type ResOptions,
+  type MinimalRes,
   ResType,
 } from "./resources/AbstractRes.js";
 export { CronRes, CronData } from "./resources/CronRes.js";
-export { DirRes, DirData } from "./resources/DirRes.js";
+export { DirRes, DirData, type MinimalDirRes } from "./resources/DirRes.js";
 export { EnvRes, EnvData } from "./resources/EnvRes.js";
 export { IniRes, IniData } from "./resources/IniRes.js";
 export { JsonRes } from "./resources/JsonRes.js";

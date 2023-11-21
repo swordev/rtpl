@@ -11,7 +11,7 @@ export type DiffOptions = GlobalOptions & {
 };
 export default async function diff(options: DiffOptions) {
   const tpl = await readTplFile(options.templatePath);
-  const resources = await resolveTpl(tpl, {
+  const { resources } = await resolveTpl(tpl, {
     filter: options.filter,
     lockPath: options.lockPath,
     outPath: options.outPath,

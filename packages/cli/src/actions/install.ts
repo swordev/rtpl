@@ -12,7 +12,7 @@ import { readTplFile, resolveTpl } from "../utils/self/resolve.js";
 import backup from "./backup.js";
 import diff from "./diff.js";
 import chalk from "chalk";
-import { rmdir } from "fs/promises";
+import { rmdir, writeFile } from "fs/promises";
 import { dirname, join } from "path";
 
 export type InstallActionOptions = GlobalOptions & {
@@ -49,11 +49,15 @@ export default async function install(options: InstallActionOptions) {
   }
 
   const tpl = await readTplFile(options.templatePath);
-  const resources = await resolveTpl(tpl, {
+  const { resources, secrets } = await resolveTpl(tpl, {
     filter: options.filter,
     lockPath: options.lockPath,
     outPath: options.outPath,
   });
+
+  const secretsPath = join(dirname(options.lockPath), "rtpl.secrets.json");
+
+  await writeFile(secretsPath, JSON.stringify(secrets, null, 2));
 
   //await tpl.onBeforeInstall?.(options);
 

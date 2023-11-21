@@ -6,7 +6,7 @@ import {
   randomString,
   upperAlphaCharset,
 } from "../utils/crypto.js";
-import { readIfExists } from "../utils/fs.js";
+import { Secrets } from "../utils/self/secrets.js";
 import { AbstractRes, ResOptions, ResType } from "./AbstractRes.js";
 import { DelayedValue, setDelayedValue } from "./DelayedValue.js";
 
@@ -46,7 +46,7 @@ export class SecretRes extends AbstractRes<
   protected override readonly type = ResType.Secret;
   private value: DelayedValue<string>;
   readonly hasNewValue: DelayedValue<boolean>;
-  constructor(readonly options: ResOptions<SecretData>) {
+  constructor(readonly options: ResOptions<SecretData | undefined>) {
     super(options);
     this.value = new DelayedValue(undefined, this.lastStacks);
     this.hasNewValue = new DelayedValue(undefined, this.lastStacks);
@@ -60,9 +60,9 @@ export class SecretRes extends AbstractRes<
   override toString() {
     return this.value.toString();
   }
-  override async onReady(path: string) {
-    await super.onReady(path);
-    const value = (await readIfExists(path))?.toString();
+  override async onReady(path: string, secrets: Secrets) {
+    await super.onReady(path, secrets);
+    const value = secrets[path];
     const hasNewValue = value ? false : true;
     const generate = this.data?.generate ?? true;
     let endValue = value;
@@ -83,7 +83,7 @@ export class SecretRes extends AbstractRes<
       if (charset.length <= 10) {
         throw new Error(`Charset length is too small`);
       }
-      endValue = randomString(length, charset);
+      endValue = secrets[path] = randomString(length, charset);
     }
     const auxValue = await this.data?.onReady?.({
       path,

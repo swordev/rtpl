@@ -1,3 +1,4 @@
+import { Secrets } from "../utils/self/secrets.js";
 import { Call, getLastStacks } from "../utils/stack.js";
 import { DelayedValue, setDelayedValue } from "./DelayedValue.js";
 import { posix } from "path";
@@ -88,7 +89,7 @@ export abstract class AbstractRes<
     );
   }
 
-  async onReady(path: string) {
+  async onReady(path: string, secrets: Secrets) {
     setDelayedValue(this.path, path);
     setDelayedValue(this.dirname, path);
   }
