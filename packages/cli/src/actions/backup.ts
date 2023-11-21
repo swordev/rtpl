@@ -1,11 +1,10 @@
 import { GlobalOptions, pkg } from "../cli.js";
+import { createBackupFile, serializeBackupData } from "../utils/self/backup.js";
 import { parseConfigFile } from "../utils/self/config.js";
-import { parseLockFile } from "../utils/self/lock.js";
 import chalk from "chalk";
 import { createHash } from "crypto";
 import { mkdir, readFile, writeFile } from "fs/promises";
 import { dirname, join } from "path";
-import { stringify } from "yaml";
 
 export type BackupOptions = GlobalOptions & {
   /**
@@ -15,32 +14,33 @@ export type BackupOptions = GlobalOptions & {
 };
 
 export default async function backup(options: BackupOptions) {
-  const config = await parseConfigFile(options.config);
-
   const log = options.log ?? true;
-  const lockData = await parseLockFile<{ contents: string }>(config.lock.path);
+  const config = await parseConfigFile(options.config);
+  const backupData = await createBackupFile(config);
 
   let files = 0;
 
-  for (const name in lockData.templates) {
-    const tpl = lockData.templates[name];
+  for (const name in backupData.templates) {
+    const tpl = backupData.templates[name];
     for (const path in tpl.files) {
       files++;
       tpl.files[path].contents = (await readFile(path)).toString();
     }
   }
 
-  const yaml = stringify(lockData, { version: "1.1" });
+  const backupDataText = serializeBackupData(backupData);
 
+  const name = Date.now();
   const header = [
-    `# version: ${pkg.version}`,
+    `# name: ${name}`,
     `# date: ${new Date().toISOString()}`,
     `# files: ${files}`,
-    `# checksum: ${createHash("sha1").update(yaml).digest("hex")}`,
+    `# version: ${pkg.version}`,
+    `# checksum: ${createHash("sha1").update(backupDataText).digest("hex")}`,
   ];
 
-  const file = [...header, yaml].join("\n");
-  const path = join(config.backup.path, `${Date.now()}.yaml`);
+  const file = [...header, backupDataText].join("\n");
+  const path = join(config.backup.path, `${name}.yaml`);
 
   await mkdir(dirname(path), { recursive: true });
   await writeFile(path, file);
