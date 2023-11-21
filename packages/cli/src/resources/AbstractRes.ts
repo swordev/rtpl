@@ -26,6 +26,15 @@ export enum ResType {
 
 const kindType = "_tplRes";
 
+export class ResReadyContext {
+  constructor(
+    readonly data: {
+      secrets: Secrets | undefined;
+      initialSecrets: boolean;
+    },
+  ) {}
+}
+
 export class MinimalRes<T = any, D = any> {
   protected [kindType] = true;
   protected readonly type!: T;
@@ -89,7 +98,7 @@ export abstract class AbstractRes<
     );
   }
 
-  async onReady(path: string, secrets: Secrets | undefined) {
+  async onReady(path: string, ctx: ResReadyContext) {
     setDelayedValue(this.path, path);
     setDelayedValue(this.dirname, path);
   }

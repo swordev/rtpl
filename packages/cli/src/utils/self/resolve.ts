@@ -1,6 +1,6 @@
-import { AbstractRes } from "../../resources/AbstractRes.js";
+import { AbstractRes, ResReadyContext } from "../../resources/AbstractRes.js";
 import { MinimalDirRes } from "../../resources/DirRes.js";
-import { findPath, readAnyFile } from "../fs.js";
+import { checkPath, findPath, readAnyFile } from "../fs.js";
 import { isPlainObject } from "../object.js";
 import { expandPaths, isDir, isPath, stripRootBackPaths } from "../path.js";
 import { makeFilter } from "../string.js";
@@ -156,15 +156,19 @@ export async function resolveTpl(
     await item.tpl.config.onResolve?.bind(rs)(item.resources, tplOptions);
   }
 
-  const secrets = config.secrets.enabled
-    ? await parseSecretsFile(config.secrets.path)
-    : undefined;
+  const ctx = new ResReadyContext({
+    secrets: config.secrets.enabled
+      ? await parseSecretsFile(config.secrets.path)
+      : undefined,
+    initialSecrets: !(await checkPath(config.secrets.path)),
+  });
+
   const resources = await resolveResources({
     config,
     filter: options.filter,
     resources: inResources,
     onValue: async (path, res, actions) => {
-      await res.onReady(posix.join(resourcesDir, path), secrets);
+      await res.onReady(posix.join(resourcesDir, path), ctx);
       if (MinimalDirRes.isInstance(res)) {
         actions.add = false;
         actions.process = !res.resolved;
@@ -184,5 +188,5 @@ export async function resolveTpl(
     delete resources[path];
   }
 
-  return { resources, secrets };
+  return { resources, secrets: ctx.data.secrets };
 }

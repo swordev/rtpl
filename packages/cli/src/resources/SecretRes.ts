@@ -7,8 +7,12 @@ import {
   upperAlphaCharset,
 } from "../utils/crypto.js";
 import { readIfExists } from "../utils/fs.js";
-import { Secrets } from "../utils/self/secrets.js";
-import { AbstractRes, ResOptions, ResType } from "./AbstractRes.js";
+import {
+  AbstractRes,
+  ResOptions,
+  ResReadyContext,
+  ResType,
+} from "./AbstractRes.js";
 import { DelayedValue, setDelayedValue } from "./DelayedValue.js";
 
 export type SecretData = {
@@ -61,42 +65,39 @@ export class SecretRes extends AbstractRes<
   override toString() {
     return this.value.toString();
   }
-  override async onReady(path: string, secrets: Secrets | undefined) {
-    await super.onReady(path, secrets);
-    const value = secrets
-      ? secrets[path]
-      : (await readIfExists(path))?.toString();
-    const hasNewValue = value ? false : true;
-    const generate = this.data?.generate ?? true;
-    let endValue = value;
-    if (!endValue && generate) {
-      const length = this.data?.length ?? 16;
-      const inCharset = this.data?.charset ?? "alpha-number";
-      const charsetMap = {
-        number: numberCharset,
-        lowerAlpha: lowerAlphaCharset,
-        upperAlpha: upperAlphaCharset,
-        alpha: alphaCharset,
-        "alpha-number": alphaNumberCharset,
-      };
-      const charset =
-        typeof inCharset === "string" ? charsetMap[inCharset] : inCharset.value;
-      if (typeof charset !== "string")
-        throw new Error(`Charset is not defined`);
-      if (charset.length <= 10) {
-        throw new Error(`Charset length is too small`);
-      }
-      endValue = randomString(length, charset);
-      if (secrets) secrets[path] = endValue;
-    }
-    const auxValue = await this.data?.onReady?.({
-      path,
-      prev: value,
-      current: endValue,
-    });
-    if (typeof auxValue === "string") endValue = auxValue;
-    if (typeof endValue !== "string") throw new Error(`Secret is empty`);
-    setDelayedValue(this.value, endValue);
-    setDelayedValue(this.hasNewValue, hasNewValue);
+  override async onReady(path: string, ctx: ResReadyContext) {
+    await super.onReady(path, ctx);
+    const prevFile = (await readIfExists(path))?.toString();
+    const prev = ctx.data.secrets
+      ? ctx.data.secrets[path] ??
+        (ctx.data.initialSecrets ? prevFile : undefined)
+      : undefined;
+    const $generate = this.data?.generate ?? true;
+    let current = prev ?? ($generate ? generate(this.data) : undefined);
+    const custom = await this.data?.onReady?.({ path, prev, current });
+    if (typeof custom === "string") current = custom;
+    if (typeof current !== "string") throw new Error(`Secret is empty`);
+    if (ctx.data.secrets) ctx.data.secrets[path] = current;
+    setDelayedValue(this.value, current);
+    setDelayedValue(this.hasNewValue, current !== prevFile);
   }
+}
+
+function generate(data: SecretData = {}) {
+  const length = data.length ?? 16;
+  const inCharset = data.charset ?? "alpha-number";
+  const charsetMap = {
+    number: numberCharset,
+    lowerAlpha: lowerAlphaCharset,
+    upperAlpha: upperAlphaCharset,
+    alpha: alphaCharset,
+    "alpha-number": alphaNumberCharset,
+  };
+  const charset =
+    typeof inCharset === "string" ? charsetMap[inCharset] : inCharset.value;
+  if (typeof charset !== "string") throw new Error(`Charset is not defined`);
+  if (charset.length <= 10) {
+    throw new Error(`Charset length is too small`);
+  }
+  return randomString(length, charset);
 }

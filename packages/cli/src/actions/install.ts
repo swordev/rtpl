@@ -10,6 +10,7 @@ import {
 import * as lock from "../utils/self/lock.js";
 import { splitGlobalOptions } from "../utils/self/options.js";
 import { parseTplFile, resolveTpl } from "../utils/self/resolve.js";
+import { writeSecretsFile } from "../utils/self/secrets.js";
 import backup from "./backup.js";
 import diff from "./diff.js";
 import chalk from "chalk";
@@ -57,23 +58,15 @@ export default async function install(options: InstallActionOptions) {
     filter: options.filter,
   });
 
-  if (secrets)
-    await writeFile(config.secrets.path, JSON.stringify(secrets, null, 2));
-
-  //await tpl.onBeforeInstall?.(options);
-
   const lockData = lock.parseFile(config.lock.path);
-
-  let changes = 0;
-  let errors = 0;
-
   const selfLockData = lockData.templates[tpl.config.name] || {
     files: {},
     dirs: {},
   };
 
   const actions = await getFileActions(resources, selfLockData);
-
+  let changes = 0;
+  let errors = 0;
   for (const path in actions) {
     const action = actions[path];
     if (action.type !== ActionEnum.NONE) {
@@ -119,9 +112,10 @@ export default async function install(options: InstallActionOptions) {
 
   lockData.templates[tpl.config.name] = selfLockData;
 
-  if (!options.dryRun) await lock.writeFile(config.lock.path, lockData);
-
-  //await tpl.onInstall?.(options);
+  if (!options.dryRun) {
+    if (secrets) await writeSecretsFile(config.secrets.path, secrets);
+    await lock.writeFile(config.lock.path, lockData);
+  }
 
   if (!changes) process.stderr.write(`${chalk.grey("No changes")}\n`);
   return { changes, exitCode: errors ? 1 : 0 };
