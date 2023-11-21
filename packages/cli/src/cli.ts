@@ -7,23 +7,17 @@ import options from "./actions/options.js";
 import render from "./actions/render.js";
 import repairLock from "./actions/repair-lock.js";
 import restore from "./actions/restore.js";
-import { resolveUnixPath } from "./utils/fs.js";
 import { GlobalOptions } from "./utils/self/options.js";
 import { parseStringListValue } from "./utils/string.js";
 import chalk from "chalk";
 import { program } from "commander";
 import { readFileSync } from "fs";
-import { resolve } from "path";
 import { fileURLToPath } from "url";
 
 export type { GlobalOptions };
 
 function getGlobalOptions(): GlobalOptions {
-  const options = program.opts() as GlobalOptions;
-  options.templatePath = resolveUnixPath(options.templatePath);
-  options.outPath = resolve(options.outPath);
-  options.lockPath = resolve(options.lockPath);
-  return options;
+  return program.opts() as GlobalOptions;
 }
 
 function makeAction(cb: (options: any) => Promise<any>) {
@@ -50,14 +44,7 @@ export default (defaultOptions?: Partial<GlobalOptions>) => {
   program.name("rtpl");
   program.version(pkg.version);
   program
-    .option("-t,--template-path <value>", "template file path", ".")
-    .option("--backup-path <value>", "backup path", "./.rtpl-backup")
-    .option(
-      "-l,--lock-path <value>",
-      "lock file path",
-      defaultOptions?.lockPath ?? "rtpl-lock.json",
-    )
-    .option("-o,--out-path <value>", "out path", ".")
+    .option("-c,--config <path>", "config file path", "./rtpl-config.*")
     .option(
       "-f,--filter <patterns>",
       "patterns filter",

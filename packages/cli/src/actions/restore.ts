@@ -1,5 +1,6 @@
 import { GlobalOptions } from "../cli.js";
 import { confirmPrompt } from "../utils/cli.js";
+import { parseConfigFile } from "../utils/self/config.js";
 import { LockData } from "../utils/self/lock.js";
 import chalk from "chalk";
 import { existsSync } from "fs";
@@ -43,8 +44,9 @@ const normalizePath = (path: string) =>
   relative(process.cwd(), path).replace(/\\/g, "/");
 
 export default async function restore(options: RestoreOptions) {
+  const config = await parseConfigFile(options.config);
   const path = normalizePath(
-    await findBackup(options.backupPath, options.input),
+    await findBackup(config.backup.path, options.input),
   );
   const yaml = (await readFile(path)).toString();
   const lockData = parse(yaml, { version: "1.1" }) as LockData<{
@@ -74,7 +76,7 @@ export default async function restore(options: RestoreOptions) {
     errorFiles.push(path);
   };
 
-  if (existsSync(options.lockPath)) logError(options.lockPath);
+  if (existsSync(config.lock.path)) logError(config.lock.path);
 
   for (const name in lockData.templates) {
     const tpl = lockData.templates[name];
@@ -105,7 +107,7 @@ export default async function restore(options: RestoreOptions) {
     }
   }
 
-  await writeFile(options.lockPath, JSON.stringify(lockData, null, 2));
+  await writeFile(config.lock.path, JSON.stringify(lockData, null, 2));
 
   console.info();
   console.info(chalk.green("Backup restored successfully."));

@@ -90,15 +90,15 @@ export async function writeFile(path: string, data: LockData) {
   await _writeFile(path, JSON.stringify(data, null, 2));
 }
 
-export function parseFile(
-  path: string,
-  ifExists?: boolean,
-): LockData | undefined {
+export function parseFile(path: string): LockData {
   try {
     const json = readFileSync(path).toString();
     return JSON.parse(json);
   } catch (error) {
-    if (ifExists && (error as NodeJS.ErrnoException).code === "ENOENT") return;
+    if ((error as NodeJS.ErrnoException).code === "ENOENT")
+      return {
+        templates: {},
+      };
     throw error;
   }
 }

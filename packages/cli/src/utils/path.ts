@@ -23,3 +23,15 @@ export function stripRootBackPaths(path: string) {
     })
     .join("/");
 }
+
+export function expandPaths(
+  path: string,
+  ext: { js?: boolean; ts?: boolean; json?: boolean },
+) {
+  const exts: string[] = [
+    ...(ext.js ? ["js", "cjs", "mjs"] : []),
+    ...(ext.ts ? ["ts", "cts", "mts"] : []),
+    ...(ext.json ? ["json"] : []),
+  ];
+  return path.includes("*") ? exts.map((e) => path.replace("*", e)) : [path];
+}

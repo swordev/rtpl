@@ -1,12 +1,13 @@
 import { GlobalOptions } from "../cli.js";
-import { readTplFile, resolveTpl } from "../utils/self/resolve.js";
+import { parseConfigFile } from "../utils/self/config.js";
+import { parseTplFile, resolveTpl } from "../utils/self/resolve.js";
 
 export default async function render(options: GlobalOptions) {
-  const tpl = await readTplFile(options.templatePath);
+  const config = await parseConfigFile(options.config);
+  const tpl = await parseTplFile(config.template.path);
   const { resources } = await resolveTpl(tpl, {
+    config,
     filter: options.filter,
-    lockPath: options.lockPath,
-    outPath: options.outPath,
   });
   for (const path in resources) {
     const res = resources[path];

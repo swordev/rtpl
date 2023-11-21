@@ -14,6 +14,11 @@ export async function checkPath(path: string) {
   return !!(await statIfExists(path));
 }
 
+export async function findPath(paths: string[]): Promise<string | undefined> {
+  for (const path of paths) {
+    if (await checkPath(path)) return path;
+  }
+}
 export async function readIfExists(path: string) {
   try {
     return await readFile(path);
@@ -45,4 +50,16 @@ export async function mkrdir(dir: string, baseDir?: string) {
     }
   }
   return dirs;
+}
+
+export async function readAnyFile(path: string) {
+  if (/\.[cm]?[jt]s$/i.test(path)) {
+    const object = await import(`file://${path}`);
+    return object.default ?? object;
+  } else if (/\.json$/i.test(path)) {
+    const buffer = await readFile(path);
+    return JSON.parse(buffer.toString());
+  } else {
+    throw new Error(`Invalid extension: ${path}`);
+  }
 }

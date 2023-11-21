@@ -89,7 +89,7 @@ export abstract class AbstractRes<
     );
   }
 
-  async onReady(path: string, secrets: Secrets) {
+  async onReady(path: string, secrets: Secrets | undefined) {
     setDelayedValue(this.path, path);
     setDelayedValue(this.dirname, path);
   }

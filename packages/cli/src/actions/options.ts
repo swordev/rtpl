@@ -1,5 +1,6 @@
 import { GlobalOptions } from "../cli.js";
-import { readTplFile } from "../utils/self/resolve.js";
+import { parseConfigFile } from "../utils/self/config.js";
+import { parseTplFile } from "../utils/self/resolve.js";
 import camelCase from "lodash.camelcase";
 import { stringify } from "yaml";
 
@@ -8,7 +9,8 @@ export type OptionsOptions = GlobalOptions & {
 };
 
 export default async function options(options: OptionsOptions) {
-  const tpl = await readTplFile(options.templatePath);
+  const config = await parseConfigFile(options.config);
+  const tpl = await parseTplFile(config.template.path);
   const tplOptions = await tpl.options();
 
   if (options.format === "yaml") {

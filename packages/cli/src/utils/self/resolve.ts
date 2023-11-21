@@ -1,31 +1,21 @@
 import { AbstractRes } from "../../resources/AbstractRes.js";
 import { MinimalDirRes } from "../../resources/DirRes.js";
-import { checkPath, statIfExists } from "../fs.js";
+import { findPath, readAnyFile } from "../fs.js";
 import { isPlainObject } from "../object.js";
-import { isDir, isPath, stripRootBackPaths } from "../path.js";
+import { expandPaths, isDir, isPath, stripRootBackPaths } from "../path.js";
 import { makeFilter } from "../string.js";
+import { RtplConfig } from "./config.js";
 import { MinimalTpl, ResourcesResultItem } from "./minimal-tpl.js";
 import { createResourceSystem } from "./rs.js";
-import { getSecretsPath, parseSecretsFile } from "./secrets.js";
+import { parseSecretsFile } from "./secrets.js";
 import mm from "micromatch";
-import { basename, dirname, join, relative } from "path";
+import { basename, join, relative } from "path";
 import * as posix from "path/posix";
 
 export type ResolveConfigOptions = {
+  config: RtplConfig;
   filter?: string[];
-  outPath: string;
-  lockPath: string;
 };
-
-export function resolvePath(data: {
-  path: string;
-  outPath: string;
-  lockDir: string;
-}) {
-  let path = join(data.outPath, data.path);
-  path = relative(data.lockDir, path);
-  return path.replace(/\\/g, "/");
-}
 
 function resolveTag(tag: string, input: AbstractRes) {
   const defaultExtension = input.getDefaultExtension();
@@ -67,9 +57,8 @@ function resolvePathLevels(res: AbstractRes, levels: string[]) {
 
 export async function resolveResources(options: {
   resources: unknown;
-  outPath?: string;
-  lockDir?: string;
   filter?: string[];
+  config: RtplConfig;
   onValue?: (
     key: string,
     value: AbstractRes,
@@ -105,11 +94,7 @@ export async function resolveResources(options: {
       }
 
       const pathLevels = resolvePathLevels(input, levels);
-      const path = resolvePath({
-        path: pathLevels.join("/"),
-        lockDir: options.lockDir ?? ".",
-        outPath: options.outPath ?? ".",
-      });
+      const path = join(...pathLevels).replace(/\\/g, "/");
 
       if (
         patterns &&
@@ -134,50 +119,26 @@ export async function resolveResources(options: {
   return values;
 }
 
-export async function readTplFile(path: string): Promise<MinimalTpl> {
-  const info = await statIfExists(path);
-
-  if (!info) throw new Error(`Invalid path: ${path}`);
-
-  let filePath: string | undefined;
-
-  if (info.isDirectory()) {
-    const paths = [".js", ".cjs", ".mjs", ".ts", ".cts", ".mts"].map((ext) =>
-      join(path, `rtpl${ext}`),
-    );
-    for (const v of paths) {
-      if (await checkPath(v)) filePath = v;
-    }
-    if (!filePath) throw new Error(`Invalid path: ${path}`);
-  } else {
-    filePath = path;
-  }
-
-  if (/\.[cm]?[jt]s$/i.test(filePath)) {
-    const object = await import(`file://${filePath}`);
-    return object.default ?? object;
-  } else {
-    throw new Error(`Invalid values path: ${path}`);
-  }
+export async function parseTplFile(inPath: string): Promise<MinimalTpl> {
+  const paths = expandPaths(inPath, { js: true, ts: true });
+  const path = await findPath(paths);
+  if (!path) throw new Error(`Template file not found: ${inPath}`);
+  return readAnyFile(path);
 }
 
 export async function resolveTpl(
   tpl: MinimalTpl,
   options: ResolveConfigOptions,
 ) {
-  const lockDir = dirname(options.lockPath);
-  const outPath = options.outPath;
-  const filter = options.filter;
-  const resolveOptions = {
-    lockDir,
-    outPath,
-    filter,
-  };
-
-  const outFolder = "resources";
+  const { config } = options;
+  const resourcesDir = relative(config.root, config.resources.path).replace(
+    /\\/g,
+    "/",
+  );
   const resultItems: ResourcesResultItem[] = [];
   const inResources = await resolveResources({
-    ...resolveOptions,
+    config,
+    filter: options.filter,
     resources: await tpl.resources(resultItems),
     onValue: async (path, res, actions) => {
       if (res.resolved === false) {
@@ -195,13 +156,15 @@ export async function resolveTpl(
     await item.tpl.config.onResolve?.bind(rs)(item.resources, tplOptions);
   }
 
-  const secretsPath = getSecretsPath(lockDir);
-  const secrets = await parseSecretsFile(secretsPath);
+  const secrets = config.secrets.enabled
+    ? await parseSecretsFile(config.secrets.path)
+    : undefined;
   const resources = await resolveResources({
-    ...resolveOptions,
+    config,
+    filter: options.filter,
     resources: inResources,
     onValue: async (path, res, actions) => {
-      await res.onReady(posix.join(outFolder, path), secrets);
+      await res.onReady(posix.join(resourcesDir, path), secrets);
       if (MinimalDirRes.isInstance(res)) {
         actions.add = false;
         actions.process = !res.resolved;
@@ -216,7 +179,7 @@ export async function resolveTpl(
     if (isRootPath) {
       resources[newPath] = resources[path];
     } else {
-      resources[posix.join(outFolder, newPath)] = resources[path];
+      resources[posix.join(resourcesDir, newPath)] = resources[path];
     }
     delete resources[path];
   }

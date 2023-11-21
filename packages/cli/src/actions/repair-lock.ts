@@ -1,5 +1,6 @@
 import { GlobalOptions } from "../cli.js";
 import { confirmPrompt } from "../utils/cli.js";
+import { parseConfigFile } from "../utils/self/config.js";
 import * as lock from "../utils/self/lock.js";
 import chalk from "chalk";
 import { existsSync } from "fs";
@@ -7,9 +8,8 @@ import { existsSync } from "fs";
 export type RepairLockOptions = GlobalOptions & {};
 
 export default async function repairLock(options: RepairLockOptions) {
-  const lockData = (lock.parseFile(options.lockPath, true) ?? {
-    templates: {},
-  }) as any as lock.LockData;
+  const config = await parseConfigFile(options.config);
+  const lockData = lock.parseFile(config.lock.path) as any as lock.LockData;
 
   const notfounds: string[] = [];
 
@@ -38,7 +38,7 @@ export default async function repairLock(options: RepairLockOptions) {
 
   if (!confirm) return { exitCode: 1 };
 
-  await lock.writeFile(options.lockPath, lockData);
+  await lock.writeFile(config.lock.path, lockData);
 
   console.info(chalk.green("Lock file repared."));
 

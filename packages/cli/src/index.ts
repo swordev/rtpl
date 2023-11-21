@@ -17,3 +17,4 @@ export { SecretRes, SecretData } from "./resources/SecretRes.js";
 export { YamlRes } from "./resources/YamlRes.js";
 export { default as cli } from "./cli.js";
 export { type ResourceSystem } from "./utils/self/rs.js";
+export { defineConfig, RtplConfig, InRtplConfg } from "./utils/self/config.js";

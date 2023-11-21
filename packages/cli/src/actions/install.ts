@@ -1,5 +1,6 @@
 import { GlobalOptions } from "../cli.js";
 import { confirmPrompt } from "../utils/cli.js";
+import { parseConfigFile } from "../utils/self/config.js";
 import {
   ActionEnum,
   execFileAction,
@@ -8,12 +9,12 @@ import {
 } from "../utils/self/install.js";
 import * as lock from "../utils/self/lock.js";
 import { splitGlobalOptions } from "../utils/self/options.js";
-import { readTplFile, resolveTpl } from "../utils/self/resolve.js";
+import { parseTplFile, resolveTpl } from "../utils/self/resolve.js";
 import backup from "./backup.js";
 import diff from "./diff.js";
 import chalk from "chalk";
 import { rmdir, writeFile } from "fs/promises";
-import { dirname, join } from "path";
+import { join } from "path";
 
 export type InstallActionOptions = GlobalOptions & {
   dryRun: boolean;
@@ -39,7 +40,9 @@ export default async function install(options: InstallActionOptions) {
     console.info();
   }
 
-  if (!options.noBackup) {
+  const config = await parseConfigFile(globalOptions.config);
+
+  if (!options.noBackup && config.backup.enabled) {
     const backupResult = await backup({
       ...globalOptions,
       log: false,
@@ -48,24 +51,19 @@ export default async function install(options: InstallActionOptions) {
       return { exitCode: backupResult.exitCode, changes: 0 };
   }
 
-  const tpl = await readTplFile(options.templatePath);
+  const tpl = await parseTplFile(config.template.path);
   const { resources, secrets } = await resolveTpl(tpl, {
+    config,
     filter: options.filter,
-    lockPath: options.lockPath,
-    outPath: options.outPath,
   });
 
-  const secretsPath = join(dirname(options.lockPath), "rtpl.secrets.json");
-
-  await writeFile(secretsPath, JSON.stringify(secrets, null, 2));
+  if (secrets)
+    await writeFile(config.secrets.path, JSON.stringify(secrets, null, 2));
 
   //await tpl.onBeforeInstall?.(options);
 
-  const lockData = lock.parseFile(options.lockPath, true) ?? {
-    templates: {},
-  };
+  const lockData = lock.parseFile(config.lock.path);
 
-  const lockDir = dirname(options.lockPath);
   let changes = 0;
   let errors = 0;
 
@@ -83,7 +81,12 @@ export default async function install(options: InstallActionOptions) {
       changes++;
     }
     try {
-      const dirs = await execFileAction(action, lockDir, path, options.dryRun);
+      const dirs = await execFileAction(
+        action,
+        config.root,
+        path,
+        options.dryRun,
+      );
       if (action.lock) {
         selfLockData.files[path] = action.lock;
         if (dirs) {
@@ -109,14 +112,14 @@ export default async function install(options: InstallActionOptions) {
   const dirs = Object.keys(selfLockData.dirs).sort().reverse();
   for (const dir of dirs) {
     try {
-      await rmdir(join(lockDir, dir));
+      await rmdir(join(config.root, dir));
       delete selfLockData.dirs[dir];
     } catch (error) {}
   }
 
   lockData.templates[tpl.config.name] = selfLockData;
 
-  if (!options.dryRun) await lock.writeFile(options.lockPath, lockData);
+  if (!options.dryRun) await lock.writeFile(config.lock.path, lockData);
 
   //await tpl.onInstall?.(options);
 
