@@ -9,5 +9,7 @@ export async function parseSecretsFile(path: string): Promise<Secrets> {
 }
 
 export async function writeSecretsFile(path: string, data: Secrets) {
-  await writeFile(path, JSON.stringify(data, null, 2));
+  const sorted: Secrets = {};
+  for (const key in Object.keys(data).sort()) sorted[key] = data[key];
+  await writeFile(path, JSON.stringify(sorted, null, 2));
 }
