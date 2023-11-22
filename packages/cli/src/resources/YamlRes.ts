@@ -13,7 +13,7 @@ export class YamlRes<
 > extends AbstractRes<ResType.Yaml, T, Config> {
   protected static override type = ResType.Yaml;
   protected override readonly type = ResType.Yaml;
-  override getDefaultExtension() {
+  protected override onDefaultExtension() {
     return "yaml";
   }
   override toString() {

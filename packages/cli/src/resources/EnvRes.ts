@@ -12,7 +12,7 @@ export class EnvRes<
 > extends AbstractRes<ResType.Env, T> {
   protected static override type = ResType.Env;
   protected override readonly type = ResType.Env;
-  override getDefaultExtension() {
+  protected override onDefaultExtension() {
     return "env";
   }
   override toString() {

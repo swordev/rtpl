@@ -56,16 +56,16 @@ export class SecretRes extends AbstractRes<
     this.value = new DelayedValue(undefined, this.lastStacks);
     this.hasNewValue = new DelayedValue(undefined, this.lastStacks);
   }
-  override getDefaultExtension() {
-    return "secret";
-  }
   toJSON() {
     return this.toString();
   }
   override toString() {
     return this.value.toString();
   }
-  override async onReady(path: string, ctx: ResReadyContext) {
+  protected override onDefaultExtension() {
+    return "secret";
+  }
+  protected override async onReady(path: string, ctx: ResReadyContext) {
     await super.onReady(path, ctx);
     const prevFile = (await readIfExists(path))?.toString();
     const prev = ctx.data.secrets

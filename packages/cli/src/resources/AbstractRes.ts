@@ -78,8 +78,12 @@ export abstract class AbstractRes<
     );
   }
 
-  getDefaultExtension(): string | void {}
   abstract toString(): string;
+  protected onDefaultExtension(): string | void {}
+  protected async onReady(path: string, ctx: ResReadyContext) {
+    setDelayedValue(this.path, path);
+    setDelayedValue(this.dirname, path);
+  }
 
   static isInstance(value: unknown): value is AbstractRes {
     if (value instanceof this) return true;
@@ -96,10 +100,5 @@ export abstract class AbstractRes<
       (value as any)[kindType] &&
       (isThis(ResType.Abstract) || isThis(instanceType))
     );
-  }
-
-  async onReady(path: string, ctx: ResReadyContext) {
-    setDelayedValue(this.path, path);
-    setDelayedValue(this.dirname, path);
   }
 }

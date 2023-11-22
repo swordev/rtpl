@@ -18,7 +18,7 @@ export type ResolveConfigOptions = {
 };
 
 function resolveTag(tag: string, input: AbstractRes) {
-  const defaultExtension = input.getDefaultExtension();
+  const defaultExtension = input["onDefaultExtension"]();
   if (
     typeof defaultExtension === "string" &&
     !tag.includes(".") &&
@@ -168,7 +168,7 @@ export async function resolveTpl(
     filter: options.filter,
     resources: inResources,
     onValue: async (path, res, actions) => {
-      await res.onReady(posix.join(resourcesDir, path), ctx);
+      await res["onReady"](posix.join(resourcesDir, path), ctx);
       if (MinimalDirRes.isInstance(res)) {
         actions.add = false;
         actions.process = !res.resolved;

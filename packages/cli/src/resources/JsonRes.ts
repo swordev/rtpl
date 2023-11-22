@@ -53,7 +53,7 @@ export class JsonRes<
 > extends AbstractRes<ResType.Json, T, TConf> {
   protected static override type = ResType.Json;
   protected override readonly type = ResType.Json;
-  override getDefaultExtension() {
+  protected override onDefaultExtension() {
     return "json";
   }
   override toString() {

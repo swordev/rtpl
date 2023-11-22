@@ -35,7 +35,7 @@ export class IniRes<
 > extends AbstractRes<ResType.Ini, T, Config> {
   protected static override type = ResType.Ini;
   protected override readonly type = ResType.Ini;
-  override getDefaultExtension() {
+  protected override onDefaultExtension() {
     return "ini";
   }
   override toString() {
