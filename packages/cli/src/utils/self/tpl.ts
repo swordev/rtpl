@@ -10,19 +10,16 @@ import { z } from "zod";
 
 export type TplDeps = { [name: string]: Tpl };
 
-export type TplDepsRes<T extends { [name: string]: Tpl }> = {
-  [name in keyof T]: T[name] extends Tpl<unknown, infer R> ? R : never;
+export type TplDepsRes<T extends TplDeps> = {
+  [name in keyof T]?: T[name] extends Tpl<unknown, infer R> ? R : never;
 };
 
-export type TplResResult<
-  R,
-  D extends { [name: string]: Tpl },
-> = R extends DirRes<infer RData>
+export type TplResResult<R, D extends TplDeps> = R extends DirRes<infer RData>
   ? DirRes<RData & TplDepsRes<D>>
   : R & TplDepsRes<D>;
 
-export type TplDepsOptions<T extends { [name: string]: Tpl }> = {
-  [name in keyof T]: T[name] extends Tpl<infer O, infer R, infer D>
+export type TplDepsOptions<T extends TplDeps> = {
+  [name in keyof T]?: T[name] extends Tpl<infer O, infer R, infer D>
     ? TplOptions<O, D>
     : never;
 };
@@ -186,10 +183,10 @@ export class Tpl<O = any, R = any, D extends TplDeps = any>
   }
 }
 
-export function createTpl<O>(): <R, D extends { [name: string]: Tpl } = any>(
+export function createTpl<O>(): <R, D extends TplDeps = any>(
   config: TplConfig<O, R, D>,
 ) => Tpl<O, R, D>;
-export function createTpl<O, R, D extends { [name: string]: Tpl } = any>(
+export function createTpl<O, R, D extends TplDeps = any>(
   config: TplConfig<O, R, D>,
 ): Tpl<O, R, D>;
 export function createTpl(config?: TplConfig<any, any, any>): any {
