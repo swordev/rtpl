@@ -6,12 +6,12 @@ export type ResourcesResultItem = {
   resources: unknown;
 };
 
-export interface MinimalTplConfig {
+export interface MinimalTplConfig<O = any, R = any> {
   name: string;
   onResolve?: (
     this: ResourceSystem,
-    items: any,
-    options: any,
+    items: R,
+    options: O,
   ) => Promise<void | undefined>;
 }
 

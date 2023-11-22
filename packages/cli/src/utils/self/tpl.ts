@@ -1,140 +1,68 @@
 import { DirRes, MinimalDirRes } from "../../resources/DirRes.js";
 import { clone, merge } from "../object.js";
 import { DeepPartial } from "../ts.js";
-import { MinimalTpl, ResourcesResultItem } from "./minimal-tpl.js";
-import { ResourceSystem } from "./rs.js";
-import { Builtin } from "ts-essentials";
+import {
+  MinimalTpl,
+  MinimalTplConfig,
+  ResourcesResultItem,
+} from "./minimal-tpl.js";
 import { z } from "zod";
 
-export type PartialOptions<O> = DeepPartial<O, Builtin>;
-export type DepsTpl = { [name: string]: Tpl };
-export type Enabled<
-  T extends string | number | symbol = string | number | symbol,
-> =
-  | {
-      [N in T]?: boolean;
-    }
-  | T[];
+export type TplDeps = { [name: string]: Tpl };
 
-function normalizeEnabled<
-  T extends string | number | symbol = string | number | symbol,
->(input: Enabled<T>): T[] {
-  if (Array.isArray(input)) return input;
-  return Object.keys(input).filter(
-    (name) => input[name as keyof typeof input],
-  ) as T[];
-}
-
-export function createEnabledArray<
-  T extends string | number | symbol = string | number | symbol,
->(
-  enabled: Enabled<T> | undefined,
-  groups: Record<string, Enabled<T>> | undefined,
-) {
-  const enabledArray = normalizeEnabled(enabled ?? []);
-  const groupsArrays: Record<string, T[]> = {};
-  for (const name in groups) {
-    groupsArrays[name] = normalizeEnabled(groups[name]);
-  }
-
-  const values = enabledArray.flatMap(
-    (v) => groupsArrays[v as keyof typeof groupsArrays] ?? v,
-  );
-  return {
-    values,
-    includes: (name: T) => (enabled ? values.includes(name) : true),
-  };
-}
-
-export type DepsResources<T extends { [name: string]: Tpl }> = {
+export type TplDepsRes<T extends { [name: string]: Tpl }> = {
   [name in keyof T]: T[name] extends Tpl<unknown, infer R> ? R : never;
 };
 
-export type ResResult<R, D extends { [name: string]: Tpl }> = R extends DirRes<
-  infer RData
->
-  ? DirRes<RData & DepsResources<D>>
-  : R & DepsResources<D>;
+export type TplResResult<
+  R,
+  D extends { [name: string]: Tpl },
+> = R extends DirRes<infer RData>
+  ? DirRes<RData & TplDepsRes<D>>
+  : R & TplDepsRes<D>;
 
-export type DepsOptions<T extends { [name: string]: Tpl }> = {
-  [name in keyof T]: T[name] extends Tpl<infer O, infer R, infer D, infer DG>
-    ? TplOptions<O, D, DG>
+export type TplDepsOptions<T extends { [name: string]: Tpl }> = {
+  [name in keyof T]: T[name] extends Tpl<infer O, infer R, infer D>
+    ? TplOptions<O, D>
     : never;
 };
 
-export type TplSelf<D extends DepsTpl = {}, DG extends string = never> = {
-  isEnabled: (name: DG | keyof D) => boolean;
-};
-
-export type TplOptionsSelf<
-  D extends DepsTpl = {},
-  DG extends string = never,
-> = TplSelf<D, DG> & {
-  createDefaultsEnabled: (defaults: Enabled<DG | keyof D>) => {
-    enabled: Enabled<DG | keyof D>;
-    isEnabled: (name: DG | keyof D) => boolean;
-  };
-};
-
-export type TplResourcesSelf<D extends DepsTpl = {}> = TplSelf<D> & {
+export type TplResourcesSelf<D extends TplDeps = {}> = {
   depNames: (keyof D)[];
   deps: {
     [K in keyof D]: D[K] extends Tpl<infer O, infer R>
-      ? (options?: PartialOptions<O>) => Promise<R>
+      ? (options?: DeepPartial<O>) => Promise<R>
       : never;
   };
 };
 
-export type TplOptions<
-  O,
-  D extends DepsTpl = {},
-  DG extends string = string,
-> = O & {
-  enabled?: Enabled<DG | keyof D>;
-  deps?: DepsOptions<D>;
+export type TplOptions<O, D extends TplDeps = {}> = O & {
+  enabled?: { [k in keyof D]?: boolean };
+  deps?: TplDepsOptions<D>;
 };
 
-export type TplConfig<
-  O = any,
-  R = any,
-  D extends DepsTpl = {},
-  DG extends string = never,
-> = {
-  name: string;
+export interface TplConfig<O = any, R = any, D extends TplDeps = {}>
+  extends MinimalTplConfig<O, R> {
   deps?: D;
-  depGroups?: { [name in DG]: Enabled<keyof D> };
   schema?: z.ZodType<O>;
-  defaultOptions?: PartialOptions<TplOptions<O, D, DG>>;
+  defaultOptions?: DeepPartial<TplOptions<O, D>>;
   options?:
-    | PartialOptions<TplOptions<O, D, DG>>
+    | DeepPartial<TplOptions<O, D>>
     | ((
-        this: TplOptionsSelf<D, DG>,
-        o: PartialOptions<TplOptions<O, D, DG>>,
+        o: DeepPartial<TplOptions<O, D>>,
         cast: (
-          o: PartialOptions<TplOptions<O, D, DG>>,
-        ) => PartialOptions<TplOptions<O, D, DG>>,
-      ) => Promise<PartialOptions<TplOptions<O, D, DG>>>);
-  resources?: (
-    this: TplResourcesSelf<D>,
-    o: TplOptions<O, D, DG>,
-  ) => Promise<R>;
-  onResolve?: (
-    this: ResourceSystem,
-    r: R,
-    o: TplOptions<O, D, DG>,
-  ) => Promise<void | undefined>;
-};
+          o: DeepPartial<TplOptions<O, D>>,
+        ) => DeepPartial<TplOptions<O, D>>,
+      ) => Promise<DeepPartial<TplOptions<O, D>>>);
+  resources?: (this: TplResourcesSelf<D>, o: TplOptions<O, D>) => Promise<R>;
+}
 
-export class Tpl<
-  O = any,
-  R = any,
-  D extends DepsTpl = any,
-  DG extends string = never,
-> implements MinimalTpl
+export class Tpl<O = any, R = any, D extends TplDeps = any>
+  implements MinimalTpl
 {
   #options: TplOptions<O, D> | undefined;
   protected deps: D;
-  constructor(readonly config: TplConfig<O, R, D, DG>) {
+  constructor(readonly config: TplConfig<O, R, D>) {
     this.deps = Object.entries<Tpl>(config.deps || {}).reduce(
       (deps, [name, tpl]) => {
         (deps as any)[name] = tpl.fork();
@@ -144,37 +72,10 @@ export class Tpl<
     );
   }
 
-  private createOptionsSelf(
-    o?: PartialOptions<TplOptions<O, D, DG>>,
-  ): TplOptionsSelf<D, DG> {
-    const enabled = createEnabledArray<DG | keyof D>(
-      o?.enabled as any,
-      this.config.depGroups,
-    );
-
-    return {
-      isEnabled: (name) => enabled.includes(name),
-      createDefaultsEnabled: (defaults) => {
-        const enabled = createEnabledArray<DG | keyof D>(
-          (o?.enabled ?? defaults) as any,
-          this.config.depGroups,
-        );
-
-        return {
-          enabled: enabled.values,
-          isEnabled: (name) => enabled.includes(name),
-        };
-      },
-    };
-  }
-
   private createResourcesSelf(
-    o: TplOptions<O, D, DG>,
     items: ResourcesResultItem[],
   ): TplResourcesSelf<D> {
-    const enabled = createEnabledArray(o.enabled, this.config.depGroups);
     const self: TplResourcesSelf<D> = {
-      isEnabled: (name) => enabled.includes(name),
       depNames: [],
       deps: {} as any,
     };
@@ -191,18 +92,17 @@ export class Tpl<
   }
 
   async setOptions(
-    o?: PartialOptions<TplOptions<O, D, DG>>,
+    o?: DeepPartial<TplOptions<O, D>>,
   ): Promise<TplOptions<O, D>> {
     o = this.config.defaultOptions
       ? merge(clone(this.config.defaultOptions), o)
       : o;
     const { config } = this;
-    const self = this.createOptionsSelf(o);
     const cast = (o: DeepPartial<TplOptions<O, D>>) => o;
     let configOptions: TplOptions<O, D>;
 
     if (typeof config.options === "function") {
-      const cb = config.options.bind(self);
+      const cb = config.options;
       configOptions = ((await cb(o! || {}, cast)) ?? {}) as any;
     } else if (config.options) {
       configOptions = merge({}, config.options) as any;
@@ -213,15 +113,10 @@ export class Tpl<
     configOptions = merge(configOptions, o);
 
     const depsOptions: Record<string, unknown> = {} as any;
-    const enabled = createEnabledArray(
-      configOptions.enabled,
-      this.config.depGroups,
-    );
 
     for (const [depName, depTpl] of Object.entries<Tpl>(this.deps)) {
-      if (enabled.includes(depName)) {
+      if (configOptions.enabled?.[depName]) {
         const depOptions = configOptions.deps?.[depName];
-
         depsOptions[depName] = await depTpl.setOptions(depOptions);
       }
     }
@@ -235,7 +130,9 @@ export class Tpl<
     return (this.#options = options);
   }
 
-  async updateOptions(o?: PartialOptions<TplOptions<O, D, DG>>) {
+  async updateOptions(
+    o?: DeepPartial<TplOptions<O, D>>,
+  ): Promise<TplOptions<O, D>> {
     if (this.#options) {
       if (o) {
         return this.setOptions(merge(this.#options, o));
@@ -247,33 +144,35 @@ export class Tpl<
     }
   }
 
-  async options() {
+  async options(): Promise<TplOptions<O, D>> {
     return this.#options ?? (await this.setOptions());
   }
 
-  async resources(items: ResourcesResultItem[] = []) {
+  async resources(
+    items: ResourcesResultItem[] = [],
+  ): Promise<TplResResult<R, D>> {
     const { config } = this;
     const options = await this.options();
-    const self = this.createResourcesSelf(options, items);
+    const self = this.createResourcesSelf(items);
     const res =
       (await config.resources?.bind(self as any)(options)) || ({} as R);
     const depRes: Record<string, any> = {};
 
     for (const [depName] of Object.entries<Tpl>(this.deps)) {
-      if (!self.depNames.includes(depName) && self.isEnabled(depName))
+      if (!self.depNames.includes(depName) && options.enabled?.[depName])
         depRes[depName] = await self.deps[depName]();
     }
 
     const resources = MinimalDirRes.isInstance(res)
-      ? ((res as any as MinimalDirRes).add(depRes) as ResResult<R, D>)
-      : ({ ...res, ...depRes } as ResResult<R, D>);
+      ? ((res as any as MinimalDirRes).add(depRes) as TplResResult<R, D>)
+      : ({ ...res, ...depRes } as TplResResult<R, D>);
 
     items.push({ tpl: this, resources });
 
     return resources;
   }
 
-  fork(defaultOptions?: PartialOptions<TplOptions<O, D, DG>>) {
+  fork(defaultOptions?: DeepPartial<TplOptions<O, D>>): Tpl<O, R, D> {
     return new Tpl({
       ...this.config,
       defaultOptions: this.config.defaultOptions
@@ -287,20 +186,13 @@ export class Tpl<
   }
 }
 
-export function createTpl<O>(): <
-  R,
-  D extends { [name: string]: Tpl } = any,
-  DG extends string = never,
->(
-  config: TplConfig<O, R, D, DG>,
-) => Tpl<O, R, D, DG>;
-export function createTpl<
-  O,
-  R,
-  D extends { [name: string]: Tpl } = any,
-  DG extends string = never,
->(config: TplConfig<O, R, D, DG>): Tpl<O, R, D, DG>;
-export function createTpl(config?: TplConfig<any, any, any, any>): any {
+export function createTpl<O>(): <R, D extends { [name: string]: Tpl } = any>(
+  config: TplConfig<O, R, D>,
+) => Tpl<O, R, D>;
+export function createTpl<O, R, D extends { [name: string]: Tpl } = any>(
+  config: TplConfig<O, R, D>,
+): Tpl<O, R, D>;
+export function createTpl(config?: TplConfig<any, any, any>): any {
   if (arguments.length === 0) {
     return (config: TplConfig) => new Tpl(config);
   } else {
