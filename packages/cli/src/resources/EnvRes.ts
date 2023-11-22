@@ -4,7 +4,7 @@ import { AbstractRes, ResType } from "./AbstractRes.js";
 
 export type EnvData = Record<
   string,
-  Callable<string | number | boolean | StringifyClass>
+  Callable<string | number | boolean | undefined | StringifyClass>
 >;
 
 export class EnvRes<
