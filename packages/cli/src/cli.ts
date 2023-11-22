@@ -76,7 +76,7 @@ export default (defaultOptions?: Partial<GlobalOptions>) => {
   program
     .command("options")
     .alias("o")
-    .option("--format <type>", "Output format (json, js, yaml)", "json")
+    .option("--format <type>", "Output format (json, yaml)", "json")
     .action(makeAction(options));
   program.command("render").alias("r").action(makeAction(render));
   program.command("repair-lock").action(makeAction(repairLock));
