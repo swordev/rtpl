@@ -1,5 +1,11 @@
 # @rtpl/cli
 
+## 0.10.5
+
+### Patch Changes
+
+- [`5ed6957`](https://github.com/swordev/rtpl/commit/5ed695792e63ee5494607ed0505832d1d4c8fd63) Thanks [@juanrgm](https://github.com/juanrgm)! - Fix options action
+
 ## 0.10.4
 
 ### Patch Changes
