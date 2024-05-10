@@ -1,4 +1,5 @@
-import { Builtin, IsTuple } from "ts-essentials";
+import type { MinimalRes } from "../resources/AbstractRes.js";
+import type { Builtin, IsTuple } from "ts-essentials";
 
 type IsAny<T> = 0 extends 1 & T ? true : false;
 type IsUnknown<T> = IsAny<T> extends true
@@ -7,7 +8,9 @@ type IsUnknown<T> = IsAny<T> extends true
   ? true
   : false;
 
-export type DeepPartial<T, E = Builtin> = T extends E
+export type DeepPartial<T, E = Builtin> = T extends MinimalRes
+  ? T
+  : T extends E
   ? T
   : T extends Map<infer K, infer V>
   ? Map<DeepPartial<K, E>, DeepPartial<V, E>>
