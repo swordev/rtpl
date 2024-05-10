@@ -3,49 +3,29 @@ on:
   push:
     branches:
       - main
-      - develop
 env:
-  PNPM_CACHE_FOLDER: .pnpm-store
+  NODE_VERSION: 20
+  PNPM_VERSION: 9
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
         with:
-          fetch-depth: 0
-      - name: Use Node.js 18.x
-        uses: actions/setup-node@v2
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
         with:
-          node-version: 18
-      - uses: actions/cache@v2
-        with:
-          path: ${{ env.PNPM_CACHE_FOLDER }}
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-
-      - name: Use pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
-      - name: Setup pnpm config
-        run: pnpm config set store-dir $PNPM_CACHE_FOLDER
-      - name: Install dependencies
-        run: pnpm install
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - name: Check
-        run: pnpm check
-      - name: Test
-        run: pnpm test
-      - name: Build
-        run: pnpm build
-      - name: Create release pull request or publish to npm
-        id: changesets
-        uses: changesets/action@v1
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install
+      - run: pnpm build
+      - run: pnpm test
+      - uses: changesets/action@v1
         with:
           commit: "chore: update versions"
           title: Update versions
-          publish: pnpm exec changeset publish
+          publish: pnpm publish -r --no-git-checks
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
