@@ -1,5 +1,17 @@
 # @rtpl/cli
 
+## 0.11.0
+
+### Minor Changes
+
+- [`65d505d`](https://github.com/swordev/rtpl/commit/65d505d0b4ce728c329efa84d3a2c5bfe74c2ec7) Thanks [@juanrgm](https://github.com/juanrgm)! - Add derived secrets
+
+### Patch Changes
+
+- [`025b549`](https://github.com/swordev/rtpl/commit/025b549fd148c20f9bb7eca50aed5520be90314c) Thanks [@juanrgm](https://github.com/juanrgm)! - Fix deep partial type
+
+- [`e8d3e15`](https://github.com/swordev/rtpl/commit/e8d3e15cf16b7255a092915c9634b39d2161e9d7) Thanks [@juanrgm](https://github.com/juanrgm)! - Update dependencies
+
 ## 0.10.5
 
 ### Patch Changes
