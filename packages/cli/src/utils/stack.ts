@@ -16,8 +16,8 @@ export function captureStackTrace(limit = 15): Call[] {
           return fileName.startsWith("file://")
             ? stack.getFileName()
             : fileName.startsWith("node:")
-            ? fileName
-            : new URL(`file://${fileName}`).href;
+              ? fileName
+              : new URL(`file://${fileName}`).href;
         },
         getLineNumber: stack.getLineNumber.bind(stack),
       };

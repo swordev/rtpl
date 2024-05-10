@@ -27,10 +27,10 @@ export type FilterResult<F extends FilterInput> =
   F["instanceOf"] extends FilteConstructor<infer R>
     ? R
     : F["instanceOf"] extends { data: FilteConstructor<infer D> }
-    ? AbstractRes<D>
-    : F["test"] extends Guard<infer T>
-    ? T
-    : AbstractRes;
+      ? AbstractRes<D>
+      : F["test"] extends Guard<infer T>
+        ? T
+        : AbstractRes;
 
 export type ResourceSystem = ReturnType<typeof createResourceSystem>;
 

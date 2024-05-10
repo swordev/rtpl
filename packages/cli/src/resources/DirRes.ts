@@ -54,8 +54,8 @@ export class DirRes<
     T extends () => any
       ? any
       : T extends unknown[]
-      ? (T[number] | ST[number])[]
-      : ST
+        ? (T[number] | ST[number])[]
+        : ST
   >;
   override add<ST extends Record<string, unknown> | unknown[]>(
     data: ST,
@@ -66,8 +66,8 @@ export class DirRes<
           ? [...this.data, ...data]
           : [data]
         : Array.isArray(this.data)
-        ? data
-        : { ...this.data, ...data },
+          ? data
+          : { ...this.data, ...data },
     ) as any;
   }
   set<TData extends Record<string, unknown> | unknown[]>(

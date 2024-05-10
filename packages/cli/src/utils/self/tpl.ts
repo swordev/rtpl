@@ -14,9 +14,10 @@ export type TplDepsRes<T extends TplDeps> = {
   [name in keyof T]?: T[name] extends Tpl<unknown, infer R> ? R : never;
 };
 
-export type TplResResult<R, D extends TplDeps> = R extends DirRes<infer RData>
-  ? DirRes<RData & TplDepsRes<D>>
-  : R & TplDepsRes<D>;
+export type TplResResult<R, D extends TplDeps> =
+  R extends DirRes<infer RData>
+    ? DirRes<RData & TplDepsRes<D>>
+    : R & TplDepsRes<D>;
 
 export type TplDepsOptions<T extends TplDeps> = {
   [name in keyof T]?: T[name] extends Tpl<infer O, infer R, infer D>
@@ -177,8 +178,8 @@ export class Tpl<O = any, R = any, D extends TplDeps = any>
           ? merge(clone(this.config.defaultOptions), defaultOptions)
           : clone(this.config.defaultOptions)
         : defaultOptions
-        ? clone(defaultOptions)
-        : undefined,
+          ? clone(defaultOptions)
+          : undefined,
     });
   }
 }
