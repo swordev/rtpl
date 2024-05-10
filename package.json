@@ -25,30 +25,28 @@
     "check": "pnpm check:format && pnpm check:eslint",
     "check:eslint": "eslint --cache .",
     "check:format": "prettier --cache -c .",
-    "clean": "wspa clean",
+    "clean": "tsc -b tsconfig.build.json --clean",
     "format": "prettier --cache -w .",
     "start": "node packages/cli/lib/bin.js",
     "test": "vitest run",
     "watch": "tsc -b tsconfig.build.json -w"
   },
   "devDependencies": {
-    "@changesets/changelog-github": "^0.4.8",
-    "@changesets/cli": "^2.26.2",
-    "@trivago/prettier-plugin-sort-imports": "^4.2.0",
-    "@types/node": "^20.8.7",
-    "@typescript-eslint/eslint-plugin": "^6.8.0",
-    "@wspa/cli": "^0.6.0",
-    "@wspa/config": "^0.3.1",
-    "eslint": "^8.51.0",
-    "npm-check-updates": "^16.14.6",
-    "prettier": "3.0.3",
-    "prettier-plugin-packagejson": "^2.4.6",
-    "prettier-plugin-sort-json": "^3.1.0",
-    "typescript": "^5.2.2",
-    "vitest": "^0.34.6"
+    "@changesets/changelog-github": "^0.5.0",
+    "@changesets/cli": "^2.27.1",
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "@types/node": "^20.12.11",
+    "@typescript-eslint/eslint-plugin": "^7.8.0",
+    "eslint": "^9.2.0",
+    "npm-check-updates": "^16.14.20",
+    "prettier": "3.2.5",
+    "prettier-plugin-packagejson": "^2.5.0",
+    "prettier-plugin-sort-json": "^4.0.0",
+    "typescript": "^5.4.5",
+    "vitest": "^1.6.0"
   },
   "peerDependencies": {
-    "ts-node": "^10.9.1"
+    "ts-node": "^10.9.2"
   },
   "engine": {
     "node": ">=16.0.0"
