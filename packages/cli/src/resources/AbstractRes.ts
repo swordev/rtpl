@@ -85,11 +85,11 @@ export abstract class AbstractRes<
     setDelayedValue(this.dirname, path);
   }
 
-  static isInstance(value: unknown): value is AbstractRes {
-    if (value instanceof this) return true;
+  static isInstance(value: unknown, self: any = this): value is AbstractRes {
+    if (value instanceof self) return true;
 
     const isThis = (type: ResType) =>
-      this.type === type && this.name === `${ResType[type]}Res`;
+      self.type === type && self.name === `${ResType[type]}Res`;
 
     const instanceType = (value?.constructor as typeof AbstractRes | undefined)
       ?.type;

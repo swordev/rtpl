@@ -51,10 +51,22 @@ export class SecretRes extends AbstractRes<
   protected override readonly type = ResType.Secret;
   private value: DelayedValue<string>;
   readonly hasNewValue: DelayedValue<boolean>;
-  constructor(readonly options: ResOptions<SecretData | undefined>) {
-    super(options);
+  readonly options: ResOptions<SecretData | undefined>;
+  protected parent: SecretRes | undefined;
+  constructor(input: ResOptions<SecretData | undefined> | SecretRes) {
+    if (input instanceof SecretRes) {
+      super({});
+      this.options = {};
+      this.parent = input;
+    } else {
+      super(input);
+      this.options = input;
+    }
     this.value = new DelayedValue(undefined, this.lastStacks);
     this.hasNewValue = new DelayedValue(undefined, this.lastStacks);
+  }
+  static isInstance(value: unknown): value is SecretRes {
+    return AbstractRes.isInstance(value, this);
   }
   toJSON() {
     return this.toString();
@@ -77,7 +89,15 @@ export class SecretRes extends AbstractRes<
     const custom = await this.data?.onReady?.({ path, prev, current });
     if (typeof custom === "string") current = custom;
     if (typeof current !== "string") throw new Error(`Secret is empty`);
-    if (ctx.data.secrets) ctx.data.secrets[path] = current;
+
+    const parent = this.parent;
+
+    if (parent) {
+      current = parent.toString();
+    } else {
+      if (ctx.data.secrets) ctx.data.secrets[path] = current;
+    }
+
     setDelayedValue(this.value, current);
     setDelayedValue(this.hasNewValue, current !== prevFile);
   }

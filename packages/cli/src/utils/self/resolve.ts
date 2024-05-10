@@ -1,5 +1,6 @@
 import { AbstractRes, ResReadyContext } from "../../resources/AbstractRes.js";
 import { MinimalDirRes } from "../../resources/DirRes.js";
+import { SecretRes } from "../../resources/SecretRes.js";
 import { checkPath, findPath, readAnyFile } from "../fs.js";
 import { isPlainObject } from "../object.js";
 import { expandPaths, isDir, isPath, stripRootBackPaths } from "../path.js";
@@ -163,10 +164,19 @@ export async function resolveTpl(
     initialSecrets: !(await checkPath(config.secrets.path)),
   });
 
+  const resEntries = Object.entries(inResources);
+  const sortedResEntries = [
+    ...resEntries.filter(([, r]) => SecretRes.isInstance(r) && !r["parent"]),
+    ...resEntries.filter(([, r]) => SecretRes.isInstance(r) && r["parent"]),
+    ...resEntries.filter(([, r]) => !SecretRes.isInstance(r)),
+  ];
+
+  console.log(sortedResEntries);
+
   const resources = await resolveResources({
     config,
     filter: options.filter,
-    resources: inResources,
+    resources: Object.fromEntries(sortedResEntries),
     onValue: async (path, res, actions) => {
       await res["onReady"](posix.join(resourcesDir, path), ctx);
       if (MinimalDirRes.isInstance(res)) {
