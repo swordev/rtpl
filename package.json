@@ -22,8 +22,7 @@
   ],
   "scripts": {
     "build": "tsc -b tsconfig.build.json",
-    "check": "pnpm check:format && pnpm check:eslint",
-    "check:eslint": "eslint --cache .",
+    "check": "pnpm check:format",
     "check:format": "prettier --cache -c .",
     "clean": "tsc -b tsconfig.build.json --clean",
     "format": "prettier --cache -w .",
@@ -36,8 +35,6 @@
     "@changesets/cli": "^2.27.1",
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
     "@types/node": "^20.12.11",
-    "@typescript-eslint/eslint-plugin": "^7.8.0",
-    "eslint": "^9.2.0",
     "npm-check-updates": "^16.14.20",
     "prettier": "3.2.5",
     "prettier-plugin-packagejson": "^2.5.0",

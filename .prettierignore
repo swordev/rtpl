@@ -1,7 +1,5 @@
 pnpm-lock.yaml
 # .gitignore
-.eslintcache
-.history
 .pnpm-store
 .rtpl-backup
 coverage
