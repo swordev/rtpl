@@ -171,8 +171,6 @@ export async function resolveTpl(
     ...resEntries.filter(([, r]) => !SecretRes.isInstance(r)),
   ];
 
-  console.log(sortedResEntries);
-
   const resources = await resolveResources({
     config,
     filter: options.filter,
