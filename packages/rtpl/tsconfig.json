@@ -2,14 +2,13 @@
   "compilerOptions": {
     "outDir": "lib",
     "rootDir": "src",
-    "baseUrl": ".",
     "paths": {
       "@rtpl/cli": ["./../cli/src/index.ts"],
       "@rtpl/cli/*": ["./../cli/src/*"]
     }
   },
   "extends": "./../../tsconfig.json",
-  "include": ["./src/**/*"],
+  "include": ["src"],
   "references": [
     {
       "path": "./../cli"
