@@ -54,6 +54,9 @@ export async function mkrdir(dir: string, baseDir?: string) {
 
 export async function readAnyFile(path: string) {
   if (/\.[cm]?[jt]s$/i.test(path)) {
+    if (path.endsWith(".ts"))
+      // @ts-ignore
+      await import("tsx");
     const object = await import(`file://${path}`);
     return object.default ?? object;
   } else if (/\.json$/i.test(path)) {

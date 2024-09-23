@@ -41,7 +41,7 @@
     "@rtpl/cli": "workspace:*"
   },
   "peerDependencies": {
-    "ts-node": "^10.9.2"
+    "tsx": "^4.19.1"
   },
   "engine": {
     "node": ">=20.0.0"

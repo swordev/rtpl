@@ -62,10 +62,11 @@
     "@types/lodash.isplainobject": "^4.0.9",
     "@types/lodash.mergewith": "^4.6.9",
     "@types/lodash.set": "^4.3.9",
-    "@types/micromatch": "^4.0.9"
+    "@types/micromatch": "^4.0.9",
+    "tsx": "^4.19.1"
   },
   "peerDependencies": {
-    "ts-node": "^10.9.2"
+    "tsx": "^4.19.1"
   },
   "engine": {
     "node": ">=20.0.0"

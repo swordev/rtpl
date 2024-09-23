@@ -1,2 +1,2 @@
-#!/usr/bin/env -S node --no-warnings --loader ts-node/esm
+#!/usr/bin/env -S node
 import "@rtpl/cli/bin.js";
