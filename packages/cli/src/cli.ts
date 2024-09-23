@@ -4,6 +4,7 @@ import diff from "./actions/diff.js";
 import init from "./actions/init.js";
 import install from "./actions/install.js";
 import options from "./actions/options.js";
+import purgeSecrets from "./actions/purge-secrets.js";
 import render from "./actions/render.js";
 import repairLock from "./actions/repair-lock.js";
 import restore from "./actions/restore.js";
@@ -80,6 +81,10 @@ export default (defaultOptions?: Partial<GlobalOptions>) => {
     .action(makeAction(options));
   program.command("render").alias("r").action(makeAction(render));
   program.command("repair-lock").action(makeAction(repairLock));
+  program
+    .command("purge-secrets")
+    .option("--confirm", "confirm changes", false)
+    .action(makeAction(purgeSecrets));
   program.command("backup").alias("b").action(makeAction(backup));
   program
     .command("restore")

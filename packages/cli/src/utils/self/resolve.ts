@@ -8,7 +8,7 @@ import { makeFilter } from "../string.js";
 import { RtplConfig } from "./config.js";
 import { MinimalTpl, ResourcesResultItem } from "./minimal-tpl.js";
 import { createResourceSystem } from "./rs.js";
-import { parseSecretsFile } from "./secrets.js";
+import { parseSecretsFile, Secrets } from "./secrets.js";
 import mm from "micromatch";
 import { basename, join, relative } from "path";
 import * as posix from "path/posix";
@@ -16,6 +16,7 @@ import * as posix from "path/posix";
 export type ResolveConfigOptions = {
   config: RtplConfig;
   filter?: string[];
+  secrets?: Secrets;
 };
 
 function resolveTag(tag: string, input: AbstractRes) {
@@ -158,9 +159,11 @@ export async function resolveTpl(
   }
 
   const ctx = new ResReadyContext({
-    secrets: config.secrets.enabled
-      ? await parseSecretsFile(config.secrets.path)
-      : undefined,
+    secrets:
+      options.secrets ||
+      (config.secrets.enabled
+        ? await parseSecretsFile(config.secrets.path)
+        : undefined),
     initialSecrets: !(await checkPath(config.secrets.path)),
   });
 
