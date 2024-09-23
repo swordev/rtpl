@@ -1,4 +1,4 @@
-import { mkdir, readFile, stat } from "fs/promises";
+import { mkdir, readdir, readFile, rm, stat } from "fs/promises";
 import { join, relative } from "path";
 
 export async function statIfExists(path: string) {
@@ -59,4 +59,21 @@ export async function readAnyFile(path: string) {
   } else {
     throw new Error(`Invalid extension: ${path}`);
   }
+}
+
+export type DeletionPolicyOptions = {
+  keepLast?: number;
+};
+
+export async function deleteByPolicy(
+  path: string,
+  options: DeletionPolicyOptions,
+  filter: (file: string) => boolean,
+) {
+  let inputFiles = (await readdir(path)).filter(filter);
+  let removeFiles: string[] = [];
+  if (options.keepLast)
+    removeFiles = inputFiles.sort().reverse().slice(options.keepLast);
+  for (const file of removeFiles) await rm(join(path, file));
+  return removeFiles;
 }

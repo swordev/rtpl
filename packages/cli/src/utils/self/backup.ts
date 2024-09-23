@@ -1,4 +1,5 @@
 import { RtplConfig } from "../../utils/self/config.js";
+import { deleteByPolicy } from "../fs.js";
 import { LockData, parseLockFile } from "./lock.js";
 import { Secrets, parseSecretsFile } from "./secrets.js";
 import { readFile, readdir } from "fs/promises";
@@ -12,8 +13,21 @@ export function serializeBackupData(data: BackupData) {
   return stringify(data, { version: "1.1" });
 }
 
+function isBackupFile(name: string) {
+  return /^\d+\.yaml$/.test(name);
+}
+
+export async function deleteOldBackups(config: RtplConfig["backup"]) {
+  if (config.deletionPolicy === false) return [];
+  return await deleteByPolicy(
+    config.path,
+    config.deletionPolicy || {},
+    isBackupFile,
+  );
+}
+
 export async function createBackupFile(
-  config: Pick<RtplConfig, "lock" | "secrets">,
+  config: Pick<RtplConfig, "lock" | "secrets" | "backup">,
 ): Promise<BackupData> {
   const lock = await parseLockFile<{ contents: string }>(config.lock.path);
   const secrets = await parseSecretsFile(config.secrets.path);
@@ -35,7 +49,7 @@ export async function readBackupFile(
 
 async function findFileByIndex(path: string, index: number) {
   const id = (await readdir(path))
-    .filter((f) => /^\d+\.yaml$/.test(f))
+    .filter(isBackupFile)
     .map((f) => Number(f.split(".")[0]))
     .sort((a, b) => a - b)
     .at(index);

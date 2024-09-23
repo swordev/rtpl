@@ -1,5 +1,9 @@
 import { GlobalOptions, pkg } from "../cli.js";
-import { createBackupFile, serializeBackupData } from "../utils/self/backup.js";
+import {
+  createBackupFile,
+  deleteOldBackups,
+  serializeBackupData,
+} from "../utils/self/backup.js";
 import { parseConfigFile } from "../utils/self/config.js";
 import chalk from "chalk";
 import { createHash } from "crypto";
@@ -45,11 +49,16 @@ export default async function backup(options: BackupOptions) {
   await mkdir(dirname(path), { recursive: true });
   await writeFile(path, file);
 
+  const removed = await deleteOldBackups(config.backup);
+
   if (log) {
     for (const line of [...header, `# path: ${path}`])
       console.info(chalk.gray(line));
     console.info();
     console.info(chalk.green(`Backup created successfully.`));
+    if (removed.length) {
+      console.info(chalk.green(`Old backups deleted: ${removed.length}`));
+    }
   }
   return { exitCode: 0 };
 }

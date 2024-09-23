@@ -1,6 +1,7 @@
-import { findPath, readAnyFile } from "../fs.js";
+import { findPath, readAnyFile, DeletionPolicyOptions } from "../fs.js";
 import { merge } from "../object.js";
 import { expandPaths } from "../path.js";
+import { DeepPartial } from "../ts.js";
 import { dirname, join, resolve } from "path";
 
 export type RtplConfig = {
@@ -45,10 +46,14 @@ export type RtplConfig = {
      * @default ".rtpl-backup"
      */
     path: string;
+    /**
+     * @default {"keepLast": 25}
+     */
+    deletionPolicy?: false | DeletionPolicyOptions;
   };
 };
 
-export type InRtplConfg = Partial<RtplConfig>;
+export type InRtplConfg = DeepPartial<RtplConfig>;
 
 const defaults: RtplConfig = {
   root: ".",
@@ -68,6 +73,9 @@ const defaults: RtplConfig = {
   backup: {
     enabled: true,
     path: ".rtpl-backup",
+    deletionPolicy: {
+      keepLast: 25,
+    },
   },
 };
 
