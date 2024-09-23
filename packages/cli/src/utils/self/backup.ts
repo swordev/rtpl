@@ -1,21 +1,12 @@
 import { RtplConfig } from "../../utils/self/config.js";
 import { LockData, parseLockFile } from "./lock.js";
 import { Secrets, parseSecretsFile } from "./secrets.js";
-import { readFile, readdir, writeFile } from "fs/promises";
+import { readFile, readdir } from "fs/promises";
 import { parse, stringify } from "yaml";
 
 export type BackupData = LockData<{ contents: string }> & {
   secrets: Secrets;
 };
-
-export async function writeBackupFile(
-  path: string,
-  inData: BackupData | string,
-) {
-  const data =
-    typeof inData === "string" ? inData : serializeBackupData(inData);
-  await writeFile(path, data);
-}
 
 export function serializeBackupData(data: BackupData) {
   return stringify(data, { version: "1.1" });

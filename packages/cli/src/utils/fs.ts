@@ -1,5 +1,5 @@
 import { mkdir, readFile, stat } from "fs/promises";
-import { isAbsolute, join, posix, relative } from "path";
+import { join, relative } from "path";
 
 export async function statIfExists(path: string) {
   try {
@@ -27,12 +27,6 @@ export async function readIfExists(path: string) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") return;
     throw error;
   }
-}
-
-export function resolveUnixPath(path: string) {
-  return isAbsolute(path)
-    ? path
-    : posix.join(process.cwd().replace(/\\/g, "/"), path);
 }
 
 export async function mkrdir(dir: string, baseDir?: string) {
