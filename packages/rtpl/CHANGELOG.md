@@ -1,5 +1,16 @@
 # rtpl
 
+## 0.12.0
+
+### Patch Changes
+
+- [`b035ee9`](https://github.com/swordev/rtpl/commit/b035ee926af4d21d495d82adbcf106eac5d974b4) Thanks [@juanrgm](https://github.com/juanrgm)! - Replace `ts-node` by `tsx`
+
+- [`faff2cc`](https://github.com/swordev/rtpl/commit/faff2cc179a6af504ea8b90c9d4c01f178c77d45) Thanks [@juanrgm](https://github.com/juanrgm)! - Update dependencies
+
+- Updated dependencies [[`c98ba3c`](https://github.com/swordev/rtpl/commit/c98ba3cc3fc6d29bcf4d2e1a8dc3a1c69484edcc), [`33dd376`](https://github.com/swordev/rtpl/commit/33dd37631ae5fa38599a286fb600fd88da8eced8), [`ce55fba`](https://github.com/swordev/rtpl/commit/ce55fbaa52e159ef4d5e65fa1a5fc420e58ef629), [`b035ee9`](https://github.com/swordev/rtpl/commit/b035ee926af4d21d495d82adbcf106eac5d974b4), [`faff2cc`](https://github.com/swordev/rtpl/commit/faff2cc179a6af504ea8b90c9d4c01f178c77d45)]:
+  - @rtpl/cli@0.12.0
+
 ## 0.11.1
 
 ### Patch Changes
