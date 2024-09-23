@@ -41,33 +41,33 @@
   },
   "dependencies": {
     "@types/json-schema": "^7.0.15",
-    "ajv": "^8.13.0",
+    "ajv": "^8.17.1",
     "brace-expansion": "^4.0.0",
     "chalk": "^5.3.0",
-    "commander": "^12.0.0",
-    "diff": "^5.2.0",
+    "commander": "^12.1.0",
+    "diff": "^7.0.0",
     "lodash.camelcase": "^4.3.0",
     "lodash.isplainobject": "^4.0.6",
     "lodash.mergewith": "^4.6.2",
     "lodash.set": "^4.3.2",
-    "micromatch": "^4.0.5",
-    "ts-essentials": "^10.0.0",
-    "yaml": "^2.4.2",
+    "micromatch": "^4.0.8",
+    "ts-essentials": "^10.0.2",
+    "yaml": "^2.5.1",
     "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/brace-expansion": "^1.1.2",
-    "@types/diff": "^5.2.1",
+    "@types/diff": "^5.2.2",
     "@types/lodash.camelcase": "^4.3.9",
     "@types/lodash.isplainobject": "^4.0.9",
     "@types/lodash.mergewith": "^4.6.9",
     "@types/lodash.set": "^4.3.9",
-    "@types/micromatch": "^4.0.7"
+    "@types/micromatch": "^4.0.9"
   },
   "peerDependencies": {
     "ts-node": "^10.9.2"
   },
   "engine": {
-    "node": ">=16.0.0"
+    "node": ">=20.0.0"
   }
 }
