@@ -65,7 +65,7 @@ export default (defaultOptions?: Partial<GlobalOptions>) => {
     .alias("i")
     .option("-d,--dry-run", "dry run", false)
     .option("--no-backup", "no backup", false)
-    .option("-c,--confirm", "confirm changes", false)
+    .option("--confirm", "confirm changes", false)
     .option(
       "-l,--lines <value>",
       "diff context lines (interactive mode)",
