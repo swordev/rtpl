@@ -12,5 +12,14 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "editor.formatOnSave": true,
-  "typescript.tsdk": "node_modules\\typescript\\lib"
+  "terminal.integrated.env.linux": {
+    "PATH": "./node_modules/.bin;${env:PATH}"
+  },
+  "terminal.integrated.env.osx": {
+    "PATH": "./node_modules/.bin;${env:PATH}"
+  },
+  "terminal.integrated.env.windows": {
+    "PATH": "./node_modules/.bin;${env:PATH}"
+  },
+  "typescript.tsdk": "node_modules/typescript/lib"
 }
