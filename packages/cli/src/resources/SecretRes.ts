@@ -81,8 +81,8 @@ export class SecretRes extends AbstractRes<
     await super.onReady(path, ctx);
     const prevFile = (await readIfExists(path))?.toString();
     const prev = ctx.data.secrets
-      ? ctx.data.secrets[path] ??
-        (ctx.data.initialSecrets ? prevFile : undefined)
+      ? (ctx.data.secrets[path] ??
+        (ctx.data.initialSecrets ? prevFile : undefined))
       : undefined;
     const $generate = this.data?.generate ?? true;
     let current = prev ?? ($generate ? generate(this.data) : undefined);
