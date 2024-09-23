@@ -2,10 +2,10 @@
   "files": [],
   "references": [
     {
-      "path": "packages/cli"
+      "path": "./packages/cli/tsconfig.json"
     },
     {
-      "path": "packages/rtpl"
+      "path": "./packages/rtpl/tsconfig.json"
     }
   ]
 }

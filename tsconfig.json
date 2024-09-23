@@ -10,5 +10,10 @@
     "moduleResolution": "node16",
     "composite": true
   },
-  "exclude": ["**/temp/", "**/.*/", "**/lib", "**/node_modules"]
+  "exclude": ["**/temp/", "**/.*/", "**/lib", "**/node_modules"],
+  "references": [
+    {
+      "path": "./packages/rtpl/tsconfig.json"
+    }
+  ]
 }
