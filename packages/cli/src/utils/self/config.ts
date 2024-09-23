@@ -83,7 +83,10 @@ export function defineConfig(config: InRtplConfg): InRtplConfg {
   return config;
 }
 
-export async function parseConfigFile(inPath: string): Promise<RtplConfig> {
+export async function parseConfigFile(
+  inPath: string,
+  root?: string,
+): Promise<RtplConfig> {
   const paths = expandPaths(inPath, { js: true, ts: true, json: true });
   const path = await findPath(paths);
   const inConfig = path ? await readAnyFile(resolve(path)) : undefined;
@@ -91,7 +94,8 @@ export async function parseConfigFile(inPath: string): Promise<RtplConfig> {
     structuredClone(defaults),
     structuredClone(inConfig),
   );
-  if (!config.root || config.root === ".") config.root = dirname(inPath);
+  if (!config.root || config.root === ".")
+    config.root = root || dirname(inPath);
   config.root = resolve(config.root);
   config.template.path = join(config.root, config.template.path);
   config.lock.path = join(config.root, config.lock.path);

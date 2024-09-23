@@ -7,10 +7,11 @@ import { writeSecretsFile } from "../utils/self/secrets.js";
 import chalk from "chalk";
 import { existsSync } from "fs";
 import { mkdir, writeFile } from "fs/promises";
-import { relative } from "path";
+import { join, relative } from "path";
 
 export type RestoreOptions = GlobalOptions & {
   input: string;
+  output?: string;
 };
 
 const normalizePath = (path: string) =>
@@ -18,6 +19,9 @@ const normalizePath = (path: string) =>
 
 export default async function restore(options: RestoreOptions) {
   const config = await parseConfigFile(options.config);
+  const outConfig = options.output
+    ? await parseConfigFile(options.config, options.output)
+    : config;
   const path = normalizePath(
     await findBackupPath(config.backup.path, options.input),
   );
@@ -31,14 +35,19 @@ export default async function restore(options: RestoreOptions) {
   }
 
   const errors = createRestoreErrors();
+  const checkPath = (...paths: string[]) => {
+    for (const path of paths) if (existsSync(path)) errors.addPath(path);
+  };
+  const resolveResOutPath = (path: string) =>
+    options.output ? join(options.output, path) : path;
 
-  if (existsSync(config.secrets.path)) errors.addPath(config.secrets.path);
-  if (existsSync(config.lock.path)) errors.addPath(config.lock.path);
+  checkPath(outConfig.secrets.path, outConfig.lock.path);
 
   for (const name in backupData.templates) {
     const tpl = backupData.templates[name];
     for (const path in tpl.files) {
-      if (existsSync(path)) errors.addPath(path);
+      const outPath = resolveResOutPath(path);
+      checkPath(outPath);
     }
   }
 
@@ -52,19 +61,21 @@ export default async function restore(options: RestoreOptions) {
   for (const name in backupData.templates) {
     const tpl = backupData.templates[name];
     for (const path in tpl.dirs) {
-      if (dirs.has(path)) continue;
-      dirs.add(path);
-      await mkdir(path, { recursive: true });
+      const outPath = resolveResOutPath(path);
+      if (dirs.has(outPath)) continue;
+      dirs.add(outPath);
+      await mkdir(outPath, { recursive: true });
     }
     for (const path in tpl.files) {
       const contents = tpl.files[path].contents;
-      if (typeof contents === "string") await writeFile(path, contents);
+      const outPath = resolveResOutPath(path);
+      if (typeof contents === "string") await writeFile(outPath, contents);
       delete (tpl.files[path] as any).contents;
     }
   }
 
-  await writeSecretsFile(config.secrets.path, backupData.secrets);
-  await writeLockFile(config.lock.path, {
+  await writeSecretsFile(outConfig.secrets.path, backupData.secrets);
+  await writeLockFile(outConfig.lock.path, {
     templates: backupData.templates as any,
   });
 

@@ -93,6 +93,7 @@ export default (defaultOptions?: Partial<GlobalOptions>) => {
       "path, negative index or file without extension",
       "-1",
     )
+    .option("-o,--output <directory>", "output directory")
     .action(makeAction(restore));
   program.parse(process.argv);
 };
