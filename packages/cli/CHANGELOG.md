@@ -1,5 +1,11 @@
 # @rtpl/cli
 
+## 0.12.1
+
+### Patch Changes
+
+- [`ac6d995`](https://github.com/swordev/rtpl/commit/ac6d99525487473305740116594829b738b17119) Thanks [@juanrgm](https://github.com/juanrgm)! - Update dependencies.
+
 ## 0.12.0
 
 ### Minor Changes
