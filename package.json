@@ -6,20 +6,20 @@
   "bugs": {
     "url": "https://github.com/swordev/rtpl/issues"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/swordev/rtpl"
-  },
   "license": "MIT",
   "author": {
     "name": "Juanra GM",
     "email": "juanrgm724@gmail.com",
     "url": "https://github.com/juanrgm"
   },
-  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/swordev/rtpl"
+  },
   "workspaces": [
     "packages/*"
   ],
+  "type": "module",
   "scripts": {
     "build": "tsc -b tsconfig.build.json",
     "check": "pnpm check:format",
