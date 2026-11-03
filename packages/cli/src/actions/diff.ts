@@ -24,14 +24,13 @@ export default async function diff(options: DiffOptions) {
   let changes = 0;
   const lock = new TplLock(config.paths.lock);
   const lockData = await lock.read();
-  const actions = await getFileActions(resources, lockData);
-  for (const path in actions) {
-    const action = actions[path];
+  const actions = await getFileActions(config, resources, lockData);
+  for (const action of actions) {
     if (action.type === ActionEnum.NONE) continue;
-    logAction(action.type, path);
+    logAction(action.type, action.relativePath);
     changes++;
     if (action.type === ActionEnum.ADD || action.type === ActionEnum.UPDATE) {
-      await showDiff(resources[path], path, options);
+      await showDiff(resources[action.resourcePath], action.fsPath, options);
     }
   }
 

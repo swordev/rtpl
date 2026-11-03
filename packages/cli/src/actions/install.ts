@@ -56,24 +56,23 @@ export default async function install(options: InstallActionOptions) {
 
   const lock = new TplLock(config.paths.lock);
   const lockData = await lock.read();
-  const actions = await getFileActions(resources, lockData);
+  const actions = await getFileActions(config, resources, lockData);
   let changes = 0;
   let errors = 0;
-  for (const path in actions) {
-    const action = actions[path];
+  for (const action of actions) {
     if (action.type !== ActionEnum.NONE) {
-      logAction(action.type, path);
+      logAction(action.type, action.relativePath);
       changes++;
     }
     try {
       const dirs = await execFileAction(
         action,
         config.root,
-        path,
+        action.resourcePath,
         options.dryRun,
       );
       if (action.lock) {
-        lockData.files[path] = action.lock;
+        lockData.files[action.resourcePath] = action.lock;
         if (dirs) {
           for (const dir of dirs) {
             lockData.dirs[dir] = {
@@ -82,13 +81,13 @@ export default async function install(options: InstallActionOptions) {
           }
         }
       } else if (typeof action.lock === "undefined") {
-        delete lockData.files[path];
+        delete lockData.files[action.resourcePath];
       }
     } catch (error) {
       errors++;
       console.error(
         `[${styleText("red", "!")}]`,
-        path,
+        action.relativePath,
         styleText("gray", (error as Error).message),
       );
     }

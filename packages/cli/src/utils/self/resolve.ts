@@ -68,7 +68,6 @@ export async function createTplResources(
       config.resourcesDir,
       tpl.name,
     ])) {
-      if (DirRes.isInstance(res) && !options.includeDirs) continue;
       resources[path] = res;
     }
   }
@@ -93,6 +92,7 @@ export async function createTplResources(
 
     const res = resources[path];
     await res["onReady"]?.(path, ctx);
+    if (DirRes.isInstance(res) && !options.includeDirs) delete resources[path];
   }
 
   return { resources, secrets: ctx.data.secrets };

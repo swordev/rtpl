@@ -5,6 +5,7 @@ import { sort } from "../object.js";
 import { LockData, LockDataFile } from "./lock.js";
 import { readFile, rm, rmdir, writeFile } from "fs/promises";
 import { dirname, join, relative } from "path";
+import { ResolvedTplConfig } from "./config.js";
 
 export enum ActionEnum {
   NONE,
@@ -46,26 +47,22 @@ export function logAction(action: ActionEnum, path: string) {
 }
 
 export async function getFileAction(
-  path: string,
+  absPath: string,
   res: AbstractRes,
   previousLock?: LockDataFile,
 ): Promise<ActionResult> {
   const lock: LockDataFile = previousLock
-    ? {
-        ...previousLock,
-      }
-    : {
-        creationDate: new Date().toISOString(),
-      };
+    ? { ...previousLock }
+    : { creationDate: new Date().toISOString() };
 
   if (res) {
     const data = res.toString();
-    if (!(await checkPath(path))) {
+    if (!(await checkPath(absPath))) {
       return { type: ActionEnum.ADD, data, lock };
     } else {
       let oldData;
       try {
-        oldData = (await readFile(path)).toString();
+        oldData = (await readFile(absPath)).toString();
       } catch (error) {
         if ((error as NodeJS.ErrnoException).code !== "EISDIR") throw oldData;
       }
@@ -88,24 +85,49 @@ export async function getFileAction(
 }
 
 export async function getFileActions(
-  resMap: Record<string, AbstractRes>,
+  config: ResolvedTplConfig,
+  resources: Record<string, AbstractRes>,
   lockData: LockData,
 ) {
-  const result: Record<string, ActionResult> = {};
+  const result: Record<
+    string,
+    ActionResult & {
+      relativePath: string;
+      resourcePath: string;
+      fsPath: string;
+    }
+  > = {};
   const lockFilePaths = Object.keys(lockData.files);
 
-  for (const path of lockFilePaths) {
-    const lock = lockData.files[path];
-    result[path] = await getFileAction(path, resMap[path], lock);
+  for (const resourcePath of lockFilePaths) {
+    const lock = lockData.files[resourcePath];
+    const fsPath = join(config.root, resourcePath);
+    const relativePath = relative(config.paths.cwd, fsPath).replace(/\\/g, "/");
+    result[resourcePath] = {
+      ...(await getFileAction(fsPath, resources[resourcePath], lock)),
+      relativePath,
+      resourcePath,
+      fsPath,
+    };
   }
 
-  for (const path in resMap) {
-    if (!(path in result)) {
-      result[path] = await getFileAction(path, resMap[path]);
+  for (const resourcePath in resources) {
+    if (!(resourcePath in result)) {
+      const fsPath = join(config.root, resourcePath);
+      const relativePath = relative(config.paths.cwd, fsPath).replace(
+        /\\/g,
+        "/",
+      );
+      result[resourcePath] = {
+        ...(await getFileAction(fsPath, resources[resourcePath])),
+        relativePath,
+        resourcePath,
+        fsPath,
+      };
     }
   }
 
-  return sort(result);
+  return Object.values(sort(result));
 }
 
 export async function execFileAction(

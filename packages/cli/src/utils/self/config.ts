@@ -36,6 +36,7 @@ export type TplConfig = {
 };
 
 export type TplConfigPaths = {
+  cwd: string;
   root: string;
   resources: string;
   data: string;
@@ -88,6 +89,7 @@ export function resolveTplConfig(config: TplConfig) {
   return {
     ...config,
     paths: {
+      cwd: process.env.INIT_CWD ?? process.cwd(),
       root: root,
       resources: join(root, config.resourcesDir),
       data: join(root, config.dataDir),
@@ -105,6 +107,7 @@ export async function parseTplConfigFile(
   const path = await findPath(paths);
   const inConfig = path ? await readAnyFile(resolve(path)) : undefined;
   const config: TplConfig = {
+    templates: [],
     ...defaultsTplConfig,
     ...inConfig,
     backup: {
