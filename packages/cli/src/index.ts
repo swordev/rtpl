@@ -1,5 +1,11 @@
 export { DelayedValue } from "./resources/DelayedValue.js";
-export { defineTpl, Tpl } from "./utils/self/tpl.js";
+export type { StandardSchemaV1 } from "@standard-schema/spec";
+export {
+  defineTpl,
+  type Tpl,
+  type TplCommon,
+  type TplBuilder,
+} from "./utils/self/tpl.js";
 export { defineTplSchema } from "./utils/self/schema.js";
 export {
   AbstractRes,

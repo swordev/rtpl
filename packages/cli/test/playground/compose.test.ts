@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   defineTpl,
   defineTplSchema,
+  DirRes,
+  JsonRes,
   resolveTplResources,
   SecretRes,
   YamlRes,
@@ -56,8 +58,23 @@ describe("compose", () => {
       name: "app",
       resources: (name) => {
         const sqlPassword = new SecretRes({});
+        const settings = new DirRes({});
+        const config = new JsonRes({
+          data: {
+            sql: {
+              username: "postgres",
+              get password() {
+                return sqlPassword.toString();
+              },
+              get passwordPath() {
+                return sqlPassword.path.toString();
+              },
+            },
+            settingsPath: settings.path,
+          },
+        });
         return {
-          sqlPassword,
+          settings: settings.add({ sqlPassword, config }),
           compose: new ComposeRes({
             data: {
               volumes: {
@@ -98,8 +115,8 @@ describe("compose", () => {
         resourcePathAllowlist: ["docker-compose.yaml"],
       },
       {
-        "resources/app1/sqlPassword.secret": "0D6Zlwi0gXAgqasK",
-        "resources/app2/sqlPassword.secret": "MsQbkcEPiJekr3D5",
+        "resources/app1/settings/sqlPassword.secret": "0D6Zlwi0gXAgqasK",
+        "resources/app2/settings/sqlPassword.secret": "MsQbkcEPiJekr3D5",
       },
     );
 
@@ -132,8 +149,26 @@ describe("compose", () => {
             - app2_db
           volumes: []
       ",
-        "resources/app1/sqlPassword.secret": "0D6Zlwi0gXAgqasK",
-        "resources/app2/sqlPassword.secret": "MsQbkcEPiJekr3D5",
+        "resources/app1/settings": undefined,
+        "resources/app1/settings/config.json": "{
+        "sql": {
+          "username": "postgres",
+          "password": "0D6Zlwi0gXAgqasK",
+          "passwordPath": "./resources/app1/settings/sqlPassword.secret"
+        },
+        "settingsPath": "./resources/app1/settings"
+      }",
+        "resources/app1/settings/sqlPassword.secret": "0D6Zlwi0gXAgqasK",
+        "resources/app2/settings": undefined,
+        "resources/app2/settings/config.json": "{
+        "sql": {
+          "username": "postgres",
+          "password": "MsQbkcEPiJekr3D5",
+          "passwordPath": "./resources/app2/settings/sqlPassword.secret"
+        },
+        "settingsPath": "./resources/app2/settings"
+      }",
+        "resources/app2/settings/sqlPassword.secret": "MsQbkcEPiJekr3D5",
       }
     `);
   });

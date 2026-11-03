@@ -10,15 +10,6 @@ class StringRes extends AbstractRes<string | undefined> {
   }
 }
 
-describe("AbstractRes.lastStacks", () => {
-  it("returns current source", () => {
-    const stack = new StringRes({}).stack;
-    expect(stack?.split("\n")[1]).toContain(
-      fileURLToPath(import.meta.url).replaceAll("\\", "/"),
-    );
-  });
-});
-
 describe("AbstractRes.isInstance", () => {
   it("with custom DirRes", () => {
     class Dir<T extends DirData> extends DirRes<T> {}

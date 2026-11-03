@@ -27,6 +27,7 @@ export type TplCommon<
 > = {
   name: string;
   onResolve?: (data: {
+    name: string;
     fs: ResourceSystem;
     resources: Awaited<R>;
     options: O;
@@ -48,12 +49,14 @@ export type TplOptions<
     :
         | ((
             options: DeepPartial<InferInput<S>>,
+            name: string,
           ) => MaybePromise<DeepPartial<InferInput<S>>>)
         | DeepPartial<InferInput<S>>;
   onOptions?: [S] extends [never]
     ? never
     : (
         options: DeepPartial<InferInput<S>>,
+        name: string,
       ) => MaybePromise<DeepPartial<InferInput<S>>>;
 };
 
@@ -109,11 +112,11 @@ export function defineTpl(config: TplOptions<any, any>): any {
     let options = merge(
       {},
       typeof config.defaultOptions === "function"
-        ? await config.defaultOptions(rawInput)
+        ? await config.defaultOptions(rawInput, name)
         : (config.defaultOptions ?? {}),
       rawInput,
     );
-    if (config.onOptions) options = await config.onOptions(options);
+    if (config.onOptions) options = await config.onOptions(options, name);
     const result = await config.schema["~standard"].validate(options);
     if (result.issues?.length) {
       throw new Error(

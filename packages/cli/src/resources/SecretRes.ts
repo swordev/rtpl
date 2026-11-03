@@ -62,8 +62,8 @@ export class SecretRes extends AbstractRes<
       super(input);
       this.options = input;
     }
-    this.value = new DelayedValue(undefined, this.stack);
-    this.hasNewValue = new DelayedValue(undefined, this.stack);
+    this.value = new DelayedValue();
+    this.hasNewValue = new DelayedValue();
   }
   static isInstance(value: unknown): value is SecretRes {
     return AbstractRes.isInstance(value, this);

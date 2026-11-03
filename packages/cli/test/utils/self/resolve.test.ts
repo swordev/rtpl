@@ -35,7 +35,9 @@ describe("resolveTplResources", () => {
         x: new YamlRes({ data: { x: 1 } }),
         config: new DirRes({
           name: ".config",
-          password: new SecretRes({}),
+          data: {
+            password: new SecretRes({}),
+          },
         }),
       }),
     });
@@ -53,6 +55,7 @@ describe("resolveTplResources", () => {
         "password": "8YdCjcXIisJm400w"
       }",
         "resources/test0/password.secret": "8YdCjcXIisJm400w",
+        "resources/test1/.config": undefined,
         "resources/test1/.config/password.secret": "Gl3s8Ogqk14TZDDw",
         "resources/test1/x.yaml": "x: 1
       ",

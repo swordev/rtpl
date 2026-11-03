@@ -32,10 +32,9 @@ function* iterateResources(
   for (const key in inResources) {
     const value = (inResources as any)[key];
     if (DirRes.isInstance(value)) {
-      yield* iterateResources(value.config, [
-        ...parentPath,
-        value.name ?? createFileName(key, value),
-      ]);
+      const path = [...parentPath, value.name ?? createFileName(key, value)];
+      yield [path.join("/"), value];
+      yield* iterateResources(value.data, path);
     } else if (value instanceof AbstractRes) {
       const outPath = [...parentPath, value.name ?? createFileName(key, value)]
         .join("/")
@@ -50,7 +49,7 @@ function* iterateResources(
 
 export async function createTplResources(
   config: ResolvedTplConfig,
-  options: { secrets?: Record<string, string> } = {},
+  options: { secrets?: Record<string, string>; includeDirs?: boolean } = {},
 ) {
   const templates = await Promise.all(config.templates);
   const ctx = new ResReadyContext({
@@ -69,12 +68,14 @@ export async function createTplResources(
       config.resourcesDir,
       tpl.name,
     ])) {
+      if (DirRes.isInstance(res) && !options.includeDirs) continue;
       resources[path] = res;
     }
   }
   const fs = createResourceSystem(resources);
   for (const tpl of templates) {
     await tpl.onResolve?.({
+      name: tpl.name,
       options: tpl.options,
       resources: resourcesByTemplate[tpl.name],
       fs,
@@ -105,10 +106,16 @@ export async function resolveTplResources(
     Array.isArray(input) ? { templates: input } : input,
   );
   const config = resolveTplConfig(inConfig);
-  const { resources } = await createTplResources(config, { secrets });
+  const { resources } = await createTplResources(config, {
+    secrets,
+    includeDirs: true,
+  });
   return Object.fromEntries(
     Object.entries(resources).map(([path, res]) => {
-      return [path, res.toString()] as [string, string];
+      return [
+        path,
+        DirRes.isInstance(res) ? undefined : (res as any).toString(),
+      ] as [string, string];
     }),
   );
 }

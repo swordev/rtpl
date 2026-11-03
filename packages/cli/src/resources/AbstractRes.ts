@@ -52,7 +52,6 @@ export abstract class AbstractRes<
   readonly path: DelayedValue<string>;
   readonly dirname: DelayedValue<string>;
   readonly resolved: boolean | undefined;
-  readonly stack: string | undefined;
   symbol: symbol | undefined;
   constructor(
     readonly options: ResOptions<TData, TConf>,
@@ -66,14 +65,8 @@ export abstract class AbstractRes<
       if (key !== "name" && key !== "data") (config as any)[key] = options[key];
       return config;
     }, {} as TConf);
-    const error: { stack?: string } = {};
-    Error.captureStackTrace(error, this.constructor);
-    this.stack = error.stack;
-    this.path = new DelayedValue((path) => `./${path}`, this.stack);
-    this.dirname = new DelayedValue(
-      (path) => `./${posix.dirname(path)}`,
-      this.stack,
-    );
+    this.path = new DelayedValue((path) => `./${path}`);
+    this.dirname = new DelayedValue((path) => `./${posix.dirname(path)}`);
   }
 
   abstract toString(): string;
