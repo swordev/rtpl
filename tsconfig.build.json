@@ -1,11 +1,7 @@
 {
-  "files": [],
+  "include": [],
   "references": [
-    {
-      "path": "./packages/cli/tsconfig.json"
-    },
-    {
-      "path": "./packages/rtpl/tsconfig.json"
-    }
+    { "path": "./packages/cli/tsconfig.build.json" },
+    { "path": "./packages/rtpl/tsconfig.build.json" }
   ]
 }

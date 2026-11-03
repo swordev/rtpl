@@ -1,0 +1,10 @@
+{
+  "extends": ["@tsconfig/node24"],
+  "include": ["src"],
+  "compilerOptions": {
+    "composite": true,
+    "rootDir": "src",
+    "types": ["node"],
+    "outDir": "lib"
+  }
+}

@@ -1,9 +1,10 @@
-import _isPlainObject from "lodash.isplainobject";
-import mergeWith from "lodash.mergewith";
-
-export const isPlainObject: (
+export function isPlainObject(
   input: unknown,
-) => input is Record<string, unknown> = _isPlainObject as any;
+): input is Record<string, unknown> {
+  if (Object.prototype.toString.call(input) !== "[object Object]") return false;
+  const prototype = Object.getPrototypeOf(input);
+  return prototype === null || prototype === Object.prototype;
+}
 
 export function sort<T extends Record<string, unknown>>(object: T) {
   return Object.keys(object)
@@ -15,11 +16,42 @@ export function sort<T extends Record<string, unknown>>(object: T) {
 }
 
 export function merge<TObject, TSource>(object: TObject, source: TSource) {
-  return mergeWith<TObject, TSource>(object, source, (objValue, srcValue) => {
-    if (Array.isArray(objValue)) {
-      return srcValue;
+  if (!isPlainObject(object) || !isPlainObject(source))
+    return object as TObject & TSource;
+
+  return mergeRecords(
+    object as Record<string, unknown>,
+    source as Record<string, unknown>,
+  ) as TObject & TSource;
+}
+
+function mergeRecords(
+  object: Record<string, unknown>,
+  source: Record<string, unknown>,
+) {
+  for (const [key, sourceValue] of Object.entries(source)) {
+    const objectValue = object[key];
+
+    if (Array.isArray(objectValue)) {
+      object[key] = sourceValue;
+      continue;
     }
-  });
+
+    if (isPlainObject(objectValue) && isPlainObject(sourceValue)) {
+      object[key] = mergeRecords(objectValue, sourceValue);
+      continue;
+    }
+
+    object[key] = cloneMergeValue(sourceValue);
+  }
+
+  return object;
+}
+
+function cloneMergeValue(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map((item) => cloneMergeValue(item));
+  if (isPlainObject(value)) return mergeRecords({}, value);
+  return value;
 }
 
 export function clone<T>(object: T) {

@@ -1,4 +1,4 @@
-import Ajv from "ajv";
+import { Ajv } from "ajv";
 import { readFile, writeFile } from "fs/promises";
 import { JSONSchema7 } from "json-schema";
 
@@ -71,7 +71,7 @@ export const lockSchema: JSONSchema7 = {
 };
 
 export function assertLockData(data: LockData): asserts data is LockData {
-  const validate = new Ajv.default().compile(lockSchema);
+  const validate = new Ajv().compile(lockSchema);
   if (!validate(data))
     throw new Error(
       `Invalid json schema: ${JSON.stringify(validate.errors, null, 2)}`,

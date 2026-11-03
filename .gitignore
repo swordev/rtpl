@@ -7,4 +7,4 @@ rtpl-lock.json
 rtpl-secrets.json
 rtpl-config.*
 /rtpl.*
-tsconfig.tsbuildinfo
+*.tsbuildinfo

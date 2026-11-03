@@ -1,8 +1,5 @@
 {
-  "compilerOptions": {
-    "outDir": "lib",
-    "rootDir": "src"
-  },
-  "extends": "./../../tsconfig.json",
-  "include": ["src"]
+  "extends": ["./tsconfig.build.json"],
+  "include": ["src", "test"],
+  "compilerOptions": { "noEmit": true }
 }
