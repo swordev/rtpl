@@ -1,5 +1,15 @@
 # @rtpl/cli
 
+## 0.13.0
+
+### Minor Changes
+
+- [`815849c`](https://github.com/swordev/rtpl/commit/815849ca05d31edb1af1a60038f5cda8673315c3) Thanks [@juanrgm](https://github.com/juanrgm)! - Modernize tsconfig
+
+- [`bad595f`](https://github.com/swordev/rtpl/commit/bad595f2109b6c207a4feeeff58810b05ba6f01f) Thanks [@juanrgm](https://github.com/juanrgm)! - Update dependencies
+
+- [`502153e`](https://github.com/swordev/rtpl/commit/502153e3b6c952a9556518a809d1f78de10ca3de) Thanks [@juanrgm](https://github.com/juanrgm)! - Simplify code and remove dependencies
+
 ## 0.12.1
 
 ### Patch Changes
