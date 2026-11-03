@@ -1,79 +1,197 @@
-import { DirRes, RawRes } from "../../../src/index.js";
-import { resolveResources } from "../../../src/utils/self/resolve.js";
-import { it, describe, expect } from "vitest";
+import { describe, expect, it } from "vitest";
+import {
+  defineTpl,
+  defineTplSchema,
+  DirRes,
+  JsonRes,
+  resolveTplResources,
+  SecretRes,
+  YamlRes,
+} from "../../../src/index.js";
 
-describe("resolveResources", () => {
-  it("uses res name as file name", async () => {
-    const res = new RawRes({ name: "f1" });
-    expect(await resolveResources({ resources: { res } })).toMatchObject({
-      f1: res,
+describe("resolveTplResources", () => {
+  it("resolves template resources correctly", async () => {
+    const tpl0 = defineTpl({
+      name: "test0",
+      schema: defineTplSchema<{ version: string }>(),
+      defaultOptions: (o) => ({ version: o.version }),
+      resources: (o) => {
+        const password = new SecretRes({});
+        return {
+          password,
+          config: new JsonRes({
+            data: {
+              version: o.version,
+              password,
+            },
+          }),
+        };
+      },
     });
-  });
 
-  it("uses tag as file name", async () => {
-    const f1 = new RawRes({});
-    expect(await resolveResources({ resources: { f1 } })).toMatchObject({
-      f1,
+    const tpl1 = defineTpl({
+      name: "test1",
+      resources: () => ({
+        x: new YamlRes({ data: { x: 1 } }),
+        config: new DirRes({
+          name: ".config",
+          password: new SecretRes({}),
+        }),
+      }),
     });
+    const resources = await resolveTplResources(
+      [tpl0.with({ options: { version: "1" } }), tpl1],
+      {
+        "resources/test0/password.secret": "8YdCjcXIisJm400w",
+        "resources/test1/.config/password.secret": "Gl3s8Ogqk14TZDDw",
+      },
+    );
+    expect(resources).toMatchInlineSnapshot(`
+      {
+        "resources/test0/config.json": "{
+        "version": "1",
+        "password": "8YdCjcXIisJm400w"
+      }",
+        "resources/test0/password.secret": "8YdCjcXIisJm400w",
+        "resources/test1/.config/password.secret": "Gl3s8Ogqk14TZDDw",
+        "resources/test1/x.yaml": "x: 1
+      ",
+      }
+    `);
   });
+  it("skips private folders", async () => {
+    const resources = await resolveTplResources([
+      defineTpl({
+        name: "test",
+        resources: () => ({
+          a: {
+            b: {
+              _c: {
+                d: new JsonRes({ data: { value: 1 } }),
+              },
+            },
+          },
+        }),
+      }),
+    ]);
 
-  it("prepends folder", async () => {
-    const res = new RawRes({ name: "f2" });
+    expect(resources).toMatchInlineSnapshot(`
+      {
+        "resources/test/a/b/d.json": "{
+        "value": 1
+      }",
+      }
+    `);
+  });
+  it("move to prev folder", async () => {
+    const tpl = defineTpl({
+      name: "test",
+      resources: () => ({
+        a: new JsonRes({ name: "file1.json", data: { value: 1 } }),
+        b: new JsonRes({ name: "file2.json", data: { value: 2 } }),
+      }),
+      onResolve: ({ fs }) => {
+        fs.move({ name: "file1.json" }, ".");
+      },
+    });
+
+    await expect(resolveTplResources([tpl])).rejects.toThrow();
+
     expect(
-      await resolveResources({ resources: { folder: { res } } }),
-    ).toMatchObject({
-      "folder/f2": res,
-    });
+      await resolveTplResources({
+        templates: [tpl],
+        resourcePathAllowlist: ["file1.json"],
+      }),
+    ).toMatchInlineSnapshot(`
+      {
+        "file1.json": "{
+        "value": 1
+      }",
+        "resources/test/file2.json": "{
+        "value": 2
+      }",
+      }
+    `);
   });
+  it("uses defaults options", async () => {
+    const tpl = defineTpl({
+      name: "test",
+      schema: defineTplSchema<{
+        app: {
+          name: string;
+          version: string;
+        };
+      }>(),
+      defaultOptions: { app: { version: "1" } },
+      resources: (data) => ({ options: new JsonRes({ data }) }),
+    });
 
-  it("overrides file name", async () => {
-    const res = new RawRes({ name: "f3" });
     expect(
-      await resolveResources({ resources: { "./folder/fx": res } }),
-    ).toMatchObject({
-      "folder/fx": res,
-    });
-  });
+      await resolveTplResources([tpl.withOptions({ app: { name: "app1" } })]),
+    ).toMatchInlineSnapshot(`
+      {
+        "resources/test/options.json": "{
+        "app": {
+          "version": "1",
+          "name": "app1"
+        }
+      }",
+      }
+    `);
 
-  it("prepends folder", async () => {
-    const res = new RawRes({ name: "f3" });
     expect(
-      await resolveResources({ resources: { "./folder/f/": res } }),
-    ).toMatchObject({
-      "folder/f/f3": res,
-    });
+      await resolveTplResources([tpl.withOptions({ app: { version: "2" } })]),
+    ).toMatchInlineSnapshot(`
+      {
+        "resources/test/options.json": "{
+        "app": {
+          "version": "2"
+        }
+      }",
+      }
+    `);
   });
+  it("uses on options", async () => {
+    const tpl = defineTpl({
+      name: "test",
+      schema: defineTplSchema<{
+        app: {
+          name: string;
+          version: string;
+        };
+      }>(),
+      onOptions: (options) => {
+        if (options.app?.name === "app1") {
+          options.app.version = "1";
+        }
+        return options;
+      },
+      resources: (data) => ({ options: new JsonRes({ data }) }),
+    });
 
-  it("uses dir res as folder", async () => {
-    const folder1 = new DirRes({ name: "folder1" });
-    const res = new RawRes({ name: "f3" });
     expect(
-      await resolveResources({ resources: { main: folder1.set({ res }) } }),
-    ).toMatchObject({
-      folder1: folder1,
-      "folder1/f3": res,
-    });
-  });
+      await resolveTplResources([tpl.withOptions({ app: { name: "app1" } })]),
+    ).toMatchInlineSnapshot(`
+      {
+        "resources/test/options.json": "{
+        "app": {
+          "name": "app1",
+          "version": "1"
+        }
+      }",
+      }
+    `);
 
-  it("uses multiple folders", async () => {
-    const folder1 = new DirRes({ name: "folder1" });
-    const folder2 = new DirRes({ name: "folder2" });
     expect(
-      await resolveResources({ resources: { main: folder1.set({ folder2 }) } }),
-    ).toMatchObject({
-      folder1: folder1,
-      "folder1/folder2": folder2,
-    });
-  });
-
-  it("uses same dir level", async () => {
-    const f1 = new RawRes({ name: "f1" });
-    const f2 = new RawRes({ name: "f2" });
-    const f3 = new RawRes({ name: "f3" });
-    expect(await resolveResources({ resources: [f1, f2, f3] })).toMatchObject({
-      f1,
-      f2,
-      f3,
-    });
+      await resolveTplResources([tpl.withOptions({ app: { name: "app2" } })]),
+    ).toMatchInlineSnapshot(`
+      {
+        "resources/test/options.json": "{
+        "app": {
+          "name": "app2"
+        }
+      }",
+      }
+    `);
   });
 });

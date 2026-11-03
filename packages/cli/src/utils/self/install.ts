@@ -1,8 +1,8 @@
 import { AbstractRes } from "../../resources/AbstractRes.js";
 import { checkPath, mkrdir } from "../fs.js";
+import { styleText } from "util";
 import { sort } from "../object.js";
-import { LockDataFile, LockDataTemplate } from "./lock.js";
-import chalk from "chalk";
+import { LockData, LockDataFile } from "./lock.js";
 import { readFile, rm, rmdir, writeFile } from "fs/promises";
 import { dirname, join, relative } from "path";
 
@@ -35,13 +35,13 @@ type ActionResult =
 
 export function logAction(action: ActionEnum, path: string) {
   if (action === ActionEnum.NONE) {
-    console.info(`[${chalk.grey("-")}]`, path);
+    console.info(`[${styleText("gray", "-")}]`, path);
   } else if (action === ActionEnum.ADD) {
-    console.info(`[${chalk.green("A")}]`, path);
+    console.info(`[${styleText("green", "A")}]`, path);
   } else if (action === ActionEnum.UPDATE) {
-    console.info(`[${chalk.yellow("U")}]`, path);
+    console.info(`[${styleText("yellow", "U")}]`, path);
   } else if (action === ActionEnum.DELETE) {
-    console.info(`[${chalk.red("D")}]`, path);
+    console.info(`[${styleText("red", "D")}]`, path);
   }
 }
 
@@ -89,13 +89,13 @@ export async function getFileAction(
 
 export async function getFileActions(
   resMap: Record<string, AbstractRes>,
-  lockDataEntrypoint: LockDataTemplate,
+  lockData: LockData,
 ) {
   const result: Record<string, ActionResult> = {};
-  const lockFilePaths = Object.keys(lockDataEntrypoint.files);
+  const lockFilePaths = Object.keys(lockData.files);
 
   for (const path of lockFilePaths) {
-    const lock = lockDataEntrypoint.files[path];
+    const lock = lockData.files[path];
     result[path] = await getFileAction(path, resMap[path], lock);
   }
 

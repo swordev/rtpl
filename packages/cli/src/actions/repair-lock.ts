@@ -1,34 +1,33 @@
 import { GlobalOptions } from "../cli.js";
 import { confirmPrompt } from "../utils/cli.js";
-import { parseConfigFile } from "../utils/self/config.js";
-import { parseLockFile, writeLockFile } from "../utils/self/lock.js";
-import chalk from "chalk";
+import { styleText } from "util";
+import { parseTplConfigFile } from "../utils/self/config.js";
 import { existsSync } from "fs";
+import { TplLock } from "../utils/self/lock.js";
 
 export type RepairLockOptions = GlobalOptions & {};
 
 export default async function repairLock(options: RepairLockOptions) {
-  const config = await parseConfigFile(options.config);
-  const lockData = await parseLockFile(config.lock.path);
+  const config = await parseTplConfigFile(options.config);
+  const lock = new TplLock(config.paths.lock);
+  const lockData = await lock.read();
 
   const notfounds: string[] = [];
 
-  for (const name in lockData.templates) {
-    const tpl = lockData.templates[name];
-    for (const path in tpl.files) {
-      if (!existsSync(path)) {
-        delete tpl.files[path];
-        if (!notfounds.length) console.info(chalk.yellow("Files not found:"));
-        console.info(chalk.yellow(`- ${path}`));
-        notfounds.push(path);
-      }
+  for (const path in lockData.files) {
+    if (!existsSync(path)) {
+      delete lockData.files[path];
+      if (!notfounds.length)
+        console.info(styleText("yellow", "Files not found:"));
+      console.info(styleText("yellow", `- ${path}`));
+      notfounds.push(path);
     }
   }
 
   if (notfounds.length) console.info();
 
   if (!notfounds.length) {
-    console.info(chalk.green("Lock file is correct."));
+    console.info(styleText("green", "Lock file is correct."));
     return { exitCode: 0 };
   }
 
@@ -38,9 +37,9 @@ export default async function repairLock(options: RepairLockOptions) {
 
   if (!confirm) return { exitCode: 1 };
 
-  await writeLockFile(config.lock.path, lockData);
+  await lock.write(lockData);
 
-  console.info(chalk.green("Lock file repared."));
+  console.info(styleText("green", "Lock file repared."));
 
   return { exitCode: 0 };
 }

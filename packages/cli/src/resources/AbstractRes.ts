@@ -1,5 +1,4 @@
 import { Secrets } from "../utils/self/secrets.js";
-import { Call, getLastStacks } from "../utils/stack.js";
 import { DelayedValue, setDelayedValue } from "./DelayedValue.js";
 import { posix } from "path";
 
@@ -50,10 +49,10 @@ export abstract class AbstractRes<
   readonly name: string | undefined;
   readonly data: TData;
   readonly config: TConf;
-  readonly lastStacks: Call[];
   readonly path: DelayedValue<string>;
   readonly dirname: DelayedValue<string>;
   readonly resolved: boolean | undefined;
+  readonly stack: string | undefined;
   symbol: symbol | undefined;
   constructor(
     readonly options: ResOptions<TData, TConf>,
@@ -67,14 +66,13 @@ export abstract class AbstractRes<
       if (key !== "name" && key !== "data") (config as any)[key] = options[key];
       return config;
     }, {} as TConf);
-    this.lastStacks = getLastStacks(
-      [{ startsWith: new URL(".", import.meta.url).href }],
-      true,
-    );
-    this.path = new DelayedValue((path) => `./${path}`, this.lastStacks);
+    const error: { stack?: string } = {};
+    Error.captureStackTrace(error, this.constructor);
+    this.stack = error.stack;
+    this.path = new DelayedValue((path) => `./${path}`, this.stack);
     this.dirname = new DelayedValue(
       (path) => `./${posix.dirname(path)}`,
-      this.lastStacks,
+      this.stack,
     );
   }
 

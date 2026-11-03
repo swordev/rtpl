@@ -1,6 +1,6 @@
 import { Callable, isPlainObject } from "../utils/object.js";
+import { Writable } from "../utils/ts.js";
 import { AbstractRes, ResOptions, ResType } from "./AbstractRes.js";
-import { Writable } from "ts-essentials";
 
 export type DirData = Callable<
   Record<string, unknown> | unknown[] | undefined,

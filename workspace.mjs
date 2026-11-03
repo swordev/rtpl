@@ -10,6 +10,7 @@ export default defineConfig(({ pkg, packages }) => {
       base: {
         include: ["src", "test"],
         compilerOptions: {
+          rootDir: ".",
           noEmit: true,
         },
       },

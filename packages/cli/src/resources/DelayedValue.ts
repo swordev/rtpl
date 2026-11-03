@@ -1,5 +1,4 @@
-import { Call } from "../utils/stack.js";
-import { Writable } from "ts-essentials";
+import { Writable } from "../utils/ts.js";
 
 type Resolver<T> = (value: T) => any;
 
@@ -8,7 +7,7 @@ export class DelayedValue<T = any> {
   readonly value!: T;
   constructor(
     protected readonly resolver?: Resolver<T>,
-    readonly lastStacks?: Call[],
+    readonly stack?: string,
   ) {}
   static isInstance(value: unknown): value is DelayedValue {
     if (value instanceof this) return true;
@@ -26,13 +25,8 @@ export class DelayedValue<T = any> {
   toString() {
     if (!this.value) {
       const error = new Error(`Value is not resolved yet`);
-      if (this.lastStacks) {
-        error.stack =
-          `Error: ${error.message}\n` +
-          this.lastStacks
-            .filter((v) => !!v.getFileName())
-            .map((v) => `\t at ${v.getFileName()}:${v.getLineNumber()}`)
-            .join("\n");
+      if (this.stack) {
+        error.stack = `Error: ${error.message}\n` + this.stack;
       }
 
       throw error;

@@ -1,25 +1,19 @@
 import { AbstractRes, ResReadyContext } from "../../resources/AbstractRes.js";
-import { MinimalDirRes } from "../../resources/DirRes.js";
-import { SecretRes } from "../../resources/SecretRes.js";
-import { checkPath, findPath, readAnyFile } from "../fs.js";
-import { isPlainObject } from "../object.js";
-import { expandPaths, isDir, isPath, stripRootBackPaths } from "../path.js";
-import { makeFilter } from "../string.js";
-import { RtplConfig } from "./config.js";
-import { MinimalTpl, ResourcesResultItem } from "./minimal-tpl.js";
+import { TplResources } from "./tpl.js";
+import { DirRes } from "../../resources/DirRes.js";
+import {
+  defineTplConfig,
+  InTplConfig,
+  ResolvedTplConfig,
+  resolveTplConfig,
+  TplConfig,
+} from "./config.js";
+import { TplSecrets } from "./secrets.js";
+import { checkPath } from "../fs.js";
 import { createResourceSystem } from "./rs.js";
-import { parseSecretsFile, Secrets } from "./secrets.js";
-import mm from "micromatch";
-import { basename, join, relative } from "path";
-import * as posix from "path/posix";
+import { isPlainObject } from "../object.js";
 
-export type ResolveConfigOptions = {
-  config: RtplConfig;
-  filter?: string[];
-  secrets?: Secrets;
-};
-
-function resolveTag(tag: string, input: AbstractRes) {
+function createFileName(tag: string, input: AbstractRes) {
   const defaultExtension = input["onDefaultExtension"]();
   if (
     typeof defaultExtension === "string" &&
@@ -31,173 +25,90 @@ function resolveTag(tag: string, input: AbstractRes) {
   return tag;
 }
 
-function splitLevels(res: AbstractRes, levels: string[]): [string[], string] {
-  const folders = levels.slice(0, -1);
-  const rawTag = levels.slice(-1)[0] ?? "_";
-  const tag = resolveTag(rawTag, res);
-  return [folders, tag];
-}
-
-function resolvePathLevels(res: AbstractRes, levels: string[]) {
-  const isRootDir =
-    !levels.length && MinimalDirRes.isInstance(res) && !res.name?.length;
-  if (isRootDir) return [];
-
-  const [pathLevels, tag] = splitLevels(res, levels);
-
-  if (isPath(tag)) {
-    if (isDir(tag)) {
-      pathLevels.push(tag, res.name ?? "_");
-    } else {
-      pathLevels.push(tag);
+function* iterateResources(
+  inResources: TplResources,
+  parentPath: string[],
+): Generator<[string, AbstractRes]> {
+  for (const key in inResources) {
+    const value = (inResources as any)[key];
+    if (DirRes.isInstance(value)) {
+      yield* iterateResources(value.config, [
+        ...parentPath,
+        value.name ?? createFileName(key, value),
+      ]);
+    } else if (value instanceof AbstractRes) {
+      const outPath = [...parentPath, value.name ?? createFileName(key, value)]
+        .join("/")
+        .split("/")
+        .filter((f) => !f.startsWith("_"));
+      yield [outPath.join("/"), value];
+    } else if (isPlainObject(value)) {
+      yield* iterateResources(value as TplResources, [...parentPath, key]);
     }
-  } else {
-    pathLevels.push(res.name ?? tag);
   }
-  return pathLevels;
 }
 
-export async function resolveResources(options: {
-  resources: unknown;
-  filter?: string[];
-  config: RtplConfig;
-  onValue?: (
-    key: string,
-    value: AbstractRes,
-    actions: { process: boolean; add: boolean },
-  ) => Promise<void | false>;
-}) {
-  const values: Record<string, AbstractRes> = {};
-  const patterns = options?.filter?.flatMap((v) => makeFilter(v));
-
-  const process = async (input: unknown, levels: string[]) => {
-    if (isPlainObject(input)) {
-      for (const name in input) {
-        const value = input[name];
-        await process(value, [...levels, name]);
-      }
-    } else if (typeof input === "function") {
-      if (input.length === 0) {
-        const value = await input();
-        await process(value, levels);
-      }
-    } else if (Array.isArray(input)) {
-      let index = 0;
-      for (const value of input) {
-        await process(value, [...levels, (index++).toString()]);
-      }
-    } else if (AbstractRes.isInstance(input)) {
-      const resName = input.name;
-
-      if (resName) {
-        const resNameBase = basename(resName);
-        if (resName !== resNameBase)
-          throw new Error(`Invalid resource name: ${resName}`);
-      }
-
-      const pathLevels = resolvePathLevels(input, levels);
-      const path = join(...pathLevels).replace(/\\/g, "/");
-
-      if (
-        patterns &&
-        !mm.isMatch(path, patterns, {
-          dot: true,
-        })
-      )
-        return;
-      const actions = { process: true, add: true };
-      const result = await options.onValue?.(path, input, actions);
-      if (result === false) actions.add = actions.process = false;
-      if (actions.add) {
-        if (path in values)
-          throw new Error(`Duplicated resource path: ${path}`);
-        values[path] = input as any;
-      }
-      if (actions.process && MinimalDirRes.isInstance(input))
-        await process(input.data, pathLevels);
-    }
-  };
-  await process(options.resources, []);
-  return values;
-}
-
-export async function parseTplFile(inPath: string): Promise<MinimalTpl> {
-  const paths = expandPaths(inPath, { js: true, ts: true });
-  const path = await findPath(paths);
-  if (!path) throw new Error(`Template file not found: ${inPath}`);
-  return readAnyFile(path);
-}
-
-export async function resolveTpl(
-  tpl: MinimalTpl,
-  options: ResolveConfigOptions,
+export async function createTplResources(
+  config: ResolvedTplConfig,
+  options: { secrets?: Record<string, string> } = {},
 ) {
-  const { config } = options;
-  const resourcesDir = relative(config.root, config.resources.path).replace(
-    /\\/g,
-    "/",
-  );
-  const resultItems: ResourcesResultItem[] = [];
-  const inResources = await resolveResources({
-    config,
-    filter: options.filter,
-    resources: await tpl.resources(resultItems),
-    onValue: async (path, res, actions) => {
-      if (res.resolved === false) {
-        actions.process = false;
-      } else {
-        (res as { resolved: boolean }).resolved = true;
-      }
-    },
-  });
-
-  const rs = createResourceSystem(inResources);
-
-  for (const item of resultItems) {
-    const tplOptions = await item.tpl.options();
-    await item.tpl.config.onResolve?.bind(rs)(item.resources, tplOptions);
-  }
-
+  const templates = await Promise.all(config.templates);
   const ctx = new ResReadyContext({
     secrets:
       options.secrets ||
       (config.secrets.enabled
-        ? await parseSecretsFile(config.secrets.path)
+        ? await new TplSecrets(config.paths.secrets).read()
         : undefined),
-    initialSecrets: !(await checkPath(config.secrets.path)),
+    initialSecrets: !(await checkPath(config.paths.secrets)),
   });
-
-  const resEntries = Object.entries(inResources);
-  const sortedResEntries = [
-    ...resEntries.filter(([, r]) => SecretRes.isInstance(r) && !r["parent"]),
-    ...resEntries.filter(([, r]) => SecretRes.isInstance(r) && r["parent"]),
-    ...resEntries.filter(([, r]) => !SecretRes.isInstance(r)),
-  ];
-
-  const resources = await resolveResources({
-    config,
-    filter: options.filter,
-    resources: Object.fromEntries(sortedResEntries),
-    onValue: async (path, res, actions) => {
-      await res["onReady"](posix.join(resourcesDir, path), ctx);
-      if (MinimalDirRes.isInstance(res)) {
-        actions.add = false;
-        actions.process = !res.resolved;
-      }
-    },
-  });
-
-  for (const path in resources) {
-    const isRootPath = path.startsWith("../");
-
-    const newPath = stripRootBackPaths(path);
-    if (isRootPath) {
-      resources[newPath] = resources[path];
-    } else {
-      resources[posix.join(resourcesDir, newPath)] = resources[path];
+  const resources: Record<string, AbstractRes> = {};
+  const resourcesByTemplate: Record<string, any> = {};
+  for (const tpl of templates) {
+    resourcesByTemplate[tpl.name] = await tpl.resources();
+    for (const [path, res] of iterateResources(resourcesByTemplate[tpl.name], [
+      config.resourcesDir,
+      tpl.name,
+    ])) {
+      resources[path] = res;
     }
-    delete resources[path];
+  }
+  const fs = createResourceSystem(resources);
+  for (const tpl of templates) {
+    await tpl.onResolve?.({
+      options: tpl.options,
+      resources: resourcesByTemplate[tpl.name],
+      fs,
+    });
+  }
+  for (const path in resources) {
+    const isValidPath =
+      path.startsWith(config.resourcesDir) ||
+      config.resourcePathAllowlist?.includes(path);
+    if (!isValidPath) {
+      throw new Error(
+        `Resource path "${path}" is outside of the resources directory`,
+      );
+    }
+
+    const res = resources[path];
+    await res["onReady"]?.(path, ctx);
   }
 
   return { resources, secrets: ctx.data.secrets };
+}
+
+export async function resolveTplResources(
+  input: TplConfig["templates"] | InTplConfig,
+  secrets?: Record<string, string>,
+) {
+  const inConfig = defineTplConfig(
+    Array.isArray(input) ? { templates: input } : input,
+  );
+  const config = resolveTplConfig(inConfig);
+  const { resources } = await createTplResources(config, { secrets });
+  return Object.fromEntries(
+    Object.entries(resources).map(([path, res]) => {
+      return [path, res.toString()] as [string, string];
+    }),
+  );
 }

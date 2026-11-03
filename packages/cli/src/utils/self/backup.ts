@@ -1,11 +1,12 @@
-import { RtplConfig } from "../../utils/self/config.js";
 import { deleteByPolicy } from "../fs.js";
-import { LockData, parseLockFile } from "./lock.js";
-import { Secrets, parseSecretsFile } from "./secrets.js";
+import { ResolvedTplConfig } from "./config.js";
+import { LockData, TplLock } from "./lock.js";
+import { Secrets, TplSecrets } from "./secrets.js";
 import { readFile, readdir } from "fs/promises";
 import { parse, stringify } from "yaml";
 
-export type BackupData = LockData<{ contents: string }> & {
+export type BackupData = {
+  lock: LockData<{ contents: string }>;
   secrets: Secrets;
 };
 
@@ -17,21 +18,24 @@ function isBackupFile(name: string) {
   return /^\d+\.yaml$/.test(name);
 }
 
-export async function deleteOldBackups(config: RtplConfig["backup"]) {
-  if (config.deletionPolicy === false) return [];
+export async function deleteOldBackups(config: ResolvedTplConfig) {
+  if (config.backup.deletionPolicy === false) return [];
   return await deleteByPolicy(
-    config.path,
-    config.deletionPolicy || {},
+    config.paths.backup,
+    config.backup.deletionPolicy || {},
     isBackupFile,
   );
 }
 
 export async function createBackupFile(
-  config: Pick<RtplConfig, "lock" | "secrets" | "backup">,
+  config: ResolvedTplConfig,
 ): Promise<BackupData> {
-  const lock = await parseLockFile<{ contents: string }>(config.lock.path);
-  const secrets = await parseSecretsFile(config.secrets.path);
-  return { templates: lock.templates, secrets };
+  const lock = new TplLock(config.paths.lock);
+  const secrets = new TplSecrets(config.paths.secrets);
+  return {
+    lock: await lock.read<{ contents: string }>(),
+    secrets: await secrets.read(),
+  };
 }
 
 export async function readBackupFile(

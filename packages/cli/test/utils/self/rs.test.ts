@@ -10,11 +10,7 @@ describe("extractMap", () => {
       res1,
       res2,
     });
-    expect(
-      rs.extractMap({
-        name: "res1",
-      }),
-    ).toMatchObject({
+    expect(rs.remove({ name: "res1" }, true)).toMatchObject({
       res1: {},
     });
   });
@@ -30,11 +26,7 @@ describe("extractMap", () => {
       res1,
       res2,
     });
-    expect(
-      rs.extractMap({
-        instanceOf: { data: Data },
-      }),
-    ).toMatchObject({
+    expect(rs.remove({ instanceOf: { data: Data } }, true)).toMatchObject({
       res1: data,
     });
   });
@@ -54,11 +46,7 @@ describe("extractMap", () => {
       res1,
       res2,
     });
-    expect(
-      rs.extractMap({
-        instanceOf: CustomRes,
-      }),
-    ).toMatchObject({
+    expect(rs.remove({ instanceOf: CustomRes }, true)).toMatchObject({
       res1: {},
     });
   });
@@ -70,9 +58,10 @@ describe("extractMap", () => {
       res1,
       res2,
     });
-    const extracted = rs.extractMap({
-      test: (res) => res instanceof JsonRes && res.data === "b",
-    });
+    const extracted = rs.remove(
+      { test: (res) => res instanceof JsonRes && res.data === "b" },
+      true,
+    );
     expect(Object.keys(extracted)).toMatchObject(["res2"]);
     expect(extracted["res2"] === res2).toBeTruthy();
   });

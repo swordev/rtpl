@@ -1,51 +1,33 @@
 import { findPath, readAnyFile, DeletionPolicyOptions } from "../fs.js";
-import { merge } from "../object.js";
 import { expandPaths } from "../path.js";
-import { DeepPartial } from "../ts.js";
-import { dirname, join, resolve } from "path";
+import { DeepPartial, MaybePromise } from "../ts.js";
+import { join, resolve } from "path";
+import { Tpl } from "./tpl.js";
 
-export type RtplConfig = {
-  /**
-   * @default "."
-   */
+export type TplConfig = {
   root: string;
-  template: {
-    /**
-     * @default "rtpl.*"
-     */
-    path: string;
-  };
-  lock: {
-    /**
-     * @default "rtpl-lock.json"
-     */
-    path: string;
-  };
-  resources: {
-    /**
-     * @default "resources"
-     */
-    path: string;
-  };
+  templates: MaybePromise<Tpl<any, any>>[];
+  /**
+   * @default "./resources"
+   */
+  resourcesDir: string;
+  resourcePathAllowlist?: string[];
+  /**
+   * @default "./.rtpl"
+   */
+  dataDir: string;
+
   secrets: {
     /**
      * @default true
      */
     enabled: boolean;
-    /**
-     * @default "rtpl-secrets.json"
-     */
-    path: string;
   };
   backup: {
     /**
      * @default true
      */
     enabled: boolean;
-    /**
-     * @default ".rtpl-backup"
-     */
-    path: string;
     /**
      * @default {"keepLast": 25}
      */
@@ -53,54 +35,89 @@ export type RtplConfig = {
   };
 };
 
-export type InRtplConfg = DeepPartial<RtplConfig>;
+export type TplConfigPaths = {
+  root: string;
+  resources: string;
+  data: string;
+  backup: string;
+  secrets: string;
+  lock: string;
+};
 
-const defaults: RtplConfig = {
+export type ResolvedTplConfig = TplConfig & { paths: TplConfigPaths };
+
+export type InTplConfig = DeepPartial<TplConfig>;
+
+export const defaultsTplConfig = {
   root: ".",
-  template: {
-    path: "rtpl.*",
-  },
-  lock: {
-    path: "rtpl-lock.json",
-  },
-  resources: {
-    path: "resources",
-  },
+  dataDir: ".rtpl",
+  resourcesDir: "resources",
   secrets: {
     enabled: true,
-    path: "rtpl-secrets.json",
   },
   backup: {
     enabled: true,
-    path: ".rtpl-backup",
     deletionPolicy: {
       keepLast: 25,
     },
   },
-};
+} satisfies InTplConfig;
 
-export function defineConfig(config: InRtplConfg): InRtplConfg {
-  return config;
+export function defineTplConfig(config: InTplConfig): TplConfig {
+  return {
+    ...defaultsTplConfig,
+    ...config,
+    backup: {
+      ...defaultsTplConfig.backup,
+      ...config.backup,
+      deletionPolicy: {
+        ...defaultsTplConfig.backup.deletionPolicy,
+        ...config.backup?.deletionPolicy,
+      },
+    },
+    secrets: {
+      ...defaultsTplConfig.secrets,
+      ...config.secrets,
+    },
+  } as any;
 }
 
-export async function parseConfigFile(
+export function resolveTplConfig(config: TplConfig) {
+  const root =
+    config.root === "." || !config.root ? resolve(".") : resolve(config.root);
+  return {
+    ...config,
+    paths: {
+      root: root,
+      resources: join(root, config.resourcesDir),
+      data: join(root, config.dataDir),
+      backup: join(root, config.dataDir, "backup"),
+      secrets: join(root, config.dataDir, "rtpl-secrets.json"),
+      lock: join(root, config.dataDir, "rtpl-lock.json"),
+    },
+  };
+}
+export async function parseTplConfigFile(
   inPath: string,
-  root?: string,
-): Promise<RtplConfig> {
+  options?: { root: string },
+): Promise<ResolvedTplConfig> {
   const paths = expandPaths(inPath, { js: true, ts: true, json: true });
   const path = await findPath(paths);
   const inConfig = path ? await readAnyFile(resolve(path)) : undefined;
-  const config: RtplConfig = merge(
-    structuredClone(defaults),
-    structuredClone(inConfig),
-  );
-  if (!config.root || config.root === ".")
-    config.root = root || dirname(inPath);
-  config.root = resolve(config.root);
-  config.template.path = join(config.root, config.template.path);
-  config.lock.path = join(config.root, config.lock.path);
-  config.resources.path = join(config.root, config.resources.path);
-  config.backup.path = join(config.root, config.backup.path);
-  config.secrets.path = join(config.root, config.secrets.path);
-  return config;
+  const config: TplConfig = {
+    ...defaultsTplConfig,
+    ...inConfig,
+    backup: {
+      ...defaultsTplConfig.backup,
+      ...inConfig?.backup,
+    },
+    secrets: {
+      ...defaultsTplConfig.secrets,
+      ...inConfig?.secrets,
+    },
+  };
+  return resolveTplConfig({
+    ...config,
+    ...(options?.root && { root: options.root }),
+  });
 }

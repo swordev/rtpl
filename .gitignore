@@ -1,10 +1,6 @@
-.rtpl-backup
-coverage
 lib
 node_modules
-/resources
-rtpl-lock.json
-rtpl-secrets.json
-rtpl-config.*
-/rtpl.*
 *.tsbuildinfo
+.rtpl
+rtpl.config.ts
+/resources

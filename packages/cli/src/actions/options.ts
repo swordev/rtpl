@@ -1,6 +1,5 @@
 import { GlobalOptions } from "../cli.js";
-import { parseConfigFile } from "../utils/self/config.js";
-import { parseTplFile, resolveTpl } from "../utils/self/resolve.js";
+import { parseTplConfigFile } from "../utils/self/config.js";
 import { stringify } from "yaml";
 
 export type OptionsOptions = GlobalOptions & {
@@ -8,11 +7,12 @@ export type OptionsOptions = GlobalOptions & {
 };
 
 export default async function options(options: OptionsOptions) {
-  const config = await parseConfigFile(options.config);
-  const tpl = await parseTplFile(config.template.path);
-  await resolveTpl(tpl, { config, filter: options.filter });
-  const tplOptions = await tpl.options();
-
+  const config = await parseTplConfigFile(options.config);
+  const templates = await Promise.all(config.templates);
+  const tplOptions: Record<string, any> = {};
+  for (const tpl of templates) {
+    tplOptions[tpl.name] = tpl.options;
+  }
   if (options.format === "yaml") {
     console.info(stringify(tplOptions, { version: "1.1" }));
   } else if (options.format === "json") {

@@ -1,3 +1,4 @@
+import { fileURLToPath } from "url";
 import { DirData, DirRes } from "../../../src/index.js";
 import { AbstractRes } from "../../../src/resources/AbstractRes.js";
 import { MinimalDirRes } from "../../../src/resources/DirRes.js";
@@ -11,9 +12,10 @@ class StringRes extends AbstractRes<string | undefined> {
 
 describe("AbstractRes.lastStacks", () => {
   it("returns current source", () => {
-    const [stack] = new StringRes({}).lastStacks;
-    expect(stack.getFileName()).toBe(import.meta.url);
-    expect(typeof stack.getLineNumber() == "number").toBe(true);
+    const stack = new StringRes({}).stack;
+    expect(stack?.split("\n")[1]).toContain(
+      fileURLToPath(import.meta.url).replaceAll("\\", "/"),
+    );
   });
 });
 

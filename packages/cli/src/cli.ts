@@ -10,7 +10,8 @@ import repairLock from "./actions/repair-lock.js";
 import restore from "./actions/restore.js";
 import { GlobalOptions } from "./utils/self/options.js";
 import { parseStringListValue } from "./utils/string.js";
-import chalk from "chalk";
+
+import { styleText } from "node:util";
 import { program } from "commander";
 import { readFileSync } from "fs";
 import { fileURLToPath } from "url";
@@ -29,7 +30,7 @@ function makeAction(cb: (options: any) => Promise<any>) {
       } = await cb({ ...getGlobalOptions(), ...options });
       if (typeof result?.exitCode === "number") process.exit(result.exitCode);
     } catch (error) {
-      console.error(chalk.red((error as Error).stack));
+      console.error(styleText("red", (error as Error).stack?.toString() ?? ""));
       process.exit(2);
     }
   };
@@ -45,7 +46,7 @@ export default (defaultOptions?: Partial<GlobalOptions>) => {
   program.name("rtpl");
   program.version(pkg.version);
   program
-    .option("-c,--config <path>", "config file path", "./rtpl-config.*")
+    .option("-c,--config <path>", "config file path", "./rtpl.config.*")
     .option(
       "-f,--filter <patterns>",
       "patterns filter",

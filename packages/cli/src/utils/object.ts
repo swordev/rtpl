@@ -15,14 +15,13 @@ export function sort<T extends Record<string, unknown>>(object: T) {
     }, {} as T);
 }
 
-export function merge<TObject, TSource>(object: TObject, source: TSource) {
-  if (!isPlainObject(object) || !isPlainObject(source))
-    return object as TObject & TSource;
-
-  return mergeRecords(
-    object as Record<string, unknown>,
-    source as Record<string, unknown>,
-  ) as TObject & TSource;
+export function merge(object: Record<string, unknown>, ...sources: unknown[]) {
+  if (!isPlainObject(object)) return object;
+  for (const source of sources) {
+    if (!isPlainObject(source)) continue;
+    mergeRecords(object, source);
+  }
+  return object;
 }
 
 function mergeRecords(
@@ -33,7 +32,7 @@ function mergeRecords(
     const objectValue = object[key];
 
     if (Array.isArray(objectValue)) {
-      object[key] = sourceValue;
+      object[key] = cloneValue(sourceValue);
       continue;
     }
 
@@ -42,20 +41,16 @@ function mergeRecords(
       continue;
     }
 
-    object[key] = cloneMergeValue(sourceValue);
+    object[key] = cloneValue(sourceValue);
   }
 
   return object;
 }
 
-function cloneMergeValue(value: unknown): unknown {
-  if (Array.isArray(value)) return value.map((item) => cloneMergeValue(item));
+function cloneValue(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map((item) => cloneValue(item));
   if (isPlainObject(value)) return mergeRecords({}, value);
   return value;
-}
-
-export function clone<T>(object: T) {
-  return merge({}, object);
 }
 
 export type JSONClass = { toString(): string; toJSON(): string };

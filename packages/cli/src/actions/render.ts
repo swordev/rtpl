@@ -1,17 +1,14 @@
+import { styleText } from "node:util";
 import { GlobalOptions } from "../cli.js";
-import { parseConfigFile } from "../utils/self/config.js";
-import { parseTplFile, resolveTpl } from "../utils/self/resolve.js";
+import { parseTplConfigFile } from "../utils/self/config.js";
+import { createTplResources } from "../utils/self/resolve.js";
 
 export default async function render(options: GlobalOptions) {
-  const config = await parseConfigFile(options.config);
-  const tpl = await parseTplFile(config.template.path);
-  const { resources } = await resolveTpl(tpl, {
-    config,
-    filter: options.filter,
-  });
+  const config = await parseTplConfigFile(options.config);
+  const { resources } = await createTplResources(config);
   for (const path in resources) {
     const res = resources[path];
-    console.info("\x1b[36m%s\x1b[0m", path);
+    console.info(styleText("cyan", path));
     console.info(res.toString());
     console.info();
   }

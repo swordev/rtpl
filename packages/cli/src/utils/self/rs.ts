@@ -7,10 +7,10 @@ import {
   isPlainObject,
   JSONClass,
 } from "../object.js";
-import { Resources } from "./minimal-tpl.js";
 import { basename } from "path";
 import { join } from "path/posix";
 
+export type Resources = Record<string, unknown>;
 export type StringifyClass = JSONClass | AbstractRes | DelayedValue;
 type FilteConstructor<T> = { new (...args: any[]): T };
 type Guard<T> = (val: unknown) => val is T;
@@ -41,9 +41,7 @@ export function createResourceSystem(resources: Resources) {
     find,
     findOrFail,
     remove,
-    extractMap,
     move,
-    moveToRoot,
   };
   for (const name in helpers) {
     const $helpers = helpers as any;
@@ -119,23 +117,23 @@ export function findOrFail<T, F extends FilterInput<T>>(
   return resource;
 }
 
-export function extractMap<T, F extends FilterInput<T>>(
-  this: Resources,
-  input: F,
-) {
-  const extracted: Record<string, FilterResult<F>> = {};
-  forEach.bind(this)(input, ({ ref, resource, resources }) => {
-    extracted[ref] = resource as any;
-    delete resources[ref];
-  });
-  return extracted;
-}
-
 export function remove<T, F extends FilterInput<T>>(
   this: Resources,
   input: F,
-): FilterResult<F>[] {
-  return Object.values(extractMap.bind(this)(input)) as any;
+  map: true,
+): Record<string, FilterResult<F>>;
+export function remove<T, F extends FilterInput<T>>(
+  this: Resources,
+  input: F,
+): FilterResult<F>[];
+export function remove<T, F extends FilterInput<T>>(
+  this: Resources,
+  input: F,
+  map?: any,
+): any {
+  const extracted = removeAsMap(this, input);
+  const result = map ? extracted : Object.values(extracted);
+  return result as any;
 }
 
 export function move<T, F extends FilterInput<T>>(
@@ -143,7 +141,7 @@ export function move<T, F extends FilterInput<T>>(
   input: F,
   target: string,
 ) {
-  const extracted = extractMap.bind(this)(input);
+  const extracted = removeAsMap(this, input);
 
   for (const path in extracted) {
     const base = basename(path);
@@ -153,16 +151,14 @@ export function move<T, F extends FilterInput<T>>(
   return Object.values(extracted);
 }
 
-export function moveToRoot<T, F extends FilterInput<T>>(
-  this: Resources,
+function removeAsMap<T, F extends FilterInput<T>>(
+  resources: Resources,
   input: F,
-) {
-  const extracted = extractMap.bind(this)(input);
-
-  for (const path in extracted) {
-    const base = basename(path);
-    const newPath = join("../", base);
-    this[newPath] = extracted[path];
-  }
-  return Object.values(extracted);
+): Record<string, FilterResult<F>> {
+  const extracted: Record<string, FilterResult<F>> = {};
+  forEach.bind(resources)(input, ({ ref, resource, resources }) => {
+    extracted[ref] = resource as any;
+    delete resources[ref];
+  });
+  return extracted;
 }

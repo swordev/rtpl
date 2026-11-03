@@ -1,5 +1,5 @@
-import chalk from "chalk";
 import { createInterface, Interface } from "readline";
+import { styleText } from "util";
 
 export async function prompt(text: string, rl?: Interface) {
   if (!rl)
@@ -26,7 +26,7 @@ export async function confirmPrompt(
 ) {
   const ynText = defaults ? "Y/n" : "y/N";
   const result = await prompt(
-    `${chalk.cyan("?")} ${text} ${chalk.grey(`(${ynText})`)}: `,
+    `${styleText("cyan", "?")} ${text} ${styleText("gray", `(${ynText})`)}: `,
     rl,
   );
 

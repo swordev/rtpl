@@ -1,9 +1,6 @@
 export { DelayedValue } from "./resources/DelayedValue.js";
-export { createTpl, Tpl } from "./utils/self/tpl.js";
-export {
-  type MinimalTpl,
-  type MinimalTplConfig,
-} from "./utils/self/minimal-tpl.js";
+export { defineTpl, Tpl } from "./utils/self/tpl.js";
+export { defineTplSchema } from "./utils/self/schema.js";
 export {
   AbstractRes,
   type ResOptions,
@@ -25,7 +22,13 @@ export { YamlRes } from "./resources/YamlRes.js";
 export { default as cli } from "./cli.js";
 export { type ResourceSystem } from "./utils/self/rs.js";
 export {
-  defineConfig,
-  type RtplConfig,
-  type InRtplConfg,
+  defineTplConfig,
+  resolveTplConfig,
+  type TplConfig,
+  type InTplConfig,
 } from "./utils/self/config.js";
+export {
+  createTplResources,
+  resolveTplResources,
+} from "./utils/self/resolve.js";
+export type { Callable } from "./utils/object.js";

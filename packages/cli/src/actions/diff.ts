@@ -1,16 +1,16 @@
 import { GlobalOptions } from "../cli.js";
 import type { AbstractRes } from "../resources/AbstractRes.js";
 import { readIfExists } from "../utils/fs.js";
-import { parseConfigFile } from "../utils/self/config.js";
+import { parseTplConfigFile } from "../utils/self/config.js";
 import {
   ActionEnum,
   getFileActions,
   logAction,
 } from "../utils/self/install.js";
-import { parseLockFile } from "../utils/self/lock.js";
-import { parseTplFile, resolveTpl } from "../utils/self/resolve.js";
-import chalk from "chalk";
 import { diffLines } from "diff";
+import { TplLock } from "../utils/self/lock.js";
+import { styleText } from "node:util";
+import { createTplResources } from "../utils/self/resolve.js";
 
 export type DiffOptions = GlobalOptions & {
   showAll: boolean;
@@ -18,19 +18,13 @@ export type DiffOptions = GlobalOptions & {
   lines: number;
 };
 export default async function diff(options: DiffOptions) {
-  const config = await parseConfigFile(options.config);
-  const tpl = await parseTplFile(config.template.path);
-  const { resources } = await resolveTpl(tpl, {
-    config,
-    filter: options.filter,
-  });
+  const config = await parseTplConfigFile(options.config);
+  const { resources } = await createTplResources(config);
+
   let changes = 0;
-  const lockData = await parseLockFile(config.lock.path);
-  const selfLockData = lockData.templates[tpl.config.name] || {
-    files: {},
-    dirs: {},
-  };
-  const actions = await getFileActions(resources, selfLockData);
+  const lock = new TplLock(config.paths.lock);
+  const lockData = await lock.read();
+  const actions = await getFileActions(resources, lockData);
   for (const path in actions) {
     const action = actions[path];
     if (action.type === ActionEnum.NONE) continue;
@@ -41,7 +35,7 @@ export default async function diff(options: DiffOptions) {
     }
   }
 
-  if (!changes) process.stderr.write(`${chalk.grey("No changes")}\n`);
+  if (!changes) process.stderr.write(`${styleText("gray", "No changes")}\n`);
   return { exitCode: changes ? 1 : 0, changes };
 }
 
@@ -54,7 +48,7 @@ async function showDiff(
   try {
     resValue = res.toString();
   } catch (error) {
-    console.info("\x1b[36m%s\x1b[0m", path);
+    console.info(styleText("cyan", path));
     throw error;
   }
   const old = (await readIfExists(path))?.toString();
@@ -76,10 +70,10 @@ async function showDiff(
       if (line.added) {
         lineIndex -= removed;
         removed = 0;
-        result = chalk.green(subline);
+        result = styleText("green", subline);
       } else if (line.removed) {
         removed++;
-        result = chalk.red(subline);
+        result = styleText("red", subline);
       } else {
         result = subline;
       }
@@ -92,7 +86,7 @@ async function showDiff(
       } else {
         const lineIndexStr = lineIndex.toString().padStart(3, " ");
         console.info(
-          `${chalk.grey(lineIndexStr)} ${chalk.white("|")} ${result}`,
+          `${styleText("gray", lineIndexStr)} ${styleText("white", "|")} ${result}`,
         );
       }
     }

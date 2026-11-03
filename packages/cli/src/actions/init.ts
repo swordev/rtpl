@@ -1,6 +1,6 @@
+import { styleText } from "util";
 import { GlobalOptions } from "../cli.js";
 import { checkPath } from "../utils/fs.js";
-import chalk from "chalk";
 import { writeFile } from "fs/promises";
 import { join } from "path";
 
@@ -8,16 +8,26 @@ export type CheckOptions = GlobalOptions;
 
 export default async function init(options: CheckOptions) {
   const code = `
-import { createTpl } from "@rtpl/cli";
+import { defineTplConfig, defineTpl, JsonRes, defineTplSchema } from "rtpl";
 
-export default createTpl({
-  name: "myTpl"
+const tpl = defineTpl({
+  name: "app",
+  schema: defineTplSchema<{ version: string }>(),
+  defaultOptions: { version: "1.0.0" },
+  resources: (o) => ({
+    config: new JsonRes({ data: { version: o.version } }),
+  }),
 });
+
+export default defineTplConfig({
+  templates: [tpl.with({})],
+});
+
 `;
-  const base = `rtpl.ts`;
+  const base = `rtpl.config.ts`;
   const path = join(process.cwd(), base);
   if (await checkPath(path)) {
-    console.error(`[${chalk.yellow("!")}] "${base}" already exists`);
+    console.error(`[${styleText("yellow", "!")}] "${base}" already exists`);
     return { exitCode: 1 };
   }
   await writeFile(path, code);

@@ -1,44 +1,30 @@
 import { GlobalOptions } from "../cli.js";
+import { styleText } from "util";
 import { confirmPrompt } from "../utils/cli.js";
-import { parseConfigFile } from "../utils/self/config.js";
-import { parseTplFile, resolveTpl } from "../utils/self/resolve.js";
-import {
-  parseSecretsFile,
-  Secrets,
-  writeSecretsFile,
-} from "../utils/self/secrets.js";
-import chalk from "chalk";
+import { parseTplConfigFile } from "../utils/self/config.js";
+import { TplSecrets } from "../utils/self/secrets.js";
+import { createTplResources } from "../utils/self/resolve.js";
 
 export type PurgeSecretsOptions = GlobalOptions & {
   confirm?: boolean;
 };
 
 export default async function purgeSecrets(options: PurgeSecretsOptions) {
-  const config = await parseConfigFile(options.config);
-  const tpl = await parseTplFile(config.template.path);
-  const { secrets: newSecrets } = await resolveTpl(tpl, {
-    config,
+  const config = await parseTplConfigFile(options.config);
+  const { secrets: newSecrets } = await createTplResources(config, {
     secrets: {},
   });
-  const currentSecrets = await parseSecretsFile(config.secrets.path);
-  const secrets: Secrets = {};
-  const deletions: string[] = [];
-  for (const path in currentSecrets) {
-    if (path in (newSecrets || {})) {
-      secrets[path] = currentSecrets[path];
-    } else {
-      deletions.push(path);
-    }
-  }
+  const manager = new TplSecrets(config.paths.secrets);
+  const { secrets, deletions } = await manager.purge(newSecrets);
 
   if (!deletions.length) {
-    console.info(chalk.green("Secrets file is ok."));
+    console.info(styleText("green", "Secrets file is ok."));
     return { exitCode: 0 };
   }
 
   console.info();
-  console.info(chalk.yellow("The next secrets are no longer in use:"));
-  for (const path of deletions) console.info(chalk.yellow(`- ${path}`));
+  console.info(styleText("yellow", "The next secrets are no longer in use:"));
+  for (const path of deletions) console.info(styleText("yellow", `- ${path}`));
   console.info();
 
   if (!options.confirm) {
@@ -48,7 +34,7 @@ export default async function purgeSecrets(options: PurgeSecretsOptions) {
     if (!confirm) return { exitCode: 1 };
   }
 
-  await writeSecretsFile(config.secrets.path, secrets);
-  console.info(chalk.green("Secret file purged."));
+  await manager.write(secrets);
+  console.info(styleText("green", "Secret file purged."));
   return { exitCode: 0 };
 }

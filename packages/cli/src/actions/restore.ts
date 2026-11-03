@@ -1,13 +1,14 @@
 import { GlobalOptions } from "../cli.js";
 import { confirmPrompt } from "../utils/cli.js";
 import { findBackupPath, readBackupFile } from "../utils/self/backup.js";
-import { parseConfigFile } from "../utils/self/config.js";
-import { writeLockFile } from "../utils/self/lock.js";
-import { writeSecretsFile } from "../utils/self/secrets.js";
-import chalk from "chalk";
+import { parseTplConfigFile } from "../utils/self/config.js";
+
 import { existsSync } from "fs";
 import { mkdir, writeFile } from "fs/promises";
 import { join, relative } from "path";
+import { TplSecrets } from "../utils/self/secrets.js";
+import { TplLock } from "../utils/self/lock.js";
+import { styleText } from "util";
 
 export type RestoreOptions = GlobalOptions & {
   input: string;
@@ -18,20 +19,20 @@ const normalizePath = (path: string) =>
   relative(process.cwd(), path).replace(/\\/g, "/");
 
 export default async function restore(options: RestoreOptions) {
-  const config = await parseConfigFile(options.config);
+  const config = await parseTplConfigFile(options.config);
   const outConfig = options.output
-    ? await parseConfigFile(options.config, options.output)
+    ? await parseTplConfigFile(options.config, { root: options.output })
     : config;
   const path = normalizePath(
-    await findBackupPath(config.backup.path, options.input),
+    await findBackupPath(config.paths.backup, options.input),
   );
   const { data: backupData, headers } = await readBackupFile(path);
 
-  console.info(chalk.green("Restoring backup..."));
+  console.info(styleText("green", "Restoring backup..."));
 
   if (headers.length) {
     console.info();
-    console.info(chalk.grey(headers.join("\n")));
+    console.info(styleText("gray", headers.join("\n")));
   }
 
   const errors = createRestoreErrors();
@@ -41,14 +42,11 @@ export default async function restore(options: RestoreOptions) {
   const resolveResOutPath = (path: string) =>
     options.output ? join(options.output, path) : path;
 
-  checkPath(outConfig.secrets.path, outConfig.lock.path);
+  checkPath(outConfig.paths.secrets, outConfig.paths.lock);
 
-  for (const name in backupData.templates) {
-    const tpl = backupData.templates[name];
-    for (const path in tpl.files) {
-      const outPath = resolveResOutPath(path);
-      checkPath(outPath);
-    }
+  for (const path in backupData.lock.files) {
+    const outPath = resolveResOutPath(path);
+    checkPath(outPath);
   }
 
   if (errors.paths.length) {
@@ -58,29 +56,27 @@ export default async function restore(options: RestoreOptions) {
   }
 
   const dirs = new Set<string>();
-  for (const name in backupData.templates) {
-    const tpl = backupData.templates[name];
-    for (const path in tpl.dirs) {
-      const outPath = resolveResOutPath(path);
-      if (dirs.has(outPath)) continue;
-      dirs.add(outPath);
-      await mkdir(outPath, { recursive: true });
-    }
-    for (const path in tpl.files) {
-      const contents = tpl.files[path].contents;
-      const outPath = resolveResOutPath(path);
-      if (typeof contents === "string") await writeFile(outPath, contents);
-      delete (tpl.files[path] as any).contents;
-    }
+
+  for (const path in backupData.lock.dirs) {
+    const outPath = resolveResOutPath(path);
+    if (dirs.has(outPath)) continue;
+    dirs.add(outPath);
+    await mkdir(outPath, { recursive: true });
+  }
+  for (const path in backupData.lock.files) {
+    const contents = backupData.lock.files[path].contents;
+    const outPath = resolveResOutPath(path);
+    if (typeof contents === "string") await writeFile(outPath, contents);
+    delete (backupData.lock.files[path] as any).contents;
   }
 
-  await writeSecretsFile(outConfig.secrets.path, backupData.secrets);
-  await writeLockFile(outConfig.lock.path, {
-    templates: backupData.templates as any,
-  });
+  const secrets = new TplSecrets(outConfig.paths.secrets);
+  await secrets.write(backupData.secrets);
+  const lock = new TplLock(outConfig.paths.lock);
+  await lock.write(backupData.lock);
 
   console.info();
-  console.info(chalk.green("Backup restored successfully."));
+  console.info(styleText("green", "Backup restored successfully."));
 
   return { exitCode: 0 };
 }
@@ -91,10 +87,10 @@ function createRestoreErrors() {
   const addPath = (path: string) => {
     if (!paths.length) {
       console.error();
-      console.error(chalk.red(`The following files already exist:`));
+      console.error(styleText("red", `The following files already exist:`));
     }
     path = normalizePath(path);
-    console.error(chalk.red(`- ${path}`));
+    console.error(styleText("red", `- ${path}`));
     paths.push(path);
   };
   return { addPath, paths };
