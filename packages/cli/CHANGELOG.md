@@ -1,5 +1,11 @@
 # @rtpl/cli
 
+## 0.13.2
+
+### Patch Changes
+
+- [`741d456`](https://github.com/swordev/rtpl/commit/741d45617f87d1f0b0f8f6f584972ce3e18e6adc) Thanks [@juanrgm](https://github.com/juanrgm)! - Fix relative paths
+
 ## 0.13.1
 
 ### Patch Changes
