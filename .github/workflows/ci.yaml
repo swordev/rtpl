@@ -4,28 +4,28 @@ on:
     branches:
       - main
 env:
-  NODE_VERSION: 20
-  PNPM_VERSION: 10
+  NODE_VERSION: 24
+  PNPM_VERSION: 12
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v3
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
         with:
           version: ${{ env.PNPM_VERSION }}
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
       - run: pnpm install
       - run: pnpm build
       - run: pnpm test
-      - uses: changesets/action@v1
+      - uses: changesets/action@v2
         with:
-          commit: "chore: update versions"
-          title: Update versions
-          publish: pnpm publish -r --no-git-checks
+          pr-title: Update versions
+          commit-message: "chore: update versions"
+          publish-script: pnpm publish -r --no-git-checks
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

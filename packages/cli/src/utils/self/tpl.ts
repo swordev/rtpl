@@ -39,8 +39,11 @@ export type TplOptions<O, D extends TplDeps = {}> = O & {
   deps?: TplDepsOptions<D>;
 };
 
-export interface TplConfig<O = any, R = any, D extends TplDeps = {}>
-  extends MinimalTplConfig<O, R> {
+export interface TplConfig<
+  O = any,
+  R = any,
+  D extends TplDeps = {},
+> extends MinimalTplConfig<O, R> {
   deps?: D;
   schema?: z.ZodType<O>;
   defaultOptions?: DeepPartial<TplOptions<O, D>>;
@@ -55,9 +58,11 @@ export interface TplConfig<O = any, R = any, D extends TplDeps = {}>
   resources?: (this: TplResourcesSelf<D>, o: TplOptions<O, D>) => Promise<R>;
 }
 
-export class Tpl<O = any, R = any, D extends TplDeps = any>
-  implements MinimalTpl
-{
+export class Tpl<
+  O = any,
+  R = any,
+  D extends TplDeps = any,
+> implements MinimalTpl {
   #options: TplOptions<O, D> | undefined;
   protected deps: D;
   constructor(readonly config: TplConfig<O, R, D>) {

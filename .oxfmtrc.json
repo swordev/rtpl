@@ -1,0 +1,16 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "ignorePatterns": [
+    "pnpm-lock.yaml",
+    ".rtpl-backup",
+    "coverage",
+    "lib",
+    "node_modules",
+    "/resources",
+    "rtpl-lock.json",
+    "rtpl.js",
+    "tsconfig.tsbuildinfo"
+  ],
+  "printWidth": 80,
+  "sortPackageJson": {}
+}
