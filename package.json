@@ -23,6 +23,7 @@
   "scripts": {
     "build": "tsc -b tsconfig.build.json",
     "check": "pnpm check:format",
+    "publish": "changeset publish",
     "check:format": "oxfmt --cache",
     "prepare": "workspace gen",
     "clean:ts": "tsc -b tsconfig.build.json --clean",
