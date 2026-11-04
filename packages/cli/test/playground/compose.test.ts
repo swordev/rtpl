@@ -109,6 +109,11 @@ describe("compose", () => {
               app2_db_data: "app2_db_data_restored",
             },
           }),
+          app.with({
+            resources: {
+              "settings/sqlPassword": "custom-password",
+            },
+          }),
           app.with({ name: "app1" }),
           app.with({ name: "app2" }),
         ],
@@ -123,9 +128,21 @@ describe("compose", () => {
     expect(resources).toMatchInlineSnapshot(`
       {
         "docker-compose.yaml": "volumes:
+        app_db_data: {}
         app1_db_data: {}
         app2_db_data_restored: {}
       services:
+        app_db:
+          image: postgres:latest
+          volumes:
+            - app_db_data:undefined
+          environment:
+            POSTGRES_PASSWORD: custom-password
+        app_web:
+          image: nginx:latest
+          depends_on:
+            - app_db
+          volumes: []
         app1_db:
           image: postgres:latest
           volumes:
@@ -149,6 +166,16 @@ describe("compose", () => {
             - app2_db
           volumes: []
       ",
+        "resources/app/settings": undefined,
+        "resources/app/settings/config.json": "{
+        "sql": {
+          "username": "postgres",
+          "password": "custom-password",
+          "passwordPath": "./resources/app/settings/sqlPassword.secret"
+        },
+        "settingsPath": "./resources/app/settings"
+      }",
+        "resources/app/settings/sqlPassword.secret": "custom-password",
         "resources/app1/settings": undefined,
         "resources/app1/settings/config.json": "{
         "sql": {

@@ -5,6 +5,8 @@ export {
   type Tpl,
   type TplCommon,
   type TplBuilder,
+  type TplCustomResources,
+  type AnyTplCustomResources,
 } from "./utils/self/tpl.js";
 export { defineTplSchema } from "./utils/self/schema.js";
 export {

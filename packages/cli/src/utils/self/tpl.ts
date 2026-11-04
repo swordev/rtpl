@@ -9,11 +9,34 @@ import type {
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 import { ResourceSystem } from "./rs.js";
 import { merge } from "../object.js";
-import { TplConfig } from "./config.js";
 
 export interface TplResourceNode {
   [key: string]: AbstractRes | TplResourceNode;
 }
+
+export type TplCustomResources<T, Prefix extends string = "", Parent = T> =
+  T extends DirRes<infer D>
+    ? TplCustomResources<D, Prefix, Parent>
+    : T extends AbstractRes
+      ? Prefix extends ""
+        ? never
+        : {
+            [K in Prefix]?: string | ((o: T) => AbstractRes);
+          }
+      : T extends object
+        ? {
+            [K in keyof T & string]: TplCustomResources<
+              T[K],
+              Prefix extends "" ? K : `${Prefix}/${K}`,
+              T[K]
+            >;
+          }[keyof T & string]
+        : never;
+
+export type AnyTplCustomResources = Record<
+  string,
+  string | ((o: AbstractRes) => AbstractRes)
+>;
 
 export type TplResources = DirRes | TplResourceNode;
 
@@ -26,6 +49,7 @@ export type TplCommon<
   R extends MaybePromise<TplResources> = MaybePromise<TplResources>,
 > = {
   name: string;
+  customResources?: AnyTplCustomResources;
   onResolve?: (data: {
     name: string;
     fs: ResourceSystem;
@@ -75,6 +99,7 @@ export type TplBuilder<
   with(input: {
     name?: string;
     options?: DeepPartial<InferInput<S>>;
+    resources?: TplCustomResources<R>;
   }): Promise<Tpl<InferOutput<S>, R>>;
   withOptions(
     input: DeepPartial<InferInput<S>>,
@@ -84,7 +109,10 @@ export type TplBuilder<
 export function defineTpl<R extends MaybePromise<TplResources>>(
   config: TplOptions<never, R>,
 ): Tpl<undefined, R> & {
-  with(input: { name?: string }): Tpl<undefined, R>;
+  with(input: {
+    name?: string;
+    resources?: TplCustomResources<R>;
+  }): Tpl<undefined, R>;
 };
 export function defineTpl<
   S extends StandardSchemaV1,
@@ -96,17 +124,26 @@ export function defineTpl(config: TplOptions<any, any>): any {
     return {
       name: config.name,
       options: undefined,
+      customResources: config.customResources,
       resources() {
         return config.resources(this.name, this.options);
       },
       onResolve: config.onResolve,
-      with(input: { name?: string }) {
-        return { ...this, name: input.name ?? this.name };
+      with(input: { name?: string; resources?: AnyTplCustomResources }) {
+        return {
+          ...this,
+          name: input.name ?? this.name,
+          customResources: input.resources ?? this.customResources,
+        };
       },
     };
   }
 
-  async function $with(input: { name?: string; options?: unknown }) {
+  async function $with(input: {
+    name?: string;
+    options?: unknown;
+    resources?: AnyTplCustomResources;
+  }) {
     const name = input.name ?? config.name;
     const rawInput = input.options ?? {};
     let options = merge(
@@ -125,13 +162,13 @@ export function defineTpl(config: TplOptions<any, any>): any {
         )}`,
       );
     }
-
     return {
       name,
       options: result.value,
       resources() {
         return config.resources(this.options, this.name);
       },
+      customResources: input.resources,
       onResolve: config.onResolve,
     };
   }

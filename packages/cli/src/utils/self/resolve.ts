@@ -12,6 +12,8 @@ import { TplSecrets } from "./secrets.js";
 import { checkPath } from "../fs.js";
 import { createResourceSystem } from "./rs.js";
 import { isPlainObject } from "../object.js";
+import { RawRes } from "../../resources/RawRes.js";
+import { SecretRes } from "../../resources/SecretRes.js";
 
 function createFileName(tag: string, input: AbstractRes) {
   const defaultExtension = input["onDefaultExtension"]();
@@ -27,20 +29,33 @@ function createFileName(tag: string, input: AbstractRes) {
 
 function* iterateResources(
   inResources: TplResources,
-  parentPath: string[],
-): Generator<[string, AbstractRes]> {
+  parentPath: string[] = [],
+): Generator<{
+  keyPath: string;
+  path: string;
+  res: AbstractRes;
+}> {
   for (const key in inResources) {
     const value = (inResources as any)[key];
+    const keyPath = [...parentPath, key].join("/");
     if (DirRes.isInstance(value)) {
       const path = [...parentPath, value.name ?? createFileName(key, value)];
-      yield [path.join("/"), value];
+      yield {
+        keyPath,
+        path: path.join("/"),
+        res: value,
+      };
       yield* iterateResources(value.data, path);
     } else if (value instanceof AbstractRes) {
       const outPath = [...parentPath, value.name ?? createFileName(key, value)]
         .join("/")
         .split("/")
         .filter((f) => !f.startsWith("_"));
-      yield [outPath.join("/"), value];
+      yield {
+        keyPath,
+        path: outPath.join("/"),
+        res: value,
+      };
     } else if (isPlainObject(value)) {
       yield* iterateResources(value as TplResources, [...parentPath, key]);
     }
@@ -64,11 +79,25 @@ export async function createTplResources(
   const resourcesByTemplate: Record<string, any> = {};
   for (const tpl of templates) {
     resourcesByTemplate[tpl.name] = await tpl.resources();
-    for (const [path, res] of iterateResources(resourcesByTemplate[tpl.name], [
-      config.resourcesDir,
-      tpl.name,
-    ])) {
-      resources[path] = res;
+    const parentPath = [config.resourcesDir, tpl.name];
+    for (const { path, keyPath, res } of iterateResources(
+      resourcesByTemplate[tpl.name],
+    )) {
+      const absPath = [...parentPath, path].join("/");
+      const customRes = tpl.customResources?.[keyPath];
+      if (typeof customRes === "function") {
+        resources[absPath] = customRes(res);
+      } else if (typeof customRes === "string") {
+        if (SecretRes.isInstance(res)) {
+          res.data ??= {};
+          res.data.value = customRes;
+          resources[absPath] = res;
+        } else {
+          resources[absPath] = new RawRes({ data: customRes });
+        }
+      } else {
+        resources[absPath] = res;
+      }
     }
   }
   const fs = createResourceSystem(resources);

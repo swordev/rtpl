@@ -47,7 +47,7 @@ export abstract class AbstractRes<
 > extends MinimalRes<Type, TData> {
   protected static type = ResType.Abstract;
   readonly name: string | undefined;
-  readonly data: TData;
+  public data: TData;
   readonly config: TConf;
   readonly path: DelayedValue<string>;
   readonly dirname: DelayedValue<string>;

@@ -16,6 +16,7 @@ import {
 import { DelayedValue, setDelayedValue } from "./DelayedValue.js";
 
 export type SecretData = {
+  value?: string;
   /**
    * @default true
    */
@@ -80,10 +81,13 @@ export class SecretRes extends AbstractRes<
   protected override async onReady(path: string, ctx: ResReadyContext) {
     await super.onReady(path, ctx);
     const prevFile = (await readIfExists(path))?.toString();
-    const prev = ctx.data.secrets
-      ? (ctx.data.secrets[path] ??
-        (ctx.data.initialSecrets ? prevFile : undefined))
-      : undefined;
+    const prev =
+      typeof this.data?.value === "string"
+        ? this.data.value
+        : ctx.data.secrets
+          ? (ctx.data.secrets[path] ??
+            (ctx.data.initialSecrets ? prevFile : undefined))
+          : undefined;
     const $generate = this.data?.generate ?? true;
     let current = prev ?? ($generate ? generate(this.data) : undefined);
     const custom = await this.data?.onReady?.({ path, prev, current });
