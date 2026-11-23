@@ -1,6 +1,6 @@
 {
   "name": "rtpl",
-  "version": "0.13.3",
+  "version": "0.14.0",
   "description": "CLI tool for resource templates",
   "homepage": "https://github.com/swordev/rtpl",
   "bugs": {

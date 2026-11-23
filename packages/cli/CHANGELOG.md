@@ -1,5 +1,42 @@
 # @rtpl/cli
 
+## 0.14.0
+
+### Minor Changes
+
+- [`66781f0`](https://github.com/swordev/rtpl/commit/66781f0dad8202ff2fac2f4793a01101897ca64d) Thanks [@juanrgm](https://github.com/juanrgm)! - Add file modes and owners to resources:
+
+  - New `mode` (`0o640`, `"0640"` or `"640"`), `owner` and `group` (names or numeric ids) resource options, exposed as `res.mode`, `res.owner` and `res.group`. Undeclared attributes are not managed
+  - `diff`, `check` and `install` compare them with the installed files, report attribute-only changes as `[P]` and apply them (`chown` before `chmod`; new files are created with the declared mode)
+  - Backups store the mode, uid and gid of each file and `restore` applies them
+  - Attributes are ignored on Windows
+  - `DirRes` keeps `mode`, `owner` and `group` as custom options (directory attributes are not managed yet)
+
+- [`06f1173`](https://github.com/swordev/rtpl/commit/06f1173c524b1fb4a97557ea728583016c23a3ea) Thanks [@juanrgm](https://github.com/juanrgm)! - Simplify resource classes (breaking):
+
+  - Remove `ResType`, `MinimalRes`, `MinimalDirRes` and the static `isInstance` helpers of resources and `DelayedValue`; use `instanceof`
+  - Remove resource symbols (`symbol` constructor argument, `res.symbol` and the `symbol` filter of the resource system)
+  - Remove derived secrets (`new SecretRes(parentSecret)`)
+  - Remove `res.options`, `res.resolved` and `res.config`; resources only keep `name`, `data` and `path`
+  - `AbstractRes<TData>` only takes the data type parameter; resources with options define them (`DirRes<T, TConf>.config`, `IniRes.format`, `YamlRes.format`)
+  - Replace `onDefaultExtension()` with the optional `extension` property
+  - Replace `res.dirname` with `res.path.dirname` (`ResPath`) and remove the `DelayedValue` resolver
+  - Remove the `ResConfig` type (use `DirConfig`)
+
+- [`12956be`](https://github.com/swordev/rtpl/commit/12956be74c9b58477651bfd6dd36828b02e0afd3) Thanks [@juanrgm](https://github.com/juanrgm)! - - `check` no longer prompts for confirmation, so it fails with exit code 1 in non-interactive environments when there are changes
+  - `--no-backup` now skips the backup in `install`, and dry runs no longer create backups or remove directories
+  - Reject resource paths that escape the resources directory (`..` segments or sibling prefixes like `resources-other`)
+  - Report the real error when an existing resource file cannot be read
+  - Remove the unused `--filter` option and the `cli()` default options parameter
+
+### Patch Changes
+
+- [`655afd6`](https://github.com/swordev/rtpl/commit/655afd682a2bccd3f808332f62c74f868a4162fd) Thanks [@juanrgm](https://github.com/juanrgm)! - Fix errors
+
+- [`c3e7d99`](https://github.com/swordev/rtpl/commit/c3e7d996123a1070bb301b83d851c3a0616881e8) Thanks [@juanrgm](https://github.com/juanrgm)! - Resolve resource paths from the config root in `backup`, `restore`, `repair-lock`, `render` and secret resources
+
+- [`6153f9d`](https://github.com/swordev/rtpl/commit/6153f9d17004385a1c80fa5dac4521bbf4528db5) Thanks [@juanrgm](https://github.com/juanrgm)! - Fix res config type
+
 ## 0.13.3
 
 ### Patch Changes
