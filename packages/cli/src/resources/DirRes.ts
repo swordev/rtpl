@@ -64,7 +64,7 @@ export class DirRes<
       Array.isArray(data)
         ? Array.isArray(this.data)
           ? [...this.data, ...data]
-          : [data]
+          : [...data]
         : Array.isArray(this.data)
           ? data
           : { ...this.data, ...data },

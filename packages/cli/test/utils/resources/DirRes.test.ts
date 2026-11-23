@@ -64,3 +64,17 @@ describe("DirRes.config", () => {
     expectTypeOf(dir.config).not.toHaveProperty("data");
   });
 });
+
+describe("DirRes.add", () => {
+  it("adds array items to an empty dir", () => {
+    const a = new JsonRes({});
+    const b = new JsonRes({});
+    expect(new DirRes({}).add([a, b]).data).toEqual([a, b]);
+  });
+
+  it("appends array items", () => {
+    const a = new JsonRes({});
+    const b = new JsonRes({});
+    expect(new DirRes({}).add([a]).add([b]).data).toEqual([a, b]);
+  });
+});

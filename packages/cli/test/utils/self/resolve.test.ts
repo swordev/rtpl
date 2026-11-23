@@ -4,6 +4,7 @@ import {
   defineTplSchema,
   DirRes,
   JsonRes,
+  RawRes,
   resolveTplResources,
   SecretRes,
   YamlRes,
@@ -218,5 +219,83 @@ describe("resolveTplResources", () => {
     await expect(resolveTplResources([prefixTpl])).rejects.toThrow(
       /outside of the resources directory/,
     );
+  });
+});
+
+describe("resolveTplResources paths", () => {
+  it("keeps '_'-prefixed keys and names for files and dirs", async () => {
+    const tpl = defineTpl({
+      name: "app",
+      resources: () => ({
+        _private: new JsonRes({ data: {} }),
+        redirects: new RawRes({ name: "_redirects", data: "/a /b" }),
+        _dir: new DirRes({}).add({ file: new JsonRes({ data: {} }) }),
+      }),
+    });
+    expect(Object.keys(await resolveTplResources([tpl])).sort()).toEqual([
+      "resources/app/_dir",
+      "resources/app/_dir/file.json",
+      "resources/app/_private.json",
+      "resources/app/_redirects",
+    ]);
+  });
+
+  it("rejects duplicate resource paths", async () => {
+    const tpl = defineTpl({
+      name: "app",
+      resources: () => ({
+        config: new JsonRes({ data: { a: 1 } }),
+        other: new JsonRes({ name: "config.json", data: { b: 2 } }),
+      }),
+    });
+    await expect(resolveTplResources([tpl])).rejects.toThrow(
+      /Duplicate resource path "resources\/app\/config.json"/,
+    );
+  });
+
+  it("rejects duplicate template names", async () => {
+    const tpl = defineTpl({
+      name: "app",
+      resources: () => ({ config: new JsonRes({ data: {} }) }),
+    });
+    await expect(resolveTplResources([tpl, tpl])).rejects.toThrow(
+      /Duplicate template name "app"/,
+    );
+  });
+
+  it("normalizes allowlisted paths", async () => {
+    const tpl = defineTpl({
+      name: "app",
+      resources: () => ({
+        config: new JsonRes({ name: "root.json", data: {} }),
+      }),
+      onResolve: ({ fs }) => {
+        fs.move({ name: "root.json" }, ".");
+      },
+    });
+    expect(
+      await resolveTplResources({
+        templates: [tpl],
+        resourcePathAllowlist: ["./root.json"],
+      }),
+    ).toEqual({ "root.json": "{}" });
+  });
+
+  it("resolves dirname of root-level files as '.'", async () => {
+    const root = new JsonRes({ name: "root.json", data: {} });
+    const nested = new JsonRes({ name: "nested.json", data: {} });
+    const tpl = defineTpl({
+      name: "app",
+      resources: () => ({ root, nested }),
+      onResolve: ({ fs }) => {
+        fs.move({ name: "root.json" }, ".");
+      },
+    });
+    await resolveTplResources({
+      templates: [tpl],
+      resourcePathAllowlist: ["root.json"],
+    });
+    expect(root.dirname.toString()).toBe(".");
+    expect(nested.dirname.toString()).toBe("./resources/app");
   });
 });

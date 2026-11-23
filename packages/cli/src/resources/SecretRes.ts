@@ -79,6 +79,9 @@ export class SecretRes extends AbstractRes<
   protected override onDefaultExtension() {
     return "secret";
   }
+  protected override onDependencies() {
+    return this.parent ? [this.parent] : [];
+  }
   protected override async onReady(path: string, ctx: ResReadyContext) {
     await super.onReady(path, ctx);
     const prevFile = (

@@ -27,7 +27,7 @@ export function isPrimitiveValue(value: unknown): value is JSONPrimitive {
 }
 
 export const toString = (value: JSONValue): string => {
-  return JSON.stringify(
+  const result = JSON.stringify(
     value,
     (key, value) => {
       value = resolve(value);
@@ -45,6 +45,7 @@ export const toString = (value: JSONValue): string => {
     },
     2,
   );
+  return result ?? "null";
 };
 
 export class JsonRes<

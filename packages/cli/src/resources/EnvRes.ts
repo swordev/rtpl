@@ -1,4 +1,4 @@
-import { Callable, stringify } from "../utils/object.js";
+import { Callable, resolve, stringify } from "../utils/object.js";
 import { StringifyClass } from "../utils/self/rs.js";
 import { AbstractRes, ResType } from "./AbstractRes.js";
 
@@ -17,6 +17,8 @@ export class EnvRes<
   }
   override toString() {
     return Object.entries(this.data ?? {})
+      .map(([k, v]) => [k, resolve(v)] as const)
+      .filter(([, v]) => v !== undefined)
       .map(([k, v]) => `${k}=${stringify(v)}`)
       .join("\n");
   }

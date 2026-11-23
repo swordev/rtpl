@@ -22,3 +22,12 @@ describe("EnvRes.toString", () => {
     expect(res.toString()).toBe(["a=1", "b=2", "c=3", "d=3"].join("\n"));
   });
 });
+
+describe("EnvRes undefined values", () => {
+  it("skips undefined values", () => {
+    const res = new EnvRes({
+      data: { A: "1", B: undefined, C: () => undefined, D: false },
+    });
+    expect(res.toString()).toBe("A=1\nD=false");
+  });
+});

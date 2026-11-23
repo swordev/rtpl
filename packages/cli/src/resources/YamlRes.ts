@@ -25,6 +25,7 @@ export class YamlRes<
       });
     };
     const input = typeof this.data === "function" ? this.data() : this.data;
+    if (input === undefined) return "";
     if (this.options.format?.documents && Array.isArray(input)) {
       return input.map((doc) => toYaml(doc)).join("---\n");
     } else {
@@ -32,6 +33,6 @@ export class YamlRes<
     }
   }
   toJSON() {
-    return JSON.parse(this.toString());
+    return JSON.parse(toString(this.data));
   }
 }

@@ -23,6 +23,8 @@ export function formatSchedule(schedule: Schedule | undefined) {
     const [start, end] = schedule;
     return `${start}-${end}`;
   } else if (schedule && typeof schedule.each === "number") {
+    if (!Number.isInteger(schedule.each) || schedule.each < 1)
+      throw new Error(`Invalid cron step: ${schedule.each}`);
     return `*/${schedule.each}`;
   } else {
     return "*";

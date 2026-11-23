@@ -46,3 +46,13 @@ describe("JsonRes.toString", () => {
     );
   });
 });
+
+describe("JsonRes without data", () => {
+  it("renders valid JSON", () => {
+    expect(new JsonRes({ data: undefined }).toString()).toBe("null");
+    expect(new JsonRes({ data: { a: () => undefined } }).toString()).toBe("{}");
+    expect(new JsonRes({ data: { a: () => () => undefined } }).toString()).toBe(
+      '{\n  "a": null\n}',
+    );
+  });
+});

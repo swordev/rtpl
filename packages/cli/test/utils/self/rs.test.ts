@@ -1,4 +1,11 @@
-import { AbstractRes, DirRes, JsonRes, RawRes } from "../../../src/index.js";
+import {
+  AbstractRes,
+  defineTpl,
+  DirRes,
+  JsonRes,
+  RawRes,
+  resolveTplResources,
+} from "../../../src/index.js";
 import { createResourceSystem } from "../../../src/utils/self/rs.js";
 import { it, describe, expect } from "vitest";
 
@@ -127,5 +134,56 @@ describe("filter", () => {
     const f3 = rs.filter({ symbol: res.r2.symbol, instanceOf: DirRes });
     expect(f3.length).toBe(1);
     expect(f3.includes(res.r2)).toBeTruthy();
+  });
+});
+
+describe("resource system inside onResolve", () => {
+  it("does not return duplicates for resources nested in a DirRes", async () => {
+    let found: unknown[] = [];
+    const tpl = defineTpl({
+      name: "app",
+      resources: () => ({
+        dir: new DirRes({}).add({ config: new JsonRes({ data: { a: 1 } }) }),
+      }),
+      onResolve: ({ fs }) => {
+        found = fs.filter({ instanceOf: JsonRes });
+      },
+    });
+    await resolveTplResources([tpl]);
+    expect(found).toHaveLength(1);
+  });
+
+  it("moves a resource nested in a DirRes once", async () => {
+    const tpl = defineTpl({
+      name: "app",
+      resources: () => ({
+        dir: new DirRes({}).add({
+          config: new JsonRes({ name: "config.json", data: { a: 1 } }),
+        }),
+      }),
+      onResolve: ({ fs }) => {
+        fs.move({ instanceOf: JsonRes }, "resources/moved");
+      },
+    });
+    const resources = await resolveTplResources([tpl]);
+    expect(Object.keys(resources).sort()).toEqual([
+      "resources/app/dir",
+      "resources/moved/config.json",
+    ]);
+  });
+
+  it("stops iterating nested resources when the callback returns false", () => {
+    const rs = createResourceSystem({
+      dir: new DirRes({
+        data: { a: new RawRes({}), b: new RawRes({}) },
+      }),
+      c: new RawRes({}),
+    });
+    const visited: string[] = [];
+    rs.forEach({ instanceOf: RawRes }, ({ ref }) => {
+      visited.push(ref);
+      return false;
+    });
+    expect(visited).toEqual(["a"]);
   });
 });

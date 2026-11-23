@@ -71,10 +71,13 @@ export function defineTplConfig(config: InTplConfig): TplConfig {
     backup: {
       ...defaultsTplConfig.backup,
       ...config.backup,
-      deletionPolicy: {
-        ...defaultsTplConfig.backup.deletionPolicy,
-        ...config.backup?.deletionPolicy,
-      },
+      deletionPolicy:
+        config.backup?.deletionPolicy === false
+          ? false
+          : {
+              ...defaultsTplConfig.backup.deletionPolicy,
+              ...config.backup?.deletionPolicy,
+            },
     },
     secrets: {
       ...defaultsTplConfig.secrets,

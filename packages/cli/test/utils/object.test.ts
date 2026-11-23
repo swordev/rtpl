@@ -29,3 +29,24 @@ describe("merge", () => {
     expect(target).toEqual({ a: 1, b: 2, c: 3 });
   });
 });
+
+describe("merge safety", () => {
+  it("ignores undefined source values", () => {
+    expect(
+      merge({}, { a: 1, b: { c: 2 } }, { a: undefined, b: { c: undefined } }),
+    ).toEqual({ a: 1, b: { c: 2 } });
+  });
+
+  it("is not vulnerable to prototype pollution", () => {
+    const payload = JSON.parse(
+      '{"__proto__": {"rtplPolluted": true}, "constructor": {"prototype": {"rtplPolluted": true}}}',
+    );
+    try {
+      const output = merge({}, payload);
+      expect(({} as any).rtplPolluted).toBeUndefined();
+      expect(Object.getPrototypeOf(output)).toBe(Object.prototype);
+    } finally {
+      delete (Object.prototype as any).rtplPolluted;
+    }
+  });
+});

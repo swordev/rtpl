@@ -39,8 +39,8 @@ const composeTpl = defineTpl({
             volumes:
               value.volumes?.map((v) => {
                 if (typeof v === "string") {
-                  const [a, b] = v.split(":");
-                  return `${volume(a)}:${b}`;
+                  const [source, ...rest] = v.split(":");
+                  return [volume(source), ...rest].join(":");
                 } else {
                   return v;
                 }
@@ -135,7 +135,7 @@ describe("compose", () => {
         app_db:
           image: postgres:latest
           volumes:
-            - app_db_data:undefined
+            - app_db_data
           environment:
             POSTGRES_PASSWORD: custom-password
         app_web:
@@ -146,7 +146,7 @@ describe("compose", () => {
         app1_db:
           image: postgres:latest
           volumes:
-            - app1_db_data:undefined
+            - app1_db_data
           environment:
             POSTGRES_PASSWORD: 0D6Zlwi0gXAgqasK
         app1_web:
@@ -157,7 +157,7 @@ describe("compose", () => {
         app2_db:
           image: postgres:latest
           volumes:
-            - app2_db_data_restored:undefined
+            - app2_db_data_restored
           environment:
             POSTGRES_PASSWORD: MsQbkcEPiJekr3D5
         app2_web:

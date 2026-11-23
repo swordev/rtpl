@@ -69,11 +69,20 @@ export abstract class AbstractRes<
       return config;
     }, {} as ResConfig<TConf>);
     this.path = new DelayedValue((path) => `./${path}`);
-    this.dirname = new DelayedValue((path) => `./${posix.dirname(path)}`);
+    this.dirname = new DelayedValue((path) => {
+      const dirname = posix.dirname(path);
+      return dirname === "." ? "." : `./${dirname}`;
+    });
   }
 
   abstract toString(): string;
   protected onDefaultExtension(): string | void {}
+  /**
+   * Resources that must be ready before this one.
+   */
+  protected onDependencies(): AbstractRes[] {
+    return [];
+  }
   protected async onReady(path: string, ctx: ResReadyContext) {
     setDelayedValue(this.path, path);
     setDelayedValue(this.dirname, path);

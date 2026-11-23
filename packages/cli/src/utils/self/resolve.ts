@@ -16,12 +16,13 @@ import { RawRes } from "../../resources/RawRes.js";
 import { SecretRes } from "../../resources/SecretRes.js";
 import { posix } from "path";
 
+const normalizePath = (value: string) =>
+  posix.normalize(value.replaceAll("\\", "/")).replace(/\/+$/, "");
+
 function isInsideDir(path: string, dir: string) {
-  const normalize = (value: string) =>
-    posix.normalize(value.replaceAll("\\", "/")).replace(/\/+$/, "");
-  const normalizedPath = normalize(path);
+  const normalizedPath = normalizePath(path);
   if (normalizedPath.split("/").includes("..")) return false;
-  const normalizedDir = normalize(dir);
+  const normalizedDir = normalizePath(dir);
   if (normalizedDir === ".") return normalizedPath !== ".";
   return normalizedPath.startsWith(`${normalizedDir}/`);
 }
@@ -38,9 +39,14 @@ function createFileName(tag: string, input: AbstractRes) {
   return tag;
 }
 
+/**
+ * Plain object keys starting with `_` group resources without adding a path
+ * segment. Resource names (and keys used as resource names) are kept as is.
+ */
 function* iterateResources(
   inResources: TplResources,
   parentPath: string[] = [],
+  parentKeyPath: string[] = [],
 ): Generator<{
   keyPath: string;
   path: string;
@@ -48,27 +54,29 @@ function* iterateResources(
 }> {
   for (const key in inResources) {
     const value = (inResources as any)[key];
-    const keyPath = [...parentPath, key].join("/");
+    const keyPath = [...parentKeyPath, key];
     if (DirRes.isInstance(value)) {
       const path = [...parentPath, value.name ?? createFileName(key, value)];
       yield {
-        keyPath,
+        keyPath: keyPath.join("/"),
         path: path.join("/"),
         res: value,
       };
-      yield* iterateResources(value.data, path);
+      yield* iterateResources(value.data, path, keyPath);
     } else if (value instanceof AbstractRes) {
-      const outPath = [...parentPath, value.name ?? createFileName(key, value)]
-        .join("/")
-        .split("/")
-        .filter((f) => !f.startsWith("_"));
       yield {
-        keyPath,
-        path: outPath.join("/"),
+        keyPath: keyPath.join("/"),
+        path: [...parentPath, value.name ?? createFileName(key, value)].join(
+          "/",
+        ),
         res: value,
       };
     } else if (isPlainObject(value)) {
-      yield* iterateResources(value as TplResources, [...parentPath, key]);
+      yield* iterateResources(
+        value as TplResources,
+        key.startsWith("_") ? parentPath : [...parentPath, key],
+        keyPath,
+      );
     }
   }
 }
@@ -90,13 +98,19 @@ export async function createTplResources(
   const resources: Record<string, AbstractRes> = {};
   const resourcesByTemplate: Record<string, any> = {};
   for (const tpl of templates) {
+    if (tpl.name in resourcesByTemplate)
+      throw new Error(`Duplicate template name "${tpl.name}"`);
     resourcesByTemplate[tpl.name] = await tpl.resources();
+    const usedCustomResources = new Set<string>();
     const parentPath = [config.resourcesDir, tpl.name];
     for (const { path, keyPath, res } of iterateResources(
       resourcesByTemplate[tpl.name],
     )) {
       const absPath = [...parentPath, path].join("/");
+      if (absPath in resources)
+        throw new Error(`Duplicate resource path "${absPath}"`);
       const customRes = tpl.customResources?.[keyPath];
+      if (customRes !== undefined) usedCustomResources.add(keyPath);
       if (typeof customRes === "function") {
         resources[absPath] = customRes(res);
       } else if (typeof customRes === "string") {
@@ -111,6 +125,12 @@ export async function createTplResources(
         resources[absPath] = res;
       }
     }
+    for (const keyPath in tpl.customResources) {
+      if (!usedCustomResources.has(keyPath))
+        throw new Error(
+          `Custom resource "${keyPath}" not found in template "${tpl.name}"`,
+        );
+    }
   }
   const fs = createResourceSystem(resources);
   for (const tpl of templates) {
@@ -121,18 +141,41 @@ export async function createTplResources(
       fs,
     });
   }
+  const allowlist = new Set(
+    config.resourcePathAllowlist?.map((path) => normalizePath(path)),
+  );
+  const pathByRes = new Map<AbstractRes, string>();
   for (const path in resources) {
     const isValidPath =
       isInsideDir(path, config.resourcesDir) ||
-      config.resourcePathAllowlist?.includes(path);
+      allowlist.has(normalizePath(path));
     if (!isValidPath) {
       throw new Error(
         `Resource path "${path}" is outside of the resources directory`,
       );
     }
+    pathByRes.set(resources[path], path);
+  }
 
+  const ready = new Map<AbstractRes, Promise<void>>();
+  const setReady = (res: AbstractRes, path: string): Promise<void> => {
+    let promise = ready.get(res);
+    if (!promise) {
+      promise = (async () => {
+        for (const dep of res["onDependencies"]()) {
+          const depPath = pathByRes.get(dep);
+          if (depPath !== undefined) await setReady(dep, depPath);
+        }
+        await res["onReady"]?.(path, ctx);
+      })();
+      ready.set(res, promise);
+    }
+    return promise;
+  };
+
+  for (const path in resources) {
     const res = resources[path];
-    await res["onReady"]?.(path, ctx);
+    await setReady(res, path);
     if (DirRes.isInstance(res) && !options.includeDirs) delete resources[path];
   }
 

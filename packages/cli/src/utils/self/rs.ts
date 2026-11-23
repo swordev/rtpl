@@ -59,6 +59,22 @@ export function forEach<T, F extends FilterInput<T>>(
     resources: Resources;
   }) => boolean | void,
 ) {
+  walk(this, input, onFound, new Set());
+}
+
+/**
+ * @returns `false` when the iteration was stopped
+ */
+function walk<T, F extends FilterInput<T>>(
+  resources: Resources,
+  input: F,
+  onFound: (data: {
+    ref: string;
+    resource: T;
+    resources: Resources;
+  }) => boolean | void,
+  exclude: Set<unknown>,
+): boolean {
   const instanceOf: Constructor<T> | undefined =
     "instanceOf" in input && typeof input.instanceOf === "function"
       ? input.instanceOf
@@ -68,13 +84,19 @@ export function forEach<T, F extends FilterInput<T>>(
       ? input.instanceOf.data
       : undefined;
 
-  for (const ref in this) {
-    const res = this[ref] as AbstractRes;
+  // Resources already present at an upper level (e.g. the flat map built by
+  // `createTplResources`) must not be visited twice through their `DirRes`.
+  const childExclude = new Set([...exclude, ...Object.values(resources)]);
+
+  for (const ref in resources) {
+    const res = resources[ref] as AbstractRes;
+    if (exclude.has(res)) continue;
     if (isPlainObject(res)) {
-      forEach.bind(res)(input, onFound as any);
+      if (!walk(res, input, onFound, childExclude)) return false;
       continue;
     } else if (MinimalDirRes.isInstance(res) && isPlainObject(res.data)) {
-      if (!res.resolved) forEach.bind(res.data)(input, onFound as any);
+      if (!res.resolved && !walk(res.data, input, onFound, childExclude))
+        return false;
     }
     if (input.symbol && res.symbol !== input.symbol) continue;
     if (instanceOf && !isInstanceOf(res, instanceOf)) continue;
@@ -88,9 +110,10 @@ export function forEach<T, F extends FilterInput<T>>(
       }
     }
     if (input.test && !input.test(res)) continue;
-    if (onFound({ ref, resource: res as any, resources: this }) === false)
-      return;
+    if (onFound({ ref, resource: res as any, resources }) === false)
+      return false;
   }
+  return true;
 }
 
 export function filter<T, F extends FilterInput<T>>(this: Resources, input: F) {

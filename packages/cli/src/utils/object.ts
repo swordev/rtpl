@@ -24,11 +24,14 @@ export function merge(object: Record<string, unknown>, ...sources: unknown[]) {
   return object;
 }
 
+const unsafeKeys = new Set(["__proto__", "constructor", "prototype"]);
+
 function mergeRecords(
   object: Record<string, unknown>,
   source: Record<string, unknown>,
 ) {
   for (const [key, sourceValue] of Object.entries(source)) {
+    if (unsafeKeys.has(key) || sourceValue === undefined) continue;
     const objectValue = object[key];
 
     if (Array.isArray(objectValue)) {
