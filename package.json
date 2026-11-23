@@ -24,7 +24,7 @@
     "build": "tsc -b tsconfig.build.json",
     "check": "pnpm check:format",
     "publish": "changeset publish",
-    "check:format": "oxfmt --cache",
+    "check:format": "oxfmt --check",
     "prepare": "workspace gen",
     "clean:ts": "tsc -b tsconfig.build.json --clean",
     "format": "oxfmt",
