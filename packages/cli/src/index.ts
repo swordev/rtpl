@@ -12,6 +12,7 @@ export { defineTplSchema } from "./utils/self/schema.js";
 export {
   AbstractRes,
   type ResOptions,
+  type ResConfig,
   type MinimalRes,
   ResType,
 } from "./resources/AbstractRes.js";

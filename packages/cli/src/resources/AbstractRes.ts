@@ -11,6 +11,8 @@ export type ResOptions<TData, TConf extends Record<string, unknown> = {}> = {
 } & ResDataObject<TData> &
   TConf;
 
+export type ResConfig<TConf> = Omit<TConf, "name" | "data">;
+
 export enum ResType {
   Abstract = 1,
   Cron,
@@ -48,7 +50,7 @@ export abstract class AbstractRes<
   protected static type = ResType.Abstract;
   readonly name: string | undefined;
   public data: TData;
-  readonly config: TConf;
+  readonly config: ResConfig<TConf>;
   readonly path: DelayedValue<string>;
   readonly dirname: DelayedValue<string>;
   readonly resolved: boolean | undefined;
@@ -64,7 +66,7 @@ export abstract class AbstractRes<
     this.config = Object.keys(options).reduce((config, key) => {
       if (key !== "name" && key !== "data") (config as any)[key] = options[key];
       return config;
-    }, {} as TConf);
+    }, {} as ResConfig<TConf>);
     this.path = new DelayedValue((path) => `./${path}`);
     this.dirname = new DelayedValue((path) => `./${posix.dirname(path)}`);
   }
