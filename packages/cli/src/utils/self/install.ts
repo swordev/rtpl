@@ -101,7 +101,7 @@ export async function getFileActions(
 
   for (const resourcePath of lockFilePaths) {
     const lock = lockData.files[resourcePath];
-    const fsPath = join(config.root, resourcePath);
+    const fsPath = join(config.paths.root, resourcePath);
     const relativePath = relative(config.paths.cwd, fsPath).replace(/\\/g, "/");
     result[resourcePath] = {
       ...(await getFileAction(fsPath, resources[resourcePath], lock)),
@@ -113,7 +113,7 @@ export async function getFileActions(
 
   for (const resourcePath in resources) {
     if (!(resourcePath in result)) {
-      const fsPath = join(config.root, resourcePath);
+      const fsPath = join(config.paths.root, resourcePath);
       const relativePath = relative(config.paths.cwd, fsPath).replace(
         /\\/g,
         "/",

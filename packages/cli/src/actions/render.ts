@@ -12,10 +12,10 @@ export default async function render(options: GlobalOptions) {
     console.info(
       styleText(
         "cyan",
-        relative(
-          config.paths.cwd,
-          join(config.paths.resources, path),
-        ).replaceAll("\\", "/"),
+        relative(config.paths.cwd, join(config.paths.root, path)).replaceAll(
+          "\\",
+          "/",
+        ),
       ),
     );
     console.info(res.toString());

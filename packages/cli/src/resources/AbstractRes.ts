@@ -30,6 +30,7 @@ const kindType = "_tplRes";
 export class ResReadyContext {
   constructor(
     readonly data: {
+      root: string;
       secrets: Secrets | undefined;
       initialSecrets: boolean;
     },

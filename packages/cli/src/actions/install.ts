@@ -67,7 +67,7 @@ export default async function install(options: InstallActionOptions) {
     try {
       const dirs = await execFileAction(
         action,
-        config.root,
+        config.paths.root,
         action.resourcePath,
         options.dryRun,
       );
@@ -96,7 +96,7 @@ export default async function install(options: InstallActionOptions) {
   const dirs = Object.keys(lockData.dirs).sort().reverse();
   for (const dir of dirs) {
     try {
-      await rmdir(join(config.root, dir));
+      await rmdir(join(config.paths.root, dir));
       delete lockData.dirs[dir];
     } catch (error) {}
   }

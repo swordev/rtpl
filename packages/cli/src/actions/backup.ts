@@ -26,7 +26,8 @@ export default async function backup(options: BackupOptions) {
 
   for (const path in backupData.lock.files) {
     files++;
-    backupData.lock.files[path].contents = (await readFile(path)).toString();
+    const fsPath = join(config.paths.root, path);
+    backupData.lock.files[path].contents = (await readFile(fsPath)).toString();
   }
 
   const backupDataText = serializeBackupData(backupData);

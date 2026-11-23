@@ -3,6 +3,7 @@ import { confirmPrompt } from "../utils/cli.js";
 import { styleText } from "util";
 import { parseTplConfigFile } from "../utils/self/config.js";
 import { existsSync } from "fs";
+import { join } from "path";
 import { TplLock } from "../utils/self/lock.js";
 
 export type RepairLockOptions = GlobalOptions & {};
@@ -15,7 +16,7 @@ export default async function repairLock(options: RepairLockOptions) {
   const notfounds: string[] = [];
 
   for (const path in lockData.files) {
-    if (!existsSync(path)) {
+    if (!existsSync(join(config.paths.root, path))) {
       delete lockData.files[path];
       if (!notfounds.length)
         console.info(styleText("yellow", "Files not found:"));

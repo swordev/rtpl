@@ -68,6 +68,7 @@ export async function createTplResources(
 ) {
   const templates = await Promise.all(config.templates);
   const ctx = new ResReadyContext({
+    root: config.paths.root,
     secrets:
       options.secrets ||
       (config.secrets.enabled

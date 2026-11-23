@@ -39,8 +39,7 @@ export default async function restore(options: RestoreOptions) {
   const checkPath = (...paths: string[]) => {
     for (const path of paths) if (existsSync(path)) errors.addPath(path);
   };
-  const resolveResOutPath = (path: string) =>
-    options.output ? join(options.output, path) : path;
+  const resolveResOutPath = (path: string) => join(outConfig.paths.root, path);
 
   checkPath(outConfig.paths.secrets, outConfig.paths.lock);
 

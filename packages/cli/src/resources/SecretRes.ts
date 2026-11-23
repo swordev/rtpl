@@ -14,6 +14,7 @@ import {
   ResType,
 } from "./AbstractRes.js";
 import { DelayedValue, setDelayedValue } from "./DelayedValue.js";
+import { join } from "path";
 
 export type SecretData = {
   value?: string;
@@ -80,7 +81,9 @@ export class SecretRes extends AbstractRes<
   }
   protected override async onReady(path: string, ctx: ResReadyContext) {
     await super.onReady(path, ctx);
-    const prevFile = (await readIfExists(path))?.toString();
+    const prevFile = (
+      await readIfExists(join(ctx.data.root, path))
+    )?.toString();
     const prev =
       typeof this.data?.value === "string"
         ? this.data.value
