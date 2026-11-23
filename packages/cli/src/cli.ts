@@ -9,7 +9,6 @@ import render from "./actions/render.js";
 import repairLock from "./actions/repair-lock.js";
 import restore from "./actions/restore.js";
 import { GlobalOptions } from "./utils/self/options.js";
-import { parseStringListValue } from "./utils/string.js";
 
 import { styleText } from "node:util";
 import { program } from "commander";
@@ -42,17 +41,10 @@ export const pkg = JSON.parse(
   readFileSync(`${$dirname}/../package.json`).toString(),
 );
 
-export default (defaultOptions?: Partial<GlobalOptions>) => {
+export default () => {
   program.name("rtpl");
   program.version(pkg.version);
-  program
-    .option("-c,--config <path>", "config file path", "./rtpl.config.*")
-    .option(
-      "-f,--filter <patterns>",
-      "patterns filter",
-      parseStringListValue,
-      defaultOptions?.filter ?? undefined,
-    );
+  program.option("-c,--config <path>", "config file path", "./rtpl.config.*");
   program.command("check").action(makeAction(check));
   program
     .command("diff")
@@ -66,7 +58,7 @@ export default (defaultOptions?: Partial<GlobalOptions>) => {
     .command("install")
     .alias("i")
     .option("-d,--dry-run", "dry run", false)
-    .option("--no-backup", "no backup", false)
+    .option("--no-backup", "skip the backup before installing")
     .option("--confirm", "confirm changes", false)
     .option(
       "-l,--lines <value>",

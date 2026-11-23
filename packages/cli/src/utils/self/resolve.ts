@@ -14,6 +14,17 @@ import { createResourceSystem } from "./rs.js";
 import { isPlainObject } from "../object.js";
 import { RawRes } from "../../resources/RawRes.js";
 import { SecretRes } from "../../resources/SecretRes.js";
+import { posix } from "path";
+
+function isInsideDir(path: string, dir: string) {
+  const normalize = (value: string) =>
+    posix.normalize(value.replaceAll("\\", "/")).replace(/\/+$/, "");
+  const normalizedPath = normalize(path);
+  if (normalizedPath.split("/").includes("..")) return false;
+  const normalizedDir = normalize(dir);
+  if (normalizedDir === ".") return normalizedPath !== ".";
+  return normalizedPath.startsWith(`${normalizedDir}/`);
+}
 
 function createFileName(tag: string, input: AbstractRes) {
   const defaultExtension = input["onDefaultExtension"]();
@@ -112,7 +123,7 @@ export async function createTplResources(
   }
   for (const path in resources) {
     const isValidPath =
-      path.startsWith(config.resourcesDir) ||
+      isInsideDir(path, config.resourcesDir) ||
       config.resourcePathAllowlist?.includes(path);
     if (!isValidPath) {
       throw new Error(

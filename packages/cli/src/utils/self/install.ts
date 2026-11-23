@@ -64,7 +64,7 @@ export async function getFileAction(
       try {
         oldData = (await readFile(absPath)).toString();
       } catch (error) {
-        if ((error as NodeJS.ErrnoException).code !== "EISDIR") throw oldData;
+        if ((error as NodeJS.ErrnoException).code !== "EISDIR") throw error;
       }
       return oldData === data
         ? { type: ActionEnum.NONE, lock }

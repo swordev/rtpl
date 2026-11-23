@@ -197,4 +197,26 @@ describe("resolveTplResources", () => {
       }
     `);
   });
+
+  it("rejects resource paths outside of the resources directory", async () => {
+    for (const name of ["../../evil.json", "../../../evil.json"]) {
+      const tpl = defineTpl({
+        name: "test",
+        resources: () => ({ a: new JsonRes({ name, data: {} }) }),
+      });
+      await expect(resolveTplResources([tpl])).rejects.toThrow(
+        /outside of the resources directory/,
+      );
+    }
+    const prefixTpl = defineTpl({
+      name: "test",
+      resources: () => ({ a: new JsonRes({ name: "a.json", data: {} }) }),
+      onResolve: ({ fs }) => {
+        fs.move({ name: "a.json" }, "resources-other");
+      },
+    });
+    await expect(resolveTplResources([prefixTpl])).rejects.toThrow(
+      /outside of the resources directory/,
+    );
+  });
 });

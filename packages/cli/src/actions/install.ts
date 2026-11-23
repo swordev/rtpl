@@ -9,7 +9,6 @@ import {
   logAction,
 } from "../utils/self/install.js";
 import { TplLock } from "../utils/self/lock.js";
-import { splitGlobalOptions } from "../utils/self/options.js";
 import { TplSecrets } from "../utils/self/secrets.js";
 import backup from "./backup.js";
 import diff from "./diff.js";
@@ -20,12 +19,15 @@ import { createTplResources } from "../utils/self/resolve.js";
 export type InstallActionOptions = GlobalOptions & {
   dryRun: boolean;
   confirm: boolean;
-  noBackup: boolean;
+  /**
+   * @default true
+   */
+  backup?: boolean;
   lines: number;
 };
 
 export default async function install(options: InstallActionOptions) {
-  const [globalOptions] = splitGlobalOptions(options);
+  const globalOptions: GlobalOptions = { config: options.config };
 
   if (!options.confirm) {
     const diffResult = await diff({
@@ -43,7 +45,7 @@ export default async function install(options: InstallActionOptions) {
 
   const config = await parseTplConfigFile(globalOptions.config);
 
-  if (!options.noBackup && config.backup.enabled) {
+  if (!options.dryRun && options.backup !== false && config.backup.enabled) {
     const backupResult = await backup({
       ...globalOptions,
       log: false,
@@ -93,15 +95,15 @@ export default async function install(options: InstallActionOptions) {
     }
   }
 
-  const dirs = Object.keys(lockData.dirs).sort().reverse();
-  for (const dir of dirs) {
-    try {
-      await rmdir(join(config.paths.root, dir));
-      delete lockData.dirs[dir];
-    } catch (error) {}
-  }
-
   if (!options.dryRun) {
+    const dirs = Object.keys(lockData.dirs).sort().reverse();
+    for (const dir of dirs) {
+      try {
+        await rmdir(join(config.paths.root, dir));
+        delete lockData.dirs[dir];
+      } catch (error) {}
+    }
+
     if (secrets) {
       const secretsHandler = new TplSecrets(config.paths.secrets);
       await secretsHandler.write(secrets);
