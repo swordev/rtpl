@@ -9,7 +9,12 @@ export {
   type AnyTplCustomResources,
 } from "./utils/self/tpl.js";
 export { defineTplSchema } from "./utils/self/schema.js";
-export { AbstractRes, type ResOptions } from "./resources/AbstractRes.js";
+export {
+  AbstractRes,
+  type ResAttrs,
+  type ResBaseOptions,
+  type ResOptions,
+} from "./resources/AbstractRes.js";
 export { ResPath } from "./resources/ResPath.js";
 export { CronRes, type CronData } from "./resources/CronRes.js";
 export { DirRes, type DirData, type DirConfig } from "./resources/DirRes.js";

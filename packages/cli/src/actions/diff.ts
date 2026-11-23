@@ -11,6 +11,7 @@ import { diffLines } from "diff";
 import { TplLock } from "../utils/self/lock.js";
 import { styleText } from "node:util";
 import { createTplResources } from "../utils/self/resolve.js";
+import { formatAttrChanges } from "../utils/attrs.js";
 
 export type DiffOptions = GlobalOptions & {
   showAll: boolean;
@@ -31,6 +32,10 @@ export default async function diff(options: DiffOptions) {
     changes++;
     if (action.type === ActionEnum.ADD || action.type === ActionEnum.UPDATE) {
       await showDiff(resources[action.resourcePath], action.fsPath, options);
+    }
+    if (action.type !== ActionEnum.DELETE) {
+      for (const line of await formatAttrChanges(action.attrChanges))
+        console.info(styleText("blue", line));
     }
   }
 

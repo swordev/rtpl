@@ -1,5 +1,13 @@
 import { AbstractRes } from "../../resources/AbstractRes.js";
-import { checkPath, mkrdir } from "../fs.js";
+import { mkrdir, statIfExists } from "../fs.js";
+import {
+  applyAttrs,
+  AttrChanges,
+  diffAttrs,
+  hasAttrChanges,
+  ResolvedAttrs,
+  resolveAttrs,
+} from "../attrs.js";
 import { styleText } from "util";
 import { sort } from "../object.js";
 import { LockData, LockDataFile } from "./lock.js";
@@ -12,23 +20,42 @@ export enum ActionEnum {
   ADD,
   UPDATE,
   DELETE,
+  /**
+   * Only the file mode or owner changed.
+   */
+  ATTRS,
 }
 
-type ActionResult =
-  | {
+type ActionAttrs = {
+  /**
+   * Declared attributes (applied after writing the file).
+   */
+  attrs: ResolvedAttrs;
+  /**
+   * Declared attributes that differ from the current ones.
+   */
+  attrChanges: AttrChanges;
+};
+
+export type ActionResult =
+  | ({
       type: ActionEnum.NONE;
       lock: LockDataFile;
-    }
-  | {
+    } & ActionAttrs)
+  | ({
       type: ActionEnum.ADD;
       data: string;
       lock: LockDataFile;
-    }
-  | {
+    } & ActionAttrs)
+  | ({
       type: ActionEnum.UPDATE;
       data: string;
       lock: LockDataFile | false;
-    }
+    } & ActionAttrs)
+  | ({
+      type: ActionEnum.ATTRS;
+      lock: LockDataFile | false;
+    } & ActionAttrs)
   | {
       type: ActionEnum.DELETE;
       lock: LockDataFile | false | undefined;
@@ -43,6 +70,8 @@ export function logAction(action: ActionEnum, path: string) {
     console.info(`[${styleText("yellow", "U")}]`, path);
   } else if (action === ActionEnum.DELETE) {
     console.info(`[${styleText("red", "D")}]`, path);
+  } else if (action === ActionEnum.ATTRS) {
+    console.info(`[${styleText("blue", "P")}]`, path);
   }
 }
 
@@ -57,8 +86,11 @@ export async function getFileAction(
 
   if (res) {
     const data = res.toString();
-    if (!(await checkPath(absPath))) {
-      return { type: ActionEnum.ADD, data, lock };
+    const attrs = await resolveAttrs(res);
+    const stats = await statIfExists(absPath);
+    if (!stats) {
+      const attrChanges = diffAttrs(undefined, attrs);
+      return { type: ActionEnum.ADD, data, lock, attrs, attrChanges };
     } else {
       let oldData;
       try {
@@ -66,21 +98,52 @@ export async function getFileAction(
       } catch (error) {
         if ((error as NodeJS.ErrnoException).code !== "EISDIR") throw error;
       }
-      return oldData === data
-        ? { type: ActionEnum.NONE, lock }
-        : {
-            type: ActionEnum.UPDATE,
-            data,
-            lock: previousLock
-              ? { ...lock, updatingDate: new Date().toISOString() }
-              : false,
-          };
+      const attrChanges = diffAttrs(
+        stats.isDirectory() ? undefined : stats,
+        attrs,
+      );
+      const updatingLock = previousLock
+        ? { ...lock, updatingDate: new Date().toISOString() }
+        : false;
+      if (oldData !== data) {
+        return {
+          type: ActionEnum.UPDATE,
+          data,
+          lock: updatingLock,
+          attrs,
+          attrChanges,
+        };
+      } else if (hasAttrChanges(attrChanges)) {
+        return {
+          type: ActionEnum.ATTRS,
+          lock: updatingLock,
+          attrs,
+          attrChanges,
+        };
+      } else {
+        return { type: ActionEnum.NONE, lock, attrs, attrChanges };
+      }
     }
   } else {
     return {
       type: ActionEnum.DELETE,
       lock: previousLock ? undefined : false,
     };
+  }
+}
+
+async function getFileActionAt(
+  resourcePath: string,
+  fsPath: string,
+  resources: Record<string, AbstractRes>,
+  lock?: LockDataFile,
+) {
+  try {
+    return await getFileAction(fsPath, resources[resourcePath], lock);
+  } catch (error) {
+    throw new Error(`${resourcePath}: ${(error as Error).message}`, {
+      cause: error,
+    });
   }
 }
 
@@ -104,7 +167,7 @@ export async function getFileActions(
     const fsPath = join(config.paths.root, resourcePath);
     const relativePath = relative(config.paths.cwd, fsPath).replace(/\\/g, "/");
     result[resourcePath] = {
-      ...(await getFileAction(fsPath, resources[resourcePath], lock)),
+      ...(await getFileActionAt(resourcePath, fsPath, resources, lock)),
       relativePath,
       resourcePath,
       fsPath,
@@ -119,7 +182,7 @@ export async function getFileActions(
         "/",
       );
       result[resourcePath] = {
-        ...(await getFileAction(fsPath, resources[resourcePath])),
+        ...(await getFileActionAt(resourcePath, fsPath, resources)),
         relativePath,
         resourcePath,
         fsPath,
@@ -142,10 +205,19 @@ export async function execFileAction(
   } else if (!dryRun) {
     if (action.type === ActionEnum.ADD) {
       const dirs = await mkrdir(dirname(absPath), baseDir);
-      await writeFile(absPath, action.data);
+      // Create the file with the final mode so its contents are never
+      // exposed with wider permissions (the umask may still narrow it).
+      await writeFile(
+        absPath,
+        action.data,
+        action.attrs.mode === undefined ? {} : { mode: action.attrs.mode },
+      );
+      await applyAttrs(absPath, action.attrs);
       return dirs.map((v) => relative(baseDir, v).replace(/\\/g, "/"));
     } else if (action.type === ActionEnum.UPDATE) {
       const exec = async () => await writeFile(absPath, action.data);
+      // Restrict the existing file before writing the new contents.
+      await applyAttrs(absPath, action.attrs);
       try {
         await exec();
       } catch (error) {
@@ -157,6 +229,9 @@ export async function execFileAction(
         }
         await exec();
       }
+      await applyAttrs(absPath, action.attrs);
+    } else if (action.type === ActionEnum.ATTRS) {
+      await applyAttrs(absPath, action.attrs);
     } else if (action.type === ActionEnum.DELETE) {
       try {
         await rm(absPath);

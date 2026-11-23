@@ -7,7 +7,8 @@ import {
 } from "../utils/self/backup.js";
 import { parseTplConfigFile } from "../utils/self/config.js";
 import { createHash } from "crypto";
-import { mkdir, readFile, writeFile } from "fs/promises";
+import { mkdir, readFile, stat, writeFile } from "fs/promises";
+import { attrsSupported } from "../utils/attrs.js";
 import { dirname, join } from "path";
 
 export type BackupOptions = GlobalOptions & {
@@ -27,7 +28,14 @@ export default async function backup(options: BackupOptions) {
   for (const path in backupData.lock.files) {
     files++;
     const fsPath = join(config.paths.root, path);
-    backupData.lock.files[path].contents = (await readFile(fsPath)).toString();
+    const file = backupData.lock.files[path];
+    file.contents = (await readFile(fsPath)).toString();
+    if (attrsSupported()) {
+      const stats = await stat(fsPath);
+      file.mode = stats.mode & 0o7777;
+      file.uid = stats.uid;
+      file.gid = stats.gid;
+    }
   }
 
   const backupDataText = serializeBackupData(backupData);

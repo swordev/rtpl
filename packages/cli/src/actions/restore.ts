@@ -5,6 +5,7 @@ import { parseTplConfigFile } from "../utils/self/config.js";
 
 import { existsSync } from "fs";
 import { mkdir, writeFile } from "fs/promises";
+import { applyAttrs, attrsSupported } from "../utils/attrs.js";
 import { join, relative } from "path";
 import { TplSecrets } from "../utils/self/secrets.js";
 import { TplLock } from "../utils/self/lock.js";
@@ -63,10 +64,32 @@ export default async function restore(options: RestoreOptions) {
     await mkdir(outPath, { recursive: true });
   }
   for (const path in backupData.lock.files) {
-    const contents = backupData.lock.files[path].contents;
+    const { contents, mode, uid, gid } = backupData.lock.files[path];
     const outPath = resolveResOutPath(path);
-    if (typeof contents === "string") await writeFile(outPath, contents);
-    delete (backupData.lock.files[path] as any).contents;
+    if (typeof contents === "string") {
+      await writeFile(outPath, contents);
+      if (attrsSupported()) {
+        // Owner first since `chown` can clear the setuid/setgid bits.
+        try {
+          await applyAttrs(outPath, { uid, gid });
+        } catch (error) {
+          console.warn(
+            styleText(
+              "yellow",
+              `Unable to restore the owner of ${normalizePath(outPath)}: ${(error as Error).message}`,
+            ),
+          );
+        }
+        await applyAttrs(outPath, { mode });
+      }
+    }
+    const file = backupData.lock.files[path] as Partial<
+      (typeof backupData.lock.files)[string]
+    >;
+    delete file.contents;
+    delete file.mode;
+    delete file.uid;
+    delete file.gid;
   }
 
   const secrets = new TplSecrets(outConfig.paths.secrets);

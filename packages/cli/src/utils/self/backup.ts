@@ -5,8 +5,18 @@ import { Secrets, TplSecrets } from "./secrets.js";
 import { readFile, readdir } from "fs/promises";
 import { parse, stringify } from "yaml";
 
+export type BackupFile = {
+  contents: string;
+  /**
+   * File attributes (not available on Windows).
+   */
+  mode?: number;
+  uid?: number;
+  gid?: number;
+};
+
 export type BackupData = {
-  lock: LockData<{ contents: string }>;
+  lock: LockData<BackupFile>;
   secrets: Secrets;
 };
 
@@ -33,7 +43,7 @@ export async function createBackupFile(
   const lock = new TplLock(config.paths.lock);
   const secrets = new TplSecrets(config.paths.secrets);
   return {
-    lock: await lock.read<{ contents: string }>(),
+    lock: await lock.read<BackupFile>(),
     secrets: await secrets.read(),
   };
 }

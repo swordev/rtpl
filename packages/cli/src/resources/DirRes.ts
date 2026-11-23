@@ -1,5 +1,9 @@
 import { Callable } from "../utils/object.js";
-import { AbstractRes, ResOptions } from "./AbstractRes.js";
+import {
+  AbstractRes,
+  type ResBaseOptions,
+  type ResOptions,
+} from "./AbstractRes.js";
 
 export type DirData = Callable<
   Record<string, unknown> | unknown[] | undefined,
@@ -16,9 +20,11 @@ export class DirRes<
    * Custom options (everything except `name` and `data`).
    */
   readonly config: DirConfig<TConf>;
-  constructor(options: ResOptions<T> & TConf) {
-    super(options);
+  constructor(options: ResBaseOptions<T> & TConf) {
     const { name, data, ...config } = options;
+    // Directory modes and owners are not managed yet, so `mode`, `owner` and
+    // `group` keep being custom options.
+    super({ name, data } as unknown as ResOptions<T>);
     this.config = config as DirConfig<TConf>;
   }
   toString(): string {

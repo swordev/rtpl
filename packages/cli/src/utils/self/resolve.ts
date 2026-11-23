@@ -113,7 +113,12 @@ export async function createTplResources(
           res.data.value = customRes;
           resources[absPath] = res;
         } else {
-          resources[absPath] = new RawRes({ data: customRes });
+          resources[absPath] = new RawRes({
+            data: customRes,
+            mode: res.mode,
+            owner: res.owner,
+            group: res.group,
+          });
         }
       } else {
         resources[absPath] = res;
