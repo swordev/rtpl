@@ -1,6 +1,6 @@
 import { Callable, resolve, stringify } from "../utils/object.js";
-import { StringifyClass } from "../utils/self/rs.js";
-import { AbstractRes, ResType } from "./AbstractRes.js";
+import type { StringifyClass } from "../utils/self/rs.js";
+import { AbstractRes } from "./AbstractRes.js";
 
 export type EnvData = Record<
   string,
@@ -9,12 +9,8 @@ export type EnvData = Record<
 
 export class EnvRes<
   T extends EnvData | undefined = EnvData | undefined,
-> extends AbstractRes<ResType.Env, T> {
-  protected static override type = ResType.Env;
-  protected override readonly type = ResType.Env;
-  protected override onDefaultExtension() {
-    return "env";
-  }
+> extends AbstractRes<T> {
+  override readonly extension = "env";
   override toString() {
     return Object.entries(this.data ?? {})
       .map(([k, v]) => [k, resolve(v)] as const)

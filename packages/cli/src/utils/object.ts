@@ -68,19 +68,3 @@ export function stringify(data: Callable<unknown>) {
   data = resolve(data);
   return data?.toString() ?? "";
 }
-
-export type Constructor<T> = {
-  new (...args: any[]): T;
-  isInstance?: (subject: unknown) => boolean;
-};
-
-export function isInstanceOf<T>(
-  subject: unknown,
-  constructor: Constructor<T>,
-): subject is T {
-  return (
-    subject instanceof constructor ||
-    (typeof constructor["isInstance"] === "function" &&
-      constructor.isInstance(subject))
-  );
-}

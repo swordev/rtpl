@@ -38,11 +38,7 @@ export default async function diff(options: DiffOptions) {
   return { exitCode: changes ? 1 : 0, changes };
 }
 
-async function showDiff(
-  res: AbstractRes<any, any>,
-  path: string,
-  options: DiffOptions,
-) {
+async function showDiff(res: AbstractRes, path: string, options: DiffOptions) {
   let resValue: string;
   try {
     resValue = res.toString();

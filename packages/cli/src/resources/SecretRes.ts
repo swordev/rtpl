@@ -7,12 +7,7 @@ import {
   upperAlphaCharset,
 } from "../utils/crypto.js";
 import { readIfExists } from "../utils/fs.js";
-import {
-  AbstractRes,
-  ResOptions,
-  ResReadyContext,
-  ResType,
-} from "./AbstractRes.js";
+import { AbstractRes, ResReadyContext } from "./AbstractRes.js";
 import { DelayedValue, setDelayedValue } from "./DelayedValue.js";
 import { join } from "path";
 
@@ -45,69 +40,31 @@ export type SecretData = {
   }) => Promise<string | undefined>;
 };
 
-export class SecretRes extends AbstractRes<
-  ResType.Secret,
-  SecretData | undefined
-> {
-  protected static override type = ResType.Secret;
-  protected override readonly type = ResType.Secret;
-  private value: DelayedValue<string>;
-  readonly hasNewValue: DelayedValue<boolean>;
-  readonly options: ResOptions<SecretData | undefined>;
-  protected parent: SecretRes | undefined;
-  constructor(input: ResOptions<SecretData | undefined> | SecretRes) {
-    if (input instanceof SecretRes) {
-      super({});
-      this.options = {};
-      this.parent = input;
-    } else {
-      super(input);
-      this.options = input;
-    }
-    this.value = new DelayedValue();
-    this.hasNewValue = new DelayedValue();
-  }
-  static isInstance(value: unknown): value is SecretRes {
-    return AbstractRes.isInstance(value, this);
-  }
+export class SecretRes extends AbstractRes<SecretData | undefined> {
+  private readonly value = new DelayedValue<string>();
+  readonly hasNewValue = new DelayedValue<boolean>();
   toJSON() {
     return this.toString();
   }
   override toString() {
     return this.value.toString();
   }
-  protected override onDefaultExtension() {
-    return "secret";
-  }
-  protected override onDependencies() {
-    return this.parent ? [this.parent] : [];
-  }
+  override readonly extension = "secret";
   protected override async onReady(path: string, ctx: ResReadyContext) {
     await super.onReady(path, ctx);
-    const prevFile = (
-      await readIfExists(join(ctx.data.root, path))
-    )?.toString();
+    const prevFile = (await readIfExists(join(ctx.root, path)))?.toString();
     const prev =
       typeof this.data?.value === "string"
         ? this.data.value
-        : ctx.data.secrets
-          ? (ctx.data.secrets[path] ??
-            (ctx.data.initialSecrets ? prevFile : undefined))
+        : ctx.secrets
+          ? (ctx.secrets[path] ?? (ctx.initialSecrets ? prevFile : undefined))
           : undefined;
     const $generate = this.data?.generate ?? true;
     let current = prev ?? ($generate ? generate(this.data) : undefined);
     const custom = await this.data?.onReady?.({ path, prev, current });
     if (typeof custom === "string") current = custom;
     if (typeof current !== "string") throw new Error(`Secret is empty`);
-
-    const parent = this.parent;
-
-    if (parent) {
-      current = parent.toString();
-    } else {
-      if (ctx.data.secrets) ctx.data.secrets[path] = current;
-    }
-
+    if (ctx.secrets) ctx.secrets[path] = current;
     setDelayedValue(this.value, current);
     setDelayedValue(this.hasNewValue, current !== prevFile);
   }

@@ -1,20 +1,19 @@
-import { AbstractRes, ResType } from "./AbstractRes.js";
+import { AbstractRes, ResOptions } from "./AbstractRes.js";
 import { JSONValue, toString } from "./JsonRes.js";
 import { stringify } from "yaml";
 
-export type Config = {
-  format?: {
-    documents?: boolean;
-  };
+export type YamlFormat = {
+  documents?: boolean;
 };
 
 export class YamlRes<
   T extends JSONValue | undefined = JSONValue | undefined,
-> extends AbstractRes<ResType.Yaml, T, Config> {
-  protected static override type = ResType.Yaml;
-  protected override readonly type = ResType.Yaml;
-  protected override onDefaultExtension() {
-    return "yaml";
+> extends AbstractRes<T> {
+  override readonly extension = "yaml";
+  readonly format: YamlFormat | undefined;
+  constructor(options: ResOptions<T> & { format?: YamlFormat }) {
+    super(options);
+    this.format = options.format;
   }
   override toString() {
     const toYaml = (input: any) => {
@@ -26,7 +25,7 @@ export class YamlRes<
     };
     const input = typeof this.data === "function" ? this.data() : this.data;
     if (input === undefined) return "";
-    if (this.options.format?.documents && Array.isArray(input)) {
+    if (this.format?.documents && Array.isArray(input)) {
       return input.map((doc) => toYaml(doc)).join("---\n");
     } else {
       return toYaml(input);

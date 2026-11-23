@@ -1,6 +1,6 @@
 import { Callable, resolve, stringify } from "../utils/object.js";
-import { StringifyClass } from "../utils/self/rs.js";
-import { AbstractRes, ResType } from "./AbstractRes.js";
+import type { StringifyClass } from "../utils/self/rs.js";
+import { AbstractRes, ResOptions } from "./AbstractRes.js";
 import { DelayedValue } from "./DelayedValue.js";
 
 type Value = Callable<
@@ -26,17 +26,14 @@ export type ConfigFormat = {
   onRender?: (key: string | null, block: string[], level: number) => string[];
 };
 
-export type Config = {
-  format?: ConfigFormat;
-};
-
 export class IniRes<
   T extends IniData | IniData[] | undefined = IniData | IniData[] | undefined,
-> extends AbstractRes<ResType.Ini, T, Config> {
-  protected static override type = ResType.Ini;
-  protected override readonly type = ResType.Ini;
-  protected override onDefaultExtension() {
-    return "ini";
+> extends AbstractRes<T> {
+  override readonly extension = "ini";
+  readonly format: ConfigFormat | undefined;
+  constructor(options: ResOptions<T> & { format?: ConfigFormat }) {
+    super(options);
+    this.format = options.format;
   }
   override toString() {
     const format = Object.assign(
@@ -44,7 +41,7 @@ export class IniRes<
         padding: true,
         assignChar: "=",
       } as ConfigFormat,
-      this.options.format ?? {},
+      this.format,
     );
 
     const isValue = (value: unknown): value is Value => {
@@ -52,7 +49,7 @@ export class IniRes<
       return (
         value === null ||
         value instanceof AbstractRes ||
-        DelayedValue.isInstance(value) ||
+        value instanceof DelayedValue ||
         type === "function" ||
         type === "string" ||
         type === "number" ||

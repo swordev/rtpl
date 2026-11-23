@@ -295,7 +295,8 @@ describe("resolveTplResources paths", () => {
       templates: [tpl],
       resourcePathAllowlist: ["root.json"],
     });
-    expect(root.dirname.toString()).toBe(".");
-    expect(nested.dirname.toString()).toBe("./resources/app");
+    expect(root.path.toString()).toBe("./root.json");
+    expect(root.path.dirname.toString()).toBe(".");
+    expect(nested.path.dirname.toString()).toBe("./resources/app");
   });
 });

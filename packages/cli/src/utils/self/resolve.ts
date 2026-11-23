@@ -28,15 +28,9 @@ function isInsideDir(path: string, dir: string) {
 }
 
 function createFileName(tag: string, input: AbstractRes) {
-  const defaultExtension = input["onDefaultExtension"]();
-  if (
-    typeof defaultExtension === "string" &&
-    !tag.includes(".") &&
-    !input.name
-  ) {
-    return `${tag}.${defaultExtension}`;
-  }
-  return tag;
+  return input.extension && !tag.includes(".")
+    ? `${tag}.${input.extension}`
+    : tag;
 }
 
 /**
@@ -55,7 +49,7 @@ function* iterateResources(
   for (const key in inResources) {
     const value = (inResources as any)[key];
     const keyPath = [...parentKeyPath, key];
-    if (DirRes.isInstance(value)) {
+    if (value instanceof DirRes) {
       const path = [...parentPath, value.name ?? createFileName(key, value)];
       yield {
         keyPath: keyPath.join("/"),
@@ -86,7 +80,7 @@ export async function createTplResources(
   options: { secrets?: Record<string, string>; includeDirs?: boolean } = {},
 ) {
   const templates = await Promise.all(config.templates);
-  const ctx = new ResReadyContext({
+  const ctx: ResReadyContext = {
     root: config.paths.root,
     secrets:
       options.secrets ||
@@ -94,7 +88,7 @@ export async function createTplResources(
         ? await new TplSecrets(config.paths.secrets).read()
         : undefined),
     initialSecrets: !(await checkPath(config.paths.secrets)),
-  });
+  };
   const resources: Record<string, AbstractRes> = {};
   const resourcesByTemplate: Record<string, any> = {};
   for (const tpl of templates) {
@@ -114,7 +108,7 @@ export async function createTplResources(
       if (typeof customRes === "function") {
         resources[absPath] = customRes(res);
       } else if (typeof customRes === "string") {
-        if (SecretRes.isInstance(res)) {
+        if (res instanceof SecretRes) {
           res.data ??= {};
           res.data.value = customRes;
           resources[absPath] = res;
@@ -144,7 +138,6 @@ export async function createTplResources(
   const allowlist = new Set(
     config.resourcePathAllowlist?.map((path) => normalizePath(path)),
   );
-  const pathByRes = new Map<AbstractRes, string>();
   for (const path in resources) {
     const isValidPath =
       isInsideDir(path, config.resourcesDir) ||
@@ -154,32 +147,15 @@ export async function createTplResources(
         `Resource path "${path}" is outside of the resources directory`,
       );
     }
-    pathByRes.set(resources[path], path);
   }
-
-  const ready = new Map<AbstractRes, Promise<void>>();
-  const setReady = (res: AbstractRes, path: string): Promise<void> => {
-    let promise = ready.get(res);
-    if (!promise) {
-      promise = (async () => {
-        for (const dep of res["onDependencies"]()) {
-          const depPath = pathByRes.get(dep);
-          if (depPath !== undefined) await setReady(dep, depPath);
-        }
-        await res["onReady"]?.(path, ctx);
-      })();
-      ready.set(res, promise);
-    }
-    return promise;
-  };
 
   for (const path in resources) {
     const res = resources[path];
-    await setReady(res, path);
-    if (DirRes.isInstance(res) && !options.includeDirs) delete resources[path];
+    await res["onReady"](path, ctx);
+    if (res instanceof DirRes && !options.includeDirs) delete resources[path];
   }
 
-  return { resources, secrets: ctx.data.secrets };
+  return { resources, secrets: ctx.secrets };
 }
 
 export async function resolveTplResources(
@@ -196,10 +172,10 @@ export async function resolveTplResources(
   });
   return Object.fromEntries(
     Object.entries(resources).map(([path, res]) => {
-      return [
-        path,
-        DirRes.isInstance(res) ? undefined : (res as any).toString(),
-      ] as [string, string];
+      return [path, res instanceof DirRes ? undefined : res.toString()] as [
+        string,
+        string,
+      ];
     }),
   );
 }

@@ -1,5 +1,5 @@
 import { Callable, isPlainObject, resolve } from "../utils/object.js";
-import { AbstractRes, ResType } from "./AbstractRes.js";
+import { AbstractRes } from "./AbstractRes.js";
 
 export type JSONPrimitive =
   | string
@@ -50,13 +50,8 @@ export const toString = (value: JSONValue): string => {
 
 export class JsonRes<
   T extends JSONValue | undefined = JSONValue | undefined,
-  TConf extends Record<string, unknown> = {},
-> extends AbstractRes<ResType.Json, T, TConf> {
-  protected static override type = ResType.Json;
-  protected override readonly type = ResType.Json;
-  protected override onDefaultExtension() {
-    return "json";
-  }
+> extends AbstractRes<T> {
+  override readonly extension = "json";
   override toString() {
     return toString(this.data);
   }

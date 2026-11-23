@@ -1,107 +1,35 @@
 import { Secrets } from "../utils/self/secrets.js";
-import { DelayedValue, setDelayedValue } from "./DelayedValue.js";
-import { posix } from "path";
+import { ResPath, setResPath } from "./ResPath.js";
 
 export type ResDataObject<TData> = TData extends undefined
   ? { data?: TData }
   : { data: TData };
 
-export type ResOptions<TData, TConf extends Record<string, unknown> = {}> = {
-  name?: string;
-} & ResDataObject<TData> &
-  TConf;
+export type ResOptions<TData> = { name?: string } & ResDataObject<TData>;
 
-export type ResConfig<TConf> = Omit<TConf, "name" | "data">;
+export type ResReadyContext = {
+  root: string;
+  secrets: Secrets | undefined;
+  initialSecrets: boolean;
+};
 
-export enum ResType {
-  Abstract = 1,
-  Cron,
-  Dir,
-  Env,
-  Ini,
-  Json,
-  Raw,
-  Secret,
-  Yaml,
-}
-
-const kindType = "_tplRes";
-
-export class ResReadyContext {
-  constructor(
-    readonly data: {
-      root: string;
-      secrets: Secrets | undefined;
-      initialSecrets: boolean;
-    },
-  ) {}
-}
-
-export class MinimalRes<T = any, D = any> {
-  protected [kindType] = true;
-  protected readonly type!: T;
-  protected readonly _data!: D;
-}
-
-export abstract class AbstractRes<
-  Type = any,
-  TData = any,
-  TConf extends Record<string, unknown> = {},
-> extends MinimalRes<Type, TData> {
-  protected static type = ResType.Abstract;
-  readonly name: string | undefined;
-  public data: TData;
-  readonly config: ResConfig<TConf>;
-  readonly path: DelayedValue<string>;
-  readonly dirname: DelayedValue<string>;
-  readonly resolved: boolean | undefined;
-  symbol: symbol | undefined;
-  constructor(
-    readonly options: ResOptions<TData, TConf>,
-    symbol?: symbol,
-  ) {
-    super();
-    this.name = options.name;
-    this.data = options.data as any;
-    this.symbol = symbol;
-    this.config = Object.keys(options).reduce((config, key) => {
-      if (key !== "name" && key !== "data") (config as any)[key] = options[key];
-      return config;
-    }, {} as ResConfig<TConf>);
-    this.path = new DelayedValue((path) => `./${path}`);
-    this.dirname = new DelayedValue((path) => {
-      const dirname = posix.dirname(path);
-      return dirname === "." ? "." : `./${dirname}`;
-    });
-  }
-
-  abstract toString(): string;
-  protected onDefaultExtension(): string | void {}
+export abstract class AbstractRes<TData = any> {
   /**
-   * Resources that must be ready before this one.
+   * File name. Defaults to the resource key (plus `extension`).
    */
-  protected onDependencies(): AbstractRes[] {
-    return [];
+  readonly name: string | undefined;
+  /**
+   * Extension appended to the resource key when `name` is not defined.
+   */
+  readonly extension?: string;
+  public data: TData;
+  readonly path = new ResPath();
+  constructor(options: ResOptions<TData>) {
+    this.name = options.name;
+    this.data = options.data as TData;
   }
+  abstract toString(): string;
   protected async onReady(path: string, ctx: ResReadyContext) {
-    setDelayedValue(this.path, path);
-    setDelayedValue(this.dirname, path);
-  }
-
-  static isInstance(value: unknown, self: any = this): value is AbstractRes {
-    if (value instanceof self) return true;
-
-    const isThis = (type: ResType) =>
-      self.type === type && self.name === `${ResType[type]}Res`;
-
-    const instanceType = (value?.constructor as typeof AbstractRes | undefined)
-      ?.type;
-
-    return (
-      !!instanceType &&
-      !!value &&
-      (value as any)[kindType] &&
-      (isThis(ResType.Abstract) || isThis(instanceType))
-    );
+    setResPath(this.path, path);
   }
 }

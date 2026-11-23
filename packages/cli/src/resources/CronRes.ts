@@ -1,5 +1,5 @@
 import { Callable, resolve } from "../utils/object.js";
-import { AbstractRes, ResType } from "./AbstractRes.js";
+import { AbstractRes } from "./AbstractRes.js";
 
 export type Schedule = number | [number, number] | { each: number };
 
@@ -31,9 +31,7 @@ export function formatSchedule(schedule: Schedule | undefined) {
   }
 }
 
-export class CronRes extends AbstractRes<ResType.Cron, CronData> {
-  protected static override type = ResType.Cron;
-  protected override readonly type = ResType.Cron;
+export class CronRes extends AbstractRes<CronData> {
   override toString() {
     return (this.data ?? [])
       .map(resolve)

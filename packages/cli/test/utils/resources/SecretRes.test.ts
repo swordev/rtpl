@@ -6,20 +6,6 @@ import {
 import { describe, expect, it } from "vitest";
 
 describe("SecretRes", () => {
-  it("resolves a derived secret declared before its parent", async () => {
-    const tpl = defineTpl({
-      name: "app",
-      resources: () => {
-        const parent = new SecretRes({});
-        return { child: new SecretRes(parent), parent };
-      },
-    });
-    const resources = await resolveTplResources([tpl], {
-      "resources/app/parent.secret": "parentvalue12345",
-    });
-    expect(resources["resources/app/child.secret"]).toBe("parentvalue12345");
-  });
-
   it("renders an empty value", async () => {
     const tpl = defineTpl({
       name: "app",
